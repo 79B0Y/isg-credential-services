@@ -1,0 +1,49 @@
+{
+  "server": {
+    "port": 3000,
+    "host": "0.0.0.0",
+    "timeout": 30000,
+    "cors": {
+      "enabled": true,
+      "origin": "*"
+    }
+  },
+  "api": {
+    "key": "cred_tFixU2e1mMkz3WJfFsMskj7V5vdTzAsr",
+    "rateLimit": {
+      "enabled": true,
+      "windowMs": 900000,
+      "max": 100
+    }
+  },
+  "modules": {
+    "autoLoad": true,
+    "hotReload": true,
+    "isolation": true
+  },
+  "cache": {
+    "enabled": true,
+    "ttl": 300000,
+    "maxSize": 1000
+  },
+  "logging": {
+    "level": "info",
+    "file": {
+      "enabled": true,
+      "path": "./logs/app.log",
+      "maxSize": "10m",
+      "maxFiles": 5
+    }
+  },
+  "security": {
+    "encryption": {
+      "enabled": true,
+      "algorithm": "aes-256-cbc"
+    },
+    "https": {
+      "enabled": false,
+      "cert": "./certs/cert.pem",
+      "key": "./certs/key.pem"
+    }
+  }
+}

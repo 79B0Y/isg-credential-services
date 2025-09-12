@@ -1,0 +1,21 @@
+{
+  "timeout": 10000,
+  "retries": 3,
+  "cacheTimeout": 120000,
+  "features": {
+    "states": true,
+    "config": true,
+    "connectionTest": true,
+    "services": true,
+    "autoRetry": true
+  },
+  "ssl": {
+    "rejectUnauthorized": false,
+    "allowSelfSigned": true
+  },
+  "rateLimit": {
+    "enabled": true,
+    "requestsPerSecond": 30,
+    "burstLimit": 60
+  }
+}

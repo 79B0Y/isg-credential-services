@@ -1,0 +1,18 @@
+{
+  "apiBaseUrl": "https://graph.facebook.com",
+  "apiVersion": "v18.0",
+  "timeout": 12000,
+  "retries": 3,
+  "cacheTimeout": 300000,
+  "features": {
+    "messageTemplates": true,
+    "connectionTest": true,
+    "phoneInfo": true,
+    "autoRetry": true
+  },
+  "rateLimit": {
+    "enabled": true,
+    "requestsPerSecond": 25,
+    "burstLimit": 50
+  }
+}

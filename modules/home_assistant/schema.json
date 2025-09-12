@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Home Assistant API Credentials",
+  "description": "Home Assistant API credentials for home automation",
+  "properties": {
+    "access_token": {
+      "type": "string",
+      "title": "Access Token",
+      "description": "Home Assistant long-lived access token",
+      "required": true,
+      "sensitive": true,
+      "minLength": 100,
+      "maxLength": 300,
+      "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+      "ui": {
+        "widget": "password",
+        "placeholder": "Enter your Home Assistant access token",
+        "help": "Create a long-lived access token in Home Assistant profile settings"
+      }
+    },
+    "base_url": {
+      "type": "string",
+      "title": "Base URL",
+      "description": "Home Assistant base URL including protocol and port",
+      "required": true,
+      "sensitive": false,
+      "minLength": 10,
+      "maxLength": 200,
+      "pattern": "^https?://[^\\s/$.?#].[^\\s]*$",
+      "example": "http://homeassistant.local:8123",
+      "ui": {
+        "widget": "url",
+        "placeholder": "http://homeassistant.local:8123",
+        "help": "Your Home Assistant instance URL with protocol and port"
+      }
+    }
+  },
+  "required": ["access_token", "base_url"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+      "base_url": "http://homeassistant.local:8123"
+    },
+    {
+      "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+      "base_url": "https://my-homeassistant.duckdns.org"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "apiBaseUrl": "https://api.telegram.org",
+  "timeout": 15000,
+  "retries": 2,
+  "cacheTimeout": 300000,
+  "pollingInterval": 1000,
+  "maxMessageHistory": 1000,
+  "features": {
+    "webhookInfo": true,
+    "botCommands": true,
+    "connectionTest": true,
+    "autoRetry": true,
+    "messaging": true,
+    "polling": true,
+    "fileDownload": true
+  },
+  "rateLimit": {
+    "enabled": true,
+    "requestsPerSecond": 30,
+    "burstLimit": 50
+  },
+  "validation": {
+    "strictMode": true,
+    "checkBotPermissions": true,
+    "verifyWebhookUrl": false,
+    "quickValidation": false
+  },
+  "network": {
+    "keepAlive": true,
+    "keepAliveMsecs": 1000
+  },
+  "messaging": {
+    "autoStartPolling": false,
+    "webhookEnabled": false,
+    "fileDownloadPath": "./downloads",
+    "messageRetentionDays": 30
+  }
+}

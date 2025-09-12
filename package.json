@@ -1,0 +1,86 @@
+{
+  "name": "credential-service",
+  "version": "1.0.0",
+  "description": "Modular credential management service for Node-RED integration with support for multiple API services",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "NODE_ENV=development node server.js",
+    "test": "node tests/TestRunner.js",
+    "test:telegram": "node tests/TelegramModuleTest.js",
+    "test:quick": "node tests/TestRunner.js --skip-integration",
+    "test:parallel": "node tests/TestRunner.js --parallel",
+    "test:module": "node tests/TestRunner.js --modules=",
+    "lint": "echo 'No linter configured. Consider adding eslint.'",
+    "health": "node -e 'require(\"http\").get(\"http://localhost:3000/health\", (res) => { console.log(res.statusCode === 200 ? \"Healthy\" : \"Unhealthy\"); process.exit(res.statusCode === 200 ? 0 : 1); }).on(\"error\", () => { console.log(\"Unhealthy\"); process.exit(1); });'",
+    "postinstall": "node -e 'console.log(\"🔐 Credential Service installed successfully!\"); console.log(\"Run \\\"npm start\\\" to start the service.\");'"
+  },
+  "keywords": [
+    "credential",
+    "api",
+    "node-red",
+    "telegram",
+    "openai",
+    "claude",
+    "whatsapp",
+    "home-assistant",
+    "modular",
+    "microservice",
+    "termux",
+    "android"
+  ],
+  "author": {
+    "name": "Credential Service",
+    "email": "noreply@credential-service.local"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "form-data": "^4.0.4",
+    "multer": "^2.0.2",
+    "ws": "^8.18.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/credential-service.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/credential-service/issues"
+  },
+  "homepage": "https://github.com/your-username/credential-service#readme",
+  "files": [
+    "server.js",
+    "core/",
+    "modules/",
+    "public/",
+    "tests/",
+    "config/",
+    "README.md",
+    "LICENSE"
+  ],
+  "config": {
+    "port": 3000,
+    "host": "0.0.0.0"
+  },
+  "termux": {
+    "compatible": true,
+    "requirements": [
+      "nodejs",
+      "storage-permissions"
+    ]
+  },
+  "nodred": {
+    "compatible": true,
+    "integration": "http-request",
+    "endpoints": [
+      "/api/credentials/:module",
+      "/api/validate/:module",
+      "/api/modules"
+    ]
+  }
+}

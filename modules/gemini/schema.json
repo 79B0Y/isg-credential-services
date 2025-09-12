@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Google Gemini API Credentials",
+  "description": "Google Gemini API credentials for AI model access",
+  "properties": {
+    "api_key": {
+      "type": "string",
+      "title": "API Key",
+      "description": "Google Gemini API key from Google AI Studio",
+      "required": true,
+      "sensitive": true,
+      "minLength": 20,
+      "maxLength": 200,
+      "pattern": "^[A-Za-z0-9-_]+$",
+      "example": "AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "ui": {
+        "widget": "password",
+        "placeholder": "Enter your Gemini API key",
+        "help": "Get your API key from https://aistudio.google.com/app/apikey"
+      }
+    }
+  },
+  "required": ["api_key"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "api_key": "AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    }
+  ]
+}
+

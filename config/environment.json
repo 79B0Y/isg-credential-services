@@ -1,0 +1,33 @@
+{
+  "development": {
+    "logging": {
+      "level": "debug"
+    },
+    "api": {
+      "rateLimit": {
+        "enabled": false
+      }
+    }
+  },
+  "production": {
+    "logging": {
+      "level": "warn"
+    },
+    "security": {
+      "https": {
+        "enabled": true
+      }
+    }
+  },
+  "test": {
+    "server": {
+      "port": 0
+    },
+    "logging": {
+      "level": "error"
+    },
+    "cache": {
+      "enabled": false
+    }
+  }
+}

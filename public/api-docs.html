@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credential Service API 文档</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .api-section {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .api-section h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+
+        .api-section h3 {
+            color: #495057;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        .endpoint {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #e9ecef;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .method {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-weight: bold;
+            font-size: 0.8rem;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .method.get { background: #28a745; color: white; }
+        .method.post { background: #ffc107; color: #212529; }
+        .method.put { background: #17a2b8; color: white; }
+        .method.delete { background: #dc3545; color: white; }
+
+        .url {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            flex: 1;
+            border: 1px solid #ced4da;
+        }
+
+        .test-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .test-btn:hover {
+            background: #0056b3;
+        }
+
+        .endpoint-description {
+            padding: 1rem;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .endpoint-example {
+            padding: 1rem;
+            background: #212529;
+            color: #f8f9fa;
+        }
+
+        .endpoint-example pre {
+            margin: 0;
+            overflow-x: auto;
+        }
+
+        .endpoint-example code {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .endpoint-params, .endpoint-response {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            border-left: 4px solid #007bff;
+        }
+
+        .endpoint-params ul, .endpoint-response ul {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .endpoint-params li, .endpoint-response li {
+            margin: 0.25rem 0;
+        }
+
+        .websocket-info {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #e3f2fd;
+            border-radius: 0.5rem;
+            border: 1px solid #bbdefb;
+        }
+
+        .websocket-info h3 {
+            color: #1976d2;
+            margin-bottom: 1rem;
+        }
+
+        .websocket-info h4 {
+            color: #1565c0;
+            margin: 1.5rem 0 0.5rem 0;
+        }
+
+        .websocket-info ul {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .websocket-info li {
+            margin: 0.25rem 0;
+        }
+
+        .test-results {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            min-height: 100px;
+        }
+
+        .test-result {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 0.25rem;
+            border-left: 4px solid;
+        }
+
+        .test-result.success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+
+        .test-result.error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+
+        .test-result.info {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+            color: #0c5460;
+        }
+
+        .test-result pre {
+            background: #e9ecef;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            margin-top: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.8rem;
+        }
+
+        .copy-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+
+        .copy-btn:hover {
+            background: #545b62;
+        }
+
+        .base-url {
+            background: #e9ecef;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+
+        .base-url strong {
+            color: #495057;
+        }
+
+        .toc {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .toc h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        .toc a {
+            color: #495057;
+            text-decoration: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            display: block;
+        }
+
+        .toc a:hover {
+            background: #e9ecef;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Credential Service API</h1>
+            <p>完整的API文档和测试工具</p>
+        </div>
+
+        <div class="base-url">
+            <strong>Base URL:</strong> <span id="baseUrl">http://localhost:3000</span>
+            <button class="copy-btn" onclick="copyToClipboard(document.getElementById('baseUrl').textContent)">复制</button>
+        </div>
+
+        <div class="toc">
+            <h3>📋 目录</h3>
+            <ul>
+                <li><a href="#basic">基础信息</a></li>
+                <li><a href="#telegram">Telegram 消息管理</a></li>
+                <li><a href="#files">文件操作</a></li>
+                <li><a href="#webhook">Webhook 管理</a></li>
+            </ul>
+        </div>
+
+        <div class="api-section" id="basic">
+            <h2>🔧 基础信息</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="url">/api/health</span>
+                    <button class="test-btn" onclick="testApi('GET', '/api/health')">测试</button>
+                </div>
+                <div class="endpoint-description">检查服务健康状态</div>
+                <div class="endpoint-example">
+                    <pre><code>curl -X GET http://localhost:3000/api/health</code></pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="url">/api/modules</span>
+                    <button class="test-btn" onclick="testApi('GET', '/api/modules')">测试</button>
+                </div>
+                <div class="endpoint-description">获取所有模块列表</div>
+                <div class="endpoint-example">
+                    <pre><code>curl -X GET http://localhost:3000/api/modules</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="api-section" id="telegram">
+            <h2>📱 Telegram 消息管理</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="url">/api/telegram/telegram/messages</span>
+                    <button class="test-btn" onclick="testApi('GET', '/api/telegram/telegram/messages')">测试</button>
+                </div>
+                <div class="endpoint-description">获取消息历史</div>
+                <div class="endpoint-example">
+                    <pre><code>curl -X GET http://localhost:3000/api/telegram/telegram/messages</code></pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="url">/api/telegram/telegram/polling/start</span>
+                    <button class="test-btn" onclick="testApi('POST', '/api/telegram/telegram/polling/start')">测试</button>
+                </div>
+                <div class="endpoint-description">开始消息轮询</div>
+                <div class="endpoint-example">
+                    <pre><code>curl -X POST http://localhost:3000/api/telegram/telegram/polling/start</code></pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="url">/api/telegram/telegram/send/message</span>
+                    <button class="test-btn" onclick="testApi('POST', '/api/telegram/telegram/send/message', {chat_id: '123456789', text: 'Hello World'})">测试</button>
+                </div>
+                <div class="endpoint-description">发送文本消息</div>
+                <div class="endpoint-example">
+                    <pre><code>curl -X POST http://localhost:3000/api/telegram/telegram/send/message \
+  -H "Content-Type: application/json" \
+  -d '{"chat_id": "123456789", "text": "Hello World"}'</code></pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="url">/api/telegram/telegram/send/photo</span>
+                    <button class="test-btn" onclick="testApi('POST', '/api/telegram/telegram/send/photo', {chat_id: '123456789', photo: 'https://example.com/image.jpg', caption: 'Photo caption'})">测试</button>
+                </div>
+                <div class="endpoint-description">发送图片消息</div>
+                <div class="endpoint-example">
+                    <pre><code>curl -X POST http://localhost:3000/api/telegram/telegram/send/photo \
+  -H "Content-Type: application/json" \
+  -d '{"chat_id": "123456789", "photo": "https://example.com/image.jpg", "caption": "Photo caption"}'</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="api-section" id="files">
+            <h2>📁 文件操作</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="url">/api/telegram/telegram/file-url/:fileId</span>
+                    <button class="test-btn" onclick="testApi('GET', '/api/telegram/telegram/file-url/BAADBAADrwADBREAAYag8mS4AAH0Ag')">测试</button>
+                </div>
+                <div class="endpoint-description">获取文件直接URL</div>
+                <div class="endpoint-example">
+                    <pre><code>curl -X GET http://localhost:3000/api/telegram/telegram/file-url/BAADBAADrwADBREAAYag8mS4AAH0Ag</code></pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="url">/api/telegram/telegram/file/:fileId</span>
+                    <button class="test-btn" onclick="testApi('GET', '/api/telegram/telegram/file/BAADBAADrwADBREAAYag8mS4AAH0Ag')">测试</button>
+                </div>
+                <div class="endpoint-description">获取文件信息</div>
+                <div class="endpoint-example">
+                    <pre><code>curl -X GET http://localhost:3000/api/telegram/telegram/file/BAADBAADrwADBREAAYag8mS4AAH0Ag</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="api-section" id="webhook">
+            <h2>🔗 Webhook 管理</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="url">/api/telegram/telegram/webhook/set</span>
+                    <button class="test-btn" onclick="testApi('POST', '/api/telegram/telegram/webhook/set', {url: 'https://your-domain.com/webhook'})">测试</button>
+                </div>
+                <div class="endpoint-description">设置Webhook URL</div>
+                <div class="endpoint-example">
+                    <pre><code>curl -X POST http://localhost:3000/api/telegram/telegram/webhook/set \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://your-domain.com/webhook"}'</code></pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method delete">DELETE</span>
+                    <span class="url">/api/telegram/telegram/webhook</span>
+                    <button class="test-btn" onclick="testApi('DELETE', '/api/telegram/telegram/webhook')">测试</button>
+                </div>
+                <div class="endpoint-description">删除Webhook</div>
+                <div class="endpoint-example">
+                    <pre><code>curl -X DELETE http://localhost:3000/api/telegram/telegram/webhook</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="api-section" id="websocket">
+            <h2>🌐 WebSocket 管理</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="url">/api/telegram/telegram/websocket/start</span>
+                    <button class="test-btn" onclick="testApi('POST', '/api/telegram/telegram/websocket/start', {port: 8080})">测试</button>
+                </div>
+                <div class="endpoint-description">启动WebSocket服务器，用于实时接收Telegram消息</div>
+                <div class="endpoint-example">
+                    <pre><code>curl -X POST http://localhost:3000/api/telegram/telegram/websocket/start \
+  -H "Content-Type: application/json" \
+  -d '{"port": 8080}'</code></pre>
+                </div>
+                <div class="endpoint-params">
+                    <strong>参数:</strong>
+                    <ul>
+                        <li><code>port</code> (可选): WebSocket端口，默认为8080</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="url">/api/telegram/telegram/websocket/stop</span>
+                    <button class="test-btn" onclick="testApi('POST', '/api/telegram/telegram/websocket/stop')">测试</button>
+                </div>
+                <div class="endpoint-description">停止WebSocket服务器</div>
+                <div class="endpoint-example">
+                    <pre><code>curl -X POST http://localhost:3000/api/telegram/telegram/websocket/stop</code></pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="url">/api/telegram/telegram/websocket/status</span>
+                    <button class="test-btn" onclick="testApi('GET', '/api/telegram/telegram/websocket/status')">测试</button>
+                </div>
+                <div class="endpoint-description">获取WebSocket服务器状态</div>
+                <div class="endpoint-example">
+                    <pre><code>curl -X GET http://localhost:3000/api/telegram/telegram/websocket/status</code></pre>
+                </div>
+                <div class="endpoint-response">
+                    <strong>响应示例:</strong>
+                    <pre><code>{
+  "success": true,
+  "data": {
+    "running": true,
+    "port": 8080,
+    "clients": 2,
+    "url": "ws://localhost:8080"
+  }
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="websocket-info">
+                <h3>📡 WebSocket 连接说明</h3>
+                <p>WebSocket服务器启动后，可以通过以下方式连接：</p>
+                <ul>
+                    <li><strong>连接URL:</strong> <code>ws://localhost:8080</code></li>
+                    <li><strong>消息格式:</strong> JSON</li>
+                    <li><strong>支持的消息类型:</strong>
+                        <ul>
+                            <li><code>get_status</code> - 获取状态</li>
+                            <li><code>get_messages</code> - 获取消息历史</li>
+                            <li><code>start_polling</code> - 开始轮询</li>
+                            <li><code>stop_polling</code> - 停止轮询</li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <h4>JavaScript 连接示例:</h4>
+                <pre><code>const ws = new WebSocket('ws://localhost:8080');
+
+ws.onopen = function() {
+    console.log('WebSocket连接已建立');
+    // 获取状态
+    ws.send(JSON.stringify({type: 'get_status'}));
+};
+
+ws.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    console.log('收到消息:', data);
+    
+    if (data.type === 'new_message') {
+        console.log('新消息:', data.data);
+    }
+};
+
+ws.onclose = function() {
+    console.log('WebSocket连接已关闭');
+};</code></pre>
+
+                <h4>Node.js 连接示例:</h4>
+                <pre><code>const WebSocket = require('ws');
+
+const ws = new WebSocket('ws://localhost:8080');
+
+ws.on('open', function() {
+    console.log('WebSocket连接已建立');
+    // 获取状态
+    ws.send(JSON.stringify({type: 'get_status'}));
+});
+
+ws.on('message', function(data) {
+    const message = JSON.parse(data);
+    console.log('收到消息:', message);
+    
+    if (message.type === 'new_message') {
+        console.log('新消息:', message.data);
+    }
+});
+
+ws.on('close', function() {
+    console.log('WebSocket连接已关闭');
+});</code></pre>
+            </div>
+        </div>
+
+        <div class="api-section">
+            <h2>🧪 API 测试结果</h2>
+            <div class="test-results" id="testResults">
+                <p>点击上方的"测试"按钮来测试API端点</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 更新Base URL
+        document.getElementById('baseUrl').textContent = window.location.origin;
+
+        // 复制到剪贴板
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('已复制到剪贴板: ' + text);
+            });
+        }
+
+        // 测试API端点
+        async function testApi(method, url, data = null) {
+            const resultsContainer = document.getElementById('testResults');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            // 显示测试开始信息
+            const testId = `test-${Date.now()}`;
+            resultsContainer.innerHTML = `
+                <div class="test-result info" id="${testId}">
+                    <strong>🧪 测试 ${method} ${url}</strong>
+                    <div>时间: ${timestamp}</div>
+                    <div>状态: 正在测试...</div>
+                </div>
+            `;
+            
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+                
+                // 添加请求体（如果是POST/PUT请求）
+                if (data && (method === 'POST' || method === 'PUT')) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(url, options);
+                const responseData = await response.text();
+                
+                let parsedData;
+                try {
+                    parsedData = JSON.parse(responseData);
+                } catch (e) {
+                    parsedData = responseData;
+                }
+                
+                const resultClass = response.ok ? 'success' : 'error';
+                const statusText = response.ok ? '✅ 成功' : '❌ 失败';
+                
+                document.getElementById(testId).innerHTML = `
+                    <strong>🧪 测试 ${method} ${url}</strong>
+                    <div>时间: ${timestamp}</div>
+                    <div>状态: ${statusText} (HTTP ${response.status})</div>
+                    <div>响应时间: ${Date.now() - parseInt(testId.split('-')[1])}ms</div>
+                    <pre>${JSON.stringify(parsedData, null, 2)}</pre>
+                `;
+                document.getElementById(testId).className = `test-result ${resultClass}`;
+                
+            } catch (error) {
+                document.getElementById(testId).innerHTML = `
+                    <strong>🧪 测试 ${method} ${url}</strong>
+                    <div>时间: ${timestamp}</div>
+                    <div>状态: ❌ 网络错误</div>
+                    <div>错误: ${error.message}</div>
+                `;
+                document.getElementById(testId).className = 'test-result error';
+            }
+        }
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

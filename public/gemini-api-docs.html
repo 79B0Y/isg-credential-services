@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Gemini API 文档</title>
+    <style>
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #f8f9fa;
+            --text-color: #333;
+            --border-color: #e5e5e5;
+            --success-color: #34a853;
+            --error-color: #ea4335;
+            --warning-color: #fbbc04;
+            --info-color: #4285f4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), #3367d6);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav a:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+
+        .api-section {
+            background: white;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .api-section h2 {
+            background: var(--secondary-color);
+            padding: 1.5rem;
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .api-section h3 {
+            padding: 1rem 1.5rem 0.5rem;
+            color: var(--text-color);
+            font-size: 1.2rem;
+        }
+
+        .api-endpoint {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .method {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+        }
+
+        .method.get {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .method.post {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .url {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            background-color: var(--secondary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #3367d6;
+        }
+
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        .endpoint-description {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .endpoint-example {
+            background-color: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .endpoint-example pre {
+            margin: 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+
+        .endpoint-input {
+            margin: 1rem 0;
+        }
+
+        .endpoint-input label {
+            display: block;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+        }
+
+        .endpoint-input input, .endpoint-input textarea, .endpoint-input select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .endpoint-input input:focus, .endpoint-input textarea:focus, .endpoint-input select:focus {
+            outline: 0;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .endpoint-input textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .test-result-container {
+            margin-top: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .test-result-header {
+            background-color: var(--secondary-color);
+            padding: 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .test-result-header:hover {
+            background-color: #e9ecef;
+        }
+
+        .test-result-toggle {
+            transition: transform 0.2s;
+        }
+
+        .test-result-toggle.expanded {
+            transform: rotate(90deg);
+        }
+
+        .test-result-content {
+            padding: 1rem;
+            display: none;
+        }
+
+        .test-result-content.expanded {
+            display: block;
+        }
+
+        .test-result {
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 0.5rem 0;
+        }
+
+        .test-result.success {
+            background-color: #d1fae5;
+            border: 1px solid #10a37f;
+            color: #065f46;
+        }
+
+        .test-result.error {
+            background-color: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #991b1b;
+        }
+
+        .test-result.info {
+            background-color: #dbeafe;
+            border: 1px solid #3b82f6;
+            color: #1e40af;
+        }
+
+        .chat-response {
+            background-color: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            white-space: pre-wrap;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+        }
+
+        .usage-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .usage-stat {
+            background-color: var(--secondary-color);
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .usage-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .usage-stat-label {
+            font-size: 0.875rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Google Gemini API 文档</h1>
+            <p>完整的Google Gemini API接口文档，支持聊天对话、模型查询等功能</p>
+        </div>
+
+        <nav class="nav">
+            <ul>
+                <li><a href="#overview">概述</a></li>
+                <li><a href="#authentication">认证</a></li>
+                <li><a href="#models">模型管理</a></li>
+                <li><a href="#chat">聊天对话</a></li>
+                <li><a href="#simple-chat">简单聊天</a></li>
+                <li><a href="#testing">API测试</a></li>
+            </ul>
+        </nav>
+
+        <!-- 概述 -->
+        <div class="api-section" id="overview">
+            <h2>📋 概述</h2>
+            <div class="api-endpoint">
+                <p>Google Gemini API提供了强大的AI聊天功能，支持多种模型和参数配置。本服务集成了Google Gemini的官方API，提供简单易用的接口。</p>
+                
+                <h3>🔑 主要功能</h3>
+                <ul>
+                    <li><strong>模型管理</strong>: 查询可用的Gemini模型列表</li>
+                    <li><strong>聊天对话</strong>: 支持多轮对话和复杂消息结构</li>
+                    <li><strong>简单聊天</strong>: 系统提示词 + 用户提示词的简化接口</li>
+                    <li><strong>参数配置</strong>: 支持温度、最大令牌数等参数调整</li>
+                    <li><strong>安全设置</strong>: 内置安全过滤和内容审核</li>
+                    <li><strong>使用统计</strong>: 显示Token使用情况和成本信息</li>
+                </ul>
+
+                <h3>📊 支持的模型</h3>
+                <ul>
+                    <li><strong>Gemini 2.5 Pro</strong>: 最强大的模型，擅长推理、多模态理解、高级编程等复杂任务</li>
+                    <li><strong>Gemini 2.5 Flash</strong>: 快速且成本效益高，适合需要快速响应和高吞吐量的任务（推荐）</li>
+                    <li><strong>Gemini 2.5 Flash-Lite</strong>: 最经济实惠的价格，适合简单任务的高吞吐量</li>
+                    <li><strong>Gemini 2.0 Flash</strong>: 快速响应的模型</li>
+                    <li><strong>Gemini 1.5 Pro</strong>: 强大的专业模型</li>
+                    <li><strong>Gemini 1.5 Flash</strong>: 快速响应的轻量级模型</li>
+                    <li><strong>Gemini Pro</strong>: 经典的文本生成模型</li>
+                    <li><strong>Gemini Pro Vision</strong>: 支持图像理解的模型</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 认证 -->
+        <div class="api-section" id="authentication">
+            <h2>🔐 认证</h2>
+            <div class="api-endpoint">
+                <p>使用Gemini API需要有效的API Key。请确保在凭据管理中正确配置了API Key。</p>
+                
+                <div class="endpoint-example">
+                    <pre><code># API Key认证
+https://generativelanguage.googleapis.com/v1beta/models?key=YOUR_API_KEY</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模型管理 -->
+        <div class="api-section" id="models">
+            <h2>🤖 模型管理</h2>
+            
+            <div class="api-endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="url">/api/gemini/gemini/models</span>
+                    <button class="btn btn-primary" onclick="testApi('GET', '/api/gemini/gemini/models', null, 'models-test')">测试</button>
+                </div>
+                <div class="endpoint-description">获取可用的Gemini模型列表</div>
+                <div class="endpoint-example">
+                    <pre><code>curl -X GET http://localhost:3000/api/gemini/gemini/models</code></pre>
+                </div>
+                <div id="models-test" class="test-result-container"></div>
+            </div>
+        </div>
+
+        <!-- 聊天对话 -->
+        <div class="api-section" id="chat">
+            <h2>💬 聊天对话</h2>
+            
+            <div class="api-endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="url">/api/gemini/gemini/chat</span>
+                    <button class="btn btn-primary" onclick="testChatAPI()">测试</button>
+                </div>
+                <div class="endpoint-description">发送聊天消息到Gemini，支持多轮对话</div>
+                <div class="endpoint-example">
+                    <pre><code>curl -X POST http://localhost:3000/api/gemini/gemini/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "你好，请介绍一下自己"}
+    ],
+    "options": {
+      "model": "gemini-2.5-flash",
+      "temperature": 0.7,
+      "max_tokens": 1000
+    }
+  }'</code></pre>
+                </div>
+
+                <h3>📋 请求参数</h3>
+                <div class="endpoint-example">
+                    <pre><code>{
+  "messages": [
+    {
+      "role": "user",       // 用户角色
+      "content": "用户消息"
+    },
+    {
+      "role": "model",      // 模型角色
+      "content": "模型回复"
+    }
+  ],
+  "options": {
+    "model": "gemini-pro",              // 模型名称
+    "temperature": 0.7,                 // 温度 (0-2)
+    "max_tokens": 1000,                 // 最大令牌数
+    "top_p": 1,                         // Top-p采样
+    "top_k": 40,                        // Top-k采样
+    "safety_settings": true             // 安全设置
+  }
+}</code></pre>
+                </div>
+
+                <h3>🔧 聊天参数输入</h3>
+                <div class="endpoint-input">
+                    <label for="chat-system-prompt">系统提示词:</label>
+                    <textarea id="chat-system-prompt" placeholder="你是一个有用的AI助手，请用中文回答问题。"></textarea>
+                </div>
+                <div class="endpoint-input">
+                    <label for="chat-user-prompt">用户提示词:</label>
+                    <textarea id="chat-user-prompt" placeholder="请介绍一下Google Gemini的主要特点。"></textarea>
+                </div>
+                <div class="endpoint-input">
+                    <label for="chat-model">模型:</label>
+                    <select id="chat-model">
+                        <option value="gemini-2.5-pro">Gemini 2.5 Pro (最强大)</option>
+                        <option value="gemini-2.5-flash" selected>Gemini 2.5 Flash (推荐)</option>
+                        <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite (最经济)</option>
+                        <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                        <option value="gemini-pro">Gemini Pro</option>
+                        <option value="gemini-pro-vision">Gemini Pro Vision</option>
+                    </select>
+                </div>
+                <div class="endpoint-input">
+                    <label for="chat-temperature">温度 (0-2):</label>
+                    <input type="number" id="chat-temperature" min="0" max="2" step="0.1" value="0.7">
+                </div>
+                <div class="endpoint-input">
+                    <label for="chat-max-tokens">最大令牌数:</label>
+                    <input type="number" id="chat-max-tokens" min="1" max="8192" value="1000">
+                </div>
+                <div class="endpoint-input">
+                    <button class="btn btn-primary" onclick="testChatAPI()">💬 发送聊天</button>
+                    <button class="btn btn-secondary" onclick="clearChatInputs()">🗑️ 清空输入</button>
+                </div>
+                <div id="chat-test" class="test-result-container"></div>
+            </div>
+        </div>
+
+        <!-- 简单聊天 -->
+        <div class="api-section" id="simple-chat">
+            <h2>💭 简单聊天</h2>
+            
+            <div class="api-endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="url">/api/gemini/gemini/simple-chat</span>
+                    <button class="btn btn-primary" onclick="testSimpleChatAPI()">测试</button>
+                </div>
+                <div class="endpoint-description">简化的聊天接口，支持系统提示词和用户提示词</div>
+                <div class="endpoint-example">
+                    <pre><code>curl -X POST http://localhost:3000/api/gemini/gemini/simple-chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "system_prompt": "你是一个有用的AI助手",
+    "user_prompt": "请介绍一下Google Gemini",
+    "options": {
+      "model": "gemini-2.5-flash",
+      "temperature": 0.7,
+      "max_tokens": 1000
+    }
+  }'</code></pre>
+                </div>
+
+                <h3>📋 请求参数</h3>
+                <div class="endpoint-example">
+                    <pre><code>{
+  "system_prompt": "你是一个有用的AI助手",  // 系统提示词（可选）
+  "user_prompt": "请介绍一下Google Gemini", // 用户提示词（可选）
+  "options": {
+    "model": "gemini-pro",              // 模型名称
+    "temperature": 0.7,                 // 温度
+    "max_tokens": 1000                  // 最大令牌数
+  }
+}</code></pre>
+                </div>
+
+                <h3>🔧 简单聊天参数输入</h3>
+                <div class="endpoint-input">
+                    <label for="simple-system-prompt">系统提示词:</label>
+                    <textarea id="simple-system-prompt" placeholder="你是一个有用的AI助手，请用中文回答问题。"></textarea>
+                </div>
+                <div class="endpoint-input">
+                    <label for="simple-user-prompt">用户提示词:</label>
+                    <textarea id="simple-user-prompt" placeholder="请介绍一下Google Gemini的主要特点和应用场景。"></textarea>
+                </div>
+                <div class="endpoint-input">
+                    <label for="simple-model">模型:</label>
+                    <select id="simple-model">
+                        <option value="gemini-2.5-pro">Gemini 2.5 Pro (最强大)</option>
+                        <option value="gemini-2.5-flash" selected>Gemini 2.5 Flash (推荐)</option>
+                        <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite (最经济)</option>
+                        <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                        <option value="gemini-pro">Gemini Pro</option>
+                        <option value="gemini-pro-vision">Gemini Pro Vision</option>
+                    </select>
+                </div>
+                <div class="endpoint-input">
+                    <label for="simple-temperature">温度 (0-2):</label>
+                    <input type="number" id="simple-temperature" min="0" max="2" step="0.1" value="0.7">
+                </div>
+                <div class="endpoint-input">
+                    <label for="simple-max-tokens">最大令牌数:</label>
+                    <input type="number" id="simple-max-tokens" min="1" max="8192" value="1000">
+                </div>
+                <div class="endpoint-input">
+                    <button class="btn btn-primary" onclick="testSimpleChatAPI()">💭 发送简单聊天</button>
+                    <button class="btn btn-secondary" onclick="clearSimpleChatInputs()">🗑️ 清空输入</button>
+                </div>
+                <div id="simple-chat-test" class="test-result-container"></div>
+            </div>
+        </div>
+
+        <!-- API测试 -->
+        <div class="api-section" id="testing">
+            <h2>🧪 API测试</h2>
+            <div class="api-endpoint">
+                <p>使用下面的工具测试Gemini API的各种功能。</p>
+                
+                <div class="endpoint-input">
+                    <button class="btn btn-primary" onclick="testAllAPIs()">🚀 测试所有API</button>
+                    <button class="btn btn-secondary" onclick="clearAllTests()">🗑️ 清空所有测试</button>
+                </div>
+                
+                <div id="all-tests" class="test-result-container"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Google Gemini API 文档 | 由 Credential Service 提供支持</p>
+        </div>
+    </div>
+
+    <script>
+        // 通用API测试函数
+        async function testApi(method, url, data = null, containerId = null) {
+            const resultsContainer = containerId ? document.getElementById(containerId) : document.getElementById('all-tests');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const testId = `test-${Date.now()}`;
+            resultsContainer.innerHTML = `
+                <div class="test-result-container" id="${testId}">
+                    <div class="test-result-header" onclick="toggleTestResult('${testId}')">
+                        <span>🧪 测试 ${method} ${url}</span>
+                        <span class="test-result-toggle">▶</span>
+                    </div>
+                    <div class="test-result-content">
+                        <div class="test-result info">
+                            <div>时间: ${timestamp}</div>
+                            <div>状态: 正在测试...</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+                
+                if (data && (method === 'POST' || method === 'PUT')) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(url, options);
+                const responseData = await response.text();
+                
+                let parsedData;
+                try {
+                    parsedData = JSON.parse(responseData);
+                } catch (e) {
+                    parsedData = responseData;
+                }
+                
+                const resultClass = response.ok ? 'success' : 'error';
+                const statusText = response.ok ? '✅ 成功' : '❌ 失败';
+                
+                let resultsHtml = `
+                    <div class="test-result ${resultClass}">
+                        <div><strong>API测试结果</strong></div>
+                        <div>状态: ${statusText}</div>
+                        <div>HTTP状态: ${response.status}</div>
+                        <div>响应时间: ${response.headers.get('X-Response-Time') || 'N/A'}</div>
+                `;
+                
+                if (response.ok && parsedData.success) {
+                    if (parsedData.data && parsedData.data.response_text) {
+                        resultsHtml += `
+                            <div><strong>AI回复:</strong></div>
+                            <div class="chat-response">${parsedData.data.response_text}</div>
+                        `;
+                    }
+                    
+                    if (parsedData.data && parsedData.data.usage) {
+                        resultsHtml += `
+                            <div><strong>使用统计:</strong></div>
+                            <div class="usage-stats">
+                                <div class="usage-stat">
+                                    <div class="usage-stat-value">${parsedData.data.usage.total_tokens || 0}</div>
+                                    <div class="usage-stat-label">总令牌数</div>
+                                </div>
+                                <div class="usage-stat">
+                                    <div class="usage-stat-value">${parsedData.data.usage.prompt_tokens || 0}</div>
+                                    <div class="usage-stat-label">提示令牌</div>
+                                </div>
+                                <div class="usage-stat">
+                                    <div class="usage-stat-value">${parsedData.data.usage.completion_tokens || 0}</div>
+                                    <div class="usage-stat-label">完成令牌</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                resultsHtml += `
+                        <details>
+                            <summary>查看完整响应</summary>
+                            <pre>${JSON.stringify(parsedData, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+                
+                const contentElement = document.getElementById(testId).querySelector('.test-result-content');
+                contentElement.innerHTML = resultsHtml;
+                
+            } catch (error) {
+                const contentElement = document.getElementById(testId).querySelector('.test-result-content');
+                contentElement.innerHTML = `
+                    <div class="test-result error">
+                        <div>❌ 测试失败</div>
+                        <div>错误: ${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // 切换测试结果显示
+        function toggleTestResult(testId) {
+            const testResultElement = document.getElementById(testId);
+            const contentElement = testResultElement.querySelector('.test-result-content');
+            const toggleElement = testResultElement.querySelector('.test-result-toggle');
+            
+            if (contentElement.classList.contains('expanded')) {
+                contentElement.classList.remove('expanded');
+                toggleElement.classList.remove('expanded');
+            } else {
+                contentElement.classList.add('expanded');
+                toggleElement.classList.add('expanded');
+            }
+        }
+
+        // 测试聊天API
+        async function testChatAPI() {
+            const container = document.getElementById('chat-test');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            // 收集输入参数
+            const systemPrompt = document.getElementById('chat-system-prompt').value.trim();
+            const userPrompt = document.getElementById('chat-user-prompt').value.trim();
+            const model = document.getElementById('chat-model').value;
+            const temperature = parseFloat(document.getElementById('chat-temperature').value);
+            const maxTokens = parseInt(document.getElementById('chat-max-tokens').value);
+            
+            if (!systemPrompt && !userPrompt) {
+                alert('请至少输入一个提示词（系统提示词或用户提示词）');
+                return;
+            }
+            
+            // 构建消息数组
+            const messages = [];
+            if (systemPrompt) {
+                messages.push({
+                    role: 'user',
+                    content: `${systemPrompt}\n\n${userPrompt || '请回答我的问题。'}`
+                });
+            } else if (userPrompt) {
+                messages.push({
+                    role: 'user',
+                    content: userPrompt
+                });
+            }
+            
+            const options = {
+                model: model,
+                temperature: temperature,
+                max_tokens: maxTokens
+            };
+            
+            const testId = `chat-test-${Date.now()}`;
+            container.innerHTML = `
+                <div class="test-result-container" id="${testId}">
+                    <div class="test-result-header" onclick="toggleTestResult('${testId}')">
+                        <span>💬 测试聊天API</span>
+                        <span class="test-result-toggle">▶</span>
+                    </div>
+                    <div class="test-result-content">
+                        <div class="test-result info">
+                            <div>时间: ${timestamp}</div>
+                            <div>状态: 正在测试...</div>
+                            <div>模型: ${model}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch('/api/gemini/gemini/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ messages, options })
+                });
+                
+                const data = await response.json();
+                const resultClass = response.ok ? 'success' : 'error';
+                const statusText = response.ok ? '✅ 成功' : '❌ 失败';
+                
+                let resultsHtml = `
+                    <div class="test-result ${resultClass}">
+                        <div><strong>聊天API测试结果</strong></div>
+                        <div>状态: ${statusText}</div>
+                        <div>模型: ${data.data?.model || 'N/A'}</div>
+                        <div>完成原因: ${data.data?.finish_reason || 'N/A'}</div>
+                `;
+                
+                if (data.success && data.data?.response_text) {
+                    resultsHtml += `
+                        <div><strong>AI回复:</strong></div>
+                        <div class="chat-response">${data.data.response_text}</div>
+                    `;
+                }
+                
+                if (data.data?.usage) {
+                    resultsHtml += `
+                        <div><strong>使用统计:</strong></div>
+                        <div class="usage-stats">
+                            <div class="usage-stat">
+                                <div class="usage-stat-value">${data.data.usage.total_tokens || 0}</div>
+                                <div class="usage-stat-label">总令牌数</div>
+                            </div>
+                            <div class="usage-stat">
+                                <div class="usage-stat-value">${data.data.usage.prompt_tokens || 0}</div>
+                                <div class="usage-stat-label">提示令牌</div>
+                            </div>
+                            <div class="usage-stat">
+                                <div class="usage-stat-value">${data.data.usage.completion_tokens || 0}</div>
+                                <div class="usage-stat-label">完成令牌</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                resultsHtml += `
+                        <details>
+                            <summary>查看完整响应</summary>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+                
+                const contentElement = document.getElementById(testId).querySelector('.test-result-content');
+                contentElement.innerHTML = resultsHtml;
+                
+            } catch (error) {
+                const contentElement = document.getElementById(testId).querySelector('.test-result-content');
+                contentElement.innerHTML = `
+                    <div class="test-result error">
+                        <div>❌ 测试失败</div>
+                        <div>错误: ${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // 测试简单聊天API
+        async function testSimpleChatAPI() {
+            const container = document.getElementById('simple-chat-test');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            // 收集输入参数
+            const systemPrompt = document.getElementById('simple-system-prompt').value.trim();
+            const userPrompt = document.getElementById('simple-user-prompt').value.trim();
+            const model = document.getElementById('simple-model').value;
+            const temperature = parseFloat(document.getElementById('simple-temperature').value);
+            const maxTokens = parseInt(document.getElementById('simple-max-tokens').value);
+            
+            if (!systemPrompt && !userPrompt) {
+                alert('请至少输入一个提示词（系统提示词或用户提示词）');
+                return;
+            }
+            
+            const options = {
+                model: model,
+                temperature: temperature,
+                max_tokens: maxTokens
+            };
+            
+            const testId = `simple-chat-test-${Date.now()}`;
+            container.innerHTML = `
+                <div class="test-result-container" id="${testId}">
+                    <div class="test-result-header" onclick="toggleTestResult('${testId}')">
+                        <span>💭 测试简单聊天API</span>
+                        <span class="test-result-toggle">▶</span>
+                    </div>
+                    <div class="test-result-content">
+                        <div class="test-result info">
+                            <div>时间: ${timestamp}</div>
+                            <div>状态: 正在测试...</div>
+                            <div>模型: ${model}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch('/api/gemini/gemini/simple-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        system_prompt: systemPrompt, 
+                        user_prompt: userPrompt, 
+                        options 
+                    })
+                });
+                
+                const data = await response.json();
+                const resultClass = response.ok ? 'success' : 'error';
+                const statusText = response.ok ? '✅ 成功' : '❌ 失败';
+                
+                let resultsHtml = `
+                    <div class="test-result ${resultClass}">
+                        <div><strong>简单聊天API测试结果</strong></div>
+                        <div>状态: ${statusText}</div>
+                        <div>模型: ${data.data?.model || 'N/A'}</div>
+                        <div>完成原因: ${data.data?.finish_reason || 'N/A'}</div>
+                `;
+                
+                if (data.success && data.data?.response_text) {
+                    resultsHtml += `
+                        <div><strong>AI回复:</strong></div>
+                        <div class="chat-response">${data.data.response_text}</div>
+                    `;
+                }
+                
+                if (data.data?.usage) {
+                    resultsHtml += `
+                        <div><strong>使用统计:</strong></div>
+                        <div class="usage-stats">
+                            <div class="usage-stat">
+                                <div class="usage-stat-value">${data.data.usage.total_tokens || 0}</div>
+                                <div class="usage-stat-label">总令牌数</div>
+                            </div>
+                            <div class="usage-stat">
+                                <div class="usage-stat-value">${data.data.usage.prompt_tokens || 0}</div>
+                                <div class="usage-stat-label">提示令牌</div>
+                            </div>
+                            <div class="usage-stat">
+                                <div class="usage-stat-value">${data.data.usage.completion_tokens || 0}</div>
+                                <div class="usage-stat-label">完成令牌</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                resultsHtml += `
+                        <details>
+                            <summary>查看完整响应</summary>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+                
+                const contentElement = document.getElementById(testId).querySelector('.test-result-content');
+                contentElement.innerHTML = resultsHtml;
+                
+            } catch (error) {
+                const contentElement = document.getElementById(testId).querySelector('.test-result-content');
+                contentElement.innerHTML = `
+                    <div class="test-result error">
+                        <div>❌ 测试失败</div>
+                        <div>错误: ${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // 清空聊天输入
+        function clearChatInputs() {
+            document.getElementById('chat-system-prompt').value = '';
+            document.getElementById('chat-user-prompt').value = '';
+            document.getElementById('chat-model').value = 'gemini-2.5-flash';
+            document.getElementById('chat-temperature').value = '0.7';
+            document.getElementById('chat-max-tokens').value = '1000';
+        }
+
+        // 清空简单聊天输入
+        function clearSimpleChatInputs() {
+            document.getElementById('simple-system-prompt').value = '';
+            document.getElementById('simple-user-prompt').value = '';
+            document.getElementById('simple-model').value = 'gemini-2.5-flash';
+            document.getElementById('simple-temperature').value = '0.7';
+            document.getElementById('simple-max-tokens').value = '1000';
+        }
+
+        // 测试所有API
+        async function testAllAPIs() {
+            const container = document.getElementById('all-tests');
+            container.innerHTML = '<div class="test-result info">正在测试所有API...</div>';
+            
+            // 测试模型列表
+            await testApi('GET', '/api/gemini/gemini/models', null, 'all-tests');
+            
+            // 测试连接
+            await testApi('POST', '/api/gemini/gemini/test-connection', {}, 'all-tests');
+            
+            // 测试简单聊天
+            await testApi('POST', '/api/gemini/gemini/simple-chat', {
+                system_prompt: '你是一个有用的AI助手',
+                user_prompt: '请简单介绍一下Google Gemini',
+                options: {
+                    model: 'gemini-2.5-flash',
+                    temperature: 0.7,
+                    max_tokens: 500
+                }
+            }, 'all-tests');
+        }
+
+        // 清空所有测试
+        function clearAllTests() {
+            document.getElementById('all-tests').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

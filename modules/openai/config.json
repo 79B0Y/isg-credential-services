@@ -1,0 +1,17 @@
+{
+  "apiBaseUrl": "https://api.openai.com",
+  "timeout": 15000,
+  "retries": 3,
+  "cacheTimeout": 600000,
+  "features": {
+    "models": true,
+    "usage": true,
+    "connectionTest": true,
+    "autoRetry": true
+  },
+  "rateLimit": {
+    "enabled": true,
+    "requestsPerSecond": 20,
+    "burstLimit": 40
+  }
+}

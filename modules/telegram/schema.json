@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Telegram Bot Credentials",
+  "description": "Telegram Bot API credentials for bot authentication",
+  "properties": {
+    "bot_token": {
+      "type": "string",
+      "title": "Bot Token",
+      "description": "Telegram Bot API token obtained from @BotFather",
+      "required": true,
+      "sensitive": true,
+      "minLength": 45,
+      "maxLength": 50,
+      "pattern": "^\\d+:[A-Za-z0-9_-]+$",
+      "example": "123456789:ABCdefGHIjklMNOpqrsTUVwxyz",
+      "ui": {
+        "widget": "password",
+        "placeholder": "Enter your Telegram bot token",
+        "help": "Get your bot token from @BotFather on Telegram"
+      }
+    }
+  },
+  "required": ["bot_token"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "bot_token": "123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+    }
+  ]
+}

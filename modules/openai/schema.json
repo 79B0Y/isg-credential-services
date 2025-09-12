@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "OpenAI API Credentials",
+  "description": "OpenAI API credentials for AI model access",
+  "properties": {
+    "api_key": {
+      "type": "string",
+      "title": "API Key",
+      "description": "OpenAI API key from your account dashboard",
+      "required": true,
+      "sensitive": true,
+      "minLength": 40,
+      "maxLength": 200,
+      "pattern": "^sk-[A-Za-z0-9-_]+$",
+      "example": "sk-abcdef1234567890abcdef1234567890abcdef12",
+      "ui": {
+        "widget": "password",
+        "placeholder": "Enter your OpenAI API key",
+        "help": "Get your API key from https://platform.openai.com/api-keys"
+      }
+    },
+    "organization": {
+      "type": "string",
+      "title": "Organization ID",
+      "description": "OpenAI Organization ID (optional)",
+      "required": false,
+      "sensitive": false,
+      "minLength": 20,
+      "maxLength": 30,
+      "pattern": "^org-[A-Za-z0-9]+$",
+      "example": "org-abcdef1234567890abcdef12",
+      "ui": {
+        "widget": "text",
+        "placeholder": "org-xxxxxxxxxxxxxxxxxxxxxxxx",
+        "help": "Optional: Your OpenAI organization ID"
+      }
+    }
+  },
+  "required": ["api_key"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "api_key": "sk-abcdef1234567890abcdef1234567890abcdef12"
+    },
+    {
+      "api_key": "sk-abcdef1234567890abcdef1234567890abcdef12",
+      "organization": "org-abcdef1234567890abcdef12"
+    }
+  ]
+}

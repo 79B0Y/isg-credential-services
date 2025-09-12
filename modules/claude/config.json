@@ -1,0 +1,17 @@
+{
+  "apiBaseUrl": "https://api.anthropic.com",
+  "timeout": 15000,
+  "retries": 3,
+  "cacheTimeout": 600000,
+  "features": {
+    "models": true,
+    "connectionTest": true,
+    "streaming": false,
+    "autoRetry": true
+  },
+  "rateLimit": {
+    "enabled": true,
+    "requestsPerSecond": 15,
+    "burstLimit": 30
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "WhatsApp Business API Credentials",
+  "description": "WhatsApp Business API credentials for messaging",
+  "properties": {
+    "access_token": {
+      "type": "string",
+      "title": "Access Token",
+      "description": "WhatsApp Business API access token from Meta Business",
+      "required": true,
+      "sensitive": true,
+      "minLength": 50,
+      "maxLength": 300,
+      "example": "EAABsbCS1iHgBAxxxxxxxxxxxxxxxxxxxxxxxx",
+      "ui": {
+        "widget": "password",
+        "placeholder": "Enter your WhatsApp Business access token",
+        "help": "Get your access token from Meta Business Manager"
+      }
+    },
+    "phone_number_id": {
+      "type": "string",
+      "title": "Phone Number ID",
+      "description": "WhatsApp Business phone number ID",
+      "required": true,
+      "sensitive": false,
+      "minLength": 10,
+      "maxLength": 20,
+      "pattern": "^\\d+$",
+      "example": "1234567890123456",
+      "ui": {
+        "widget": "text",
+        "placeholder": "1234567890123456",
+        "help": "Your WhatsApp Business phone number ID from Meta Business"
+      }
+    }
+  },
+  "required": ["access_token", "phone_number_id"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "access_token": "EAABsbCS1iHgBAxxxxxxxxxxxxxxxxxxxxxxxx",
+      "phone_number_id": "1234567890123456"
+    }
+  ]
+}
