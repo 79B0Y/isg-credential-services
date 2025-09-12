@@ -276,7 +276,7 @@ class TelegramModule extends BaseCredentialModule {
                 if (isFinished) return; // 防止重复清理
                 isFinished = true;
 
-                this.logger.debug(`[TELEGRAM-REQ] 清理资源 ${requestId}`);
+                this.logger.info(`[TELEGRAM-REQ] 清理资源 ${requestId}`);
 
                 // 清理超时定时器
                 if (timeoutId) {
@@ -306,7 +306,7 @@ class TelegramModule extends BaseCredentialModule {
                 }
 
                 const duration = Date.now() - startTime;
-                this.logger.debug(`[TELEGRAM-REQ] 请求 ${requestId} 清理完成，耗时: ${duration}ms`);
+                this.logger.info(`[TELEGRAM-REQ] 请求 ${requestId} 清理完成，耗时: ${duration}ms`);
             };
 
             try {
@@ -395,7 +395,7 @@ class TelegramModule extends BaseCredentialModule {
 
                     res.on('close', () => {
                         if (!isFinished) {
-                            this.logger.debug(`[TELEGRAM-REQ] 响应连接关闭 ${requestId}`);
+                            // Response connection closed - no logging needed for normal operation
                         }
                     });
                 });
@@ -442,7 +442,7 @@ class TelegramModule extends BaseCredentialModule {
                 
                 req.on('close', () => {
                     if (!isFinished) {
-                        this.logger.debug(`[TELEGRAM-REQ] 请求连接关闭 ${requestId}`);
+                        // Request connection closed - normal cleanup will handle this
                         atomicCleanup();
                     }
                 });
@@ -461,7 +461,7 @@ class TelegramModule extends BaseCredentialModule {
                     }
                     req.end();
                     
-                    this.logger.debug(`[TELEGRAM-REQ] 请求已发送 ${requestId}`);
+                    this.logger.info(`[TELEGRAM-REQ] 请求已发送 ${requestId}`);
                 } catch (sendError) {
                     atomicCleanup();
                     reject(new Error(`[TELEGRAM-REQ] 发送失败 ${requestId}: ${sendError.message}`));
@@ -1940,7 +1940,7 @@ class TelegramModule extends BaseCredentialModule {
                     return;
                 }
                 
-                this.logger.debug(`[TELEGRAM-CLEANUP] 开始请求清理 - 当前活跃: ${sizeBefore}`);
+                this.logger.info(`[TELEGRAM-CLEANUP] 开始请求清理 - 当前活跃: ${sizeBefore}`);
                 
                 // 清理已经被销毁的请求
                 this.activeRequests.forEach(req => {
