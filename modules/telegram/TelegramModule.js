@@ -314,16 +314,24 @@ class TelegramModule extends BaseCredentialModule {
                 });
             });
 
-            // 添加到活跃请求集合
+            // 添加创建时间戳并加入活跃请求集合
+            req._created = Date.now();
             this.activeRequests.add(req);
             
             // 设置超时
             const timeoutId = setTimeout(() => {
+                const error = new Error(`Request timeout after ${this.config.timeout}ms`);
+                
+                // 先清理，再拒绝
                 if (!req.destroyed) {
                     req.destroy();
-                    this.activeRequests.delete(req);
                 }
-                reject(new Error(`Request timeout after ${this.config.timeout}ms`));
+                this.activeRequests.delete(req);
+                
+                // 记录超时请求数量用于调试
+                this.logger.warn(`[MEMORY] Request timeout, active requests: ${this.activeRequests.size}`);
+                
+                reject(error);
             }, this.config.timeout);
             
             // 清理函数
@@ -1806,6 +1814,8 @@ class TelegramModule extends BaseCredentialModule {
         }
         
         this.requestCleanupTimer = setInterval(() => {
+            const sizeBefore = this.activeRequests.size;
+            
             // 清理已经被销毁的请求
             this.activeRequests.forEach(req => {
                 if (req.destroyed) {
@@ -1813,11 +1823,31 @@ class TelegramModule extends BaseCredentialModule {
                 }
             });
             
-            // 日志活跃请求数
-            if (this.activeRequests.size > 0) {
-                this.logger.info(`Active requests: ${this.activeRequests.size}`);
+            // 强制清理长时间未完成的请求（防止内存泄漏）
+            const now = Date.now();
+            this.activeRequests.forEach(req => {
+                if (req._created && (now - req._created) > 120000) { // 超过2分钟
+                    this.logger.warn(`[MEMORY] Force cleanup stale request (age: ${now - req._created}ms)`);
+                    if (!req.destroyed) {
+                        req.destroy();
+                    }
+                    this.activeRequests.delete(req);
+                }
+            });
+            
+            const cleaned = sizeBefore - this.activeRequests.size;
+            
+            // 日志活跃请求数和清理情况
+            if (this.activeRequests.size > 0 || cleaned > 0) {
+                this.logger.info(`[MEMORY] Active requests: ${this.activeRequests.size} (cleaned: ${cleaned})`);
             }
-        }, 30000); // 每30秒清理一次
+            
+            // 内存压力检测 - 如果活跃请求过多，强制清理
+            if (this.activeRequests.size > 10) {
+                this.logger.error(`[MEMORY] Too many active requests (${this.activeRequests.size}), force cleanup all`);
+                this.forceCleanupAllRequests();
+            }
+        }, 15000); // 每15秒清理一次，更频繁
     }
     
     /**
@@ -1836,6 +1866,32 @@ class TelegramModule extends BaseCredentialModule {
             }
         });
         this.activeRequests.clear();
+    }
+    
+    /**
+     * 强制清理所有活跃请求 - 用于内存压力情况
+     */
+    forceCleanupAllRequests() {
+        const count = this.activeRequests.size;
+        this.logger.error(`[MEMORY] Force cleaning up ${count} active requests due to memory pressure`);
+        
+        this.activeRequests.forEach(req => {
+            if (!req.destroyed) {
+                try {
+                    req.destroy();
+                } catch (error) {
+                    // 忽略销毁错误
+                    this.logger.warn(`[MEMORY] Error destroying request: ${error.message}`);
+                }
+            }
+        });
+        this.activeRequests.clear();
+        
+        // 强制垃圾回收
+        if (global.gc) {
+            this.logger.info('[MEMORY] Triggering garbage collection after request cleanup');
+            global.gc();
+        }
     }
 
 
