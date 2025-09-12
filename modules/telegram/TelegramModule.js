@@ -248,7 +248,7 @@ class TelegramModule extends BaseCredentialModule {
     /**
      * 调用Telegram Bot API
      */
-    async callTelegramAPI(botToken, method, params = {}) {
+    async callTelegramAPI(botToken, method, params = {}, retryCount = 0) {
         return new Promise((resolve, reject) => {
             const url = `${this.config.apiBaseUrl}/bot${botToken}/${method}`;
             const urlObj = new URL(url);
@@ -266,8 +266,12 @@ class TelegramModule extends BaseCredentialModule {
                 headers: {
                     'Content-Type': 'application/json',
                     'Content-Length': Buffer.byteLength(postData),
-                    'User-Agent': 'CredentialService/1.0'
-                }
+                    'User-Agent': 'CredentialService/1.0',
+                    'Connection': 'keep-alive'
+                },
+                // 添加网络选项
+                timeout: this.config.timeout,
+                agent: false // 禁用连接池以避免连接问题
             };
 
             const req = httpModule.request(options, (res) => {
@@ -294,7 +298,23 @@ class TelegramModule extends BaseCredentialModule {
             });
 
             req.on('error', (error) => {
-                reject(new Error(`Request failed: ${error.message}`));
+                // 增强错误信息
+                let errorMessage = `Request failed: ${error.message}`;
+                
+                // 根据错误类型提供更详细的信息
+                if (error.code === 'ECONNRESET') {
+                    errorMessage += ' (Connection reset by peer)';
+                } else if (error.code === 'ECONNREFUSED') {
+                    errorMessage += ' (Connection refused)';
+                } else if (error.code === 'ENOTFOUND') {
+                    errorMessage += ' (DNS resolution failed)';
+                } else if (error.code === 'ETIMEDOUT') {
+                    errorMessage += ' (Connection timeout)';
+                } else if (error.code === 'ECONNABORTED') {
+                    errorMessage += ' (Connection aborted)';
+                }
+                
+                reject(new Error(errorMessage));
             });
 
             // 发送POST数据
@@ -303,7 +323,38 @@ class TelegramModule extends BaseCredentialModule {
             }
             
             req.end();
+        }).catch(async (error) => {
+            // 重试逻辑
+            if (retryCount < this.config.retries && this.shouldRetry(error)) {
+                this.logger.warn(`API call failed, retrying (${retryCount + 1}/${this.config.retries}): ${error.message}`);
+                
+                // 指数退避延迟
+                const delay = Math.min(1000 * Math.pow(2, retryCount), 10000);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                
+                return this.callTelegramAPI(botToken, method, params, retryCount + 1);
+            }
+            
+            throw error;
         });
+    }
+
+    /**
+     * 判断是否应该重试
+     */
+    shouldRetry(error) {
+        const retryableErrors = [
+            'ECONNRESET',
+            'ECONNREFUSED', 
+            'ETIMEDOUT',
+            'ECONNABORTED',
+            'ENOTFOUND',
+            'Request timeout'
+        ];
+        
+        return retryableErrors.some(errorType => 
+            error.message.includes(errorType) || error.code === errorType
+        );
     }
 
     /**
@@ -488,12 +539,15 @@ class TelegramModule extends BaseCredentialModule {
             }
 
             this.isPolling = true;
+            this.pollingFailures = 0; // 重置失败计数器
             this.logger.info('Starting message polling...');
 
             // 开始轮询
             this.pollingInterval = setInterval(async () => {
                 try {
                     await this.pollUpdates(bot_token);
+                    // 成功时重置失败计数器
+                    this.pollingFailures = 0;
                 } catch (error) {
                     this.logger.error('Polling error:', error);
                 }
@@ -536,13 +590,44 @@ class TelegramModule extends BaseCredentialModule {
                 for (const update of response.result) {
                     // 确保不重复处理相同的update_id
                     if (update.update_id > this.lastUpdateId) {
-                        await this.processUpdate(update);
-                        this.lastUpdateId = update.update_id;
+                        try {
+                            await this.processUpdate(update);
+                            this.lastUpdateId = update.update_id;
+                        } catch (processError) {
+                            this.logger.error('Failed to process update:', processError);
+                            // 即使处理失败，也要更新lastUpdateId以避免重复处理
+                            this.lastUpdateId = update.update_id;
+                        }
                     }
+                }
+            } else if (response.error_code) {
+                // 处理Telegram API错误
+                this.logger.warn(`Telegram API error: ${response.description} (code: ${response.error_code})`);
+                
+                // 如果是严重错误，停止轮询
+                if (response.error_code === 401) {
+                    this.logger.error('Invalid bot token, stopping polling');
+                    this.stopPolling();
                 }
             }
         } catch (error) {
             this.logger.error('Failed to poll updates:', error);
+            
+            // 连续失败计数器
+            this.pollingFailures = (this.pollingFailures || 0) + 1;
+            
+            // 如果连续失败太多次，暂停轮询
+            if (this.pollingFailures >= 10) {
+                this.logger.error('Too many polling failures, pausing polling for 60 seconds');
+                this.stopPolling();
+                
+                // 60秒后重新启动轮询
+                setTimeout(() => {
+                    this.logger.info('Restarting polling after pause');
+                    this.pollingFailures = 0;
+                    this.startPolling();
+                }, 60000);
+            }
         }
     }
 
