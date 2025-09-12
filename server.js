@@ -110,6 +110,7 @@ class CredentialService {
         // 健康检查
         this.app.get('/health', this.handleHealth.bind(this));
         this.app.get('/api/health', this.handleHealth.bind(this));
+        this.app.get('/api/server-info', this.handleServerInfo.bind(this));
         
         // 模块管理API
         this.app.get('/api/modules', this.handleGetModules.bind(this));
@@ -148,6 +149,7 @@ class CredentialService {
         this.app.get('/api/telegram/:module/messages', this.handleGetMessages.bind(this));
         this.app.get('/api/telegram/:module/messages/:messageId', this.handleGetMessage.bind(this));
         this.app.delete('/api/telegram/:module/messages', this.handleClearMessages.bind(this));
+        this.app.post('/api/telegram/:module/reprocess-messages', this.handleReprocessMessages.bind(this));
         this.app.post('/api/telegram/:module/send/message', this.handleSendMessage.bind(this));
         this.app.post('/api/telegram/:module/send/photo', this.handleSendPhoto.bind(this));
         this.app.post('/api/telegram/:module/send/video', this.handleSendVideo.bind(this));
@@ -357,6 +359,29 @@ class CredentialService {
             
             const result = module.clearMessageHistory();
             res.json(result);
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 重新处理消息的媒体数据
+     */
+    async handleReprocessMessages(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            
+            const module = this.moduleManager.getModule(moduleName);
+            if (!module || moduleName !== 'telegram') {
+                return res.status(404).json({ success: false, error: 'Telegram module not found' });
+            }
+            
+            if (typeof module.reprocessExistingMessages !== 'function') {
+                return res.status(400).json({ success: false, error: 'Message reprocessing not supported by this module' });
+            }
+            
+            const result = module.reprocessExistingMessages();
+            res.json({ success: true, data: result });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
         }
@@ -1782,6 +1807,38 @@ class CredentialService {
     }
 
     /**
+     * 服务器信息
+     */
+    async handleServerInfo(req, res) {
+        const os = require('os');
+        const networkInterfaces = os.networkInterfaces();
+        
+        // 获取局域网IP地址
+        let lanIP = '127.0.0.1';
+        for (const interfaceName in networkInterfaces) {
+            const interfaces = networkInterfaces[interfaceName];
+            for (const iface of interfaces) {
+                // 跳过内部接口和IPv6
+                if (iface.family === 'IPv4' && !iface.internal) {
+                    lanIP = iface.address;
+                    break;
+                }
+            }
+            if (lanIP !== '127.0.0.1') break;
+        }
+        
+        const port = this.port || 3000;
+        const serverInfo = {
+            lanIP: lanIP,
+            port: port,
+            url: `http://${lanIP}:${port}`,
+            timestamp: new Date().toISOString()
+        };
+        
+        res.json(serverInfo);
+    }
+
+    /**
      * 获取所有模块
      */
     async handleGetModules(req, res) {
@@ -2134,6 +2191,10 @@ class CredentialService {
             
             const port = this.configManager.get('server.port', 3000);
             const host = this.configManager.get('server.host', '0.0.0.0');
+            
+            // 存储端口信息
+            this.port = port;
+            this.host = host;
             
             this.server = this.app.listen(port, host, () => {
                 this.logger.info(`🚀 Credential Service started on ${host}:${port}`);

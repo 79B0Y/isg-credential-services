@@ -86,7 +86,11 @@ class TelegramModule extends BaseCredentialModule {
             this.logger.info('Validating Telegram bot token...');
             
             // 在网络问题的环境中，我们可以提供一个快速验证模式
-            if (process.env.QUICK_VALIDATION === 'true' || this.config.quickValidation === true) {
+            const quickValidationEnabled = process.env.QUICK_VALIDATION === 'true' || 
+                                          this.config.validation?.quickValidation === true ||
+                                          this.config.quickValidation === true;
+            
+            if (quickValidationEnabled) {
                 this.logger.info('Using quick validation mode');
                 return {
                     success: true,
@@ -104,10 +108,21 @@ class TelegramModule extends BaseCredentialModule {
             
             // 尝试调用getMe API验证token（带重试）
             let lastError;
+            let attempts = [];
+            
             for (let attempt = 1; attempt <= this.config.retries; attempt++) {
+                const attemptStart = Date.now();
                 try {
                     this.logger.info(`API validation attempt ${attempt}/${this.config.retries}`);
                     const botInfo = await this.callTelegramAPI(bot_token, 'getMe');
+                    const attemptTime = Date.now() - attemptStart;
+                    
+                    attempts.push({
+                        attempt: attempt,
+                        success: true,
+                        response_time: attemptTime,
+                        timestamp: new Date().toISOString()
+                    });
                     
                     if (botInfo.ok && botInfo.result) {
                         const bot = botInfo.result;
@@ -115,7 +130,7 @@ class TelegramModule extends BaseCredentialModule {
                         // 成功获取bot信息
                         return {
                             success: true,
-                            message: 'Telegram bot token is valid',
+                            message: `Telegram bot token验证成功 - Bot: ${bot.first_name}${bot.username ? ' (@' + bot.username + ')' : ''}`,
                             data: {
                                 bot: {
                                     id: bot.id,
@@ -124,24 +139,49 @@ class TelegramModule extends BaseCredentialModule {
                                     is_bot: bot.is_bot,
                                     can_join_groups: bot.can_join_groups,
                                     can_read_all_group_messages: bot.can_read_all_group_messages,
-                                    supports_inline_queries: bot.supports_inline_queries
+                                    supports_inline_queries: bot.supports_inline_queries,
+                                    can_connect_to_business: bot.can_connect_to_business || false,
+                                    has_main_web_app: bot.has_main_web_app || false
+                                },
+                                validation: {
+                                    api_url: `${this.config.apiBaseUrl}/bot${this.maskToken(bot_token)}/getMe`,
+                                    curl_command: `curl "${this.config.apiBaseUrl}/bot${bot_token}/getMe"`,
+                                    total_attempts: attempt,
+                                    successful_attempt: attempt,
+                                    response_time: attemptTime,
+                                    attempts: attempts
                                 },
                                 validated_at: new Date().toISOString(),
                                 mode: 'full'
                             }
                         };
                     } else {
+                        // API返回了错误
                         return {
                             success: false,
-                            error: botInfo.description || 'Invalid bot token',
+                            error: `Telegram API错误: ${botInfo.description || 'Invalid bot token'}`,
                             details: {
                                 error_code: botInfo.error_code,
-                                description: botInfo.description
+                                description: botInfo.description,
+                                api_url: `${this.config.apiBaseUrl}/bot${this.maskToken(bot_token)}/getMe`,
+                                curl_command: `curl "${this.config.apiBaseUrl}/bot${bot_token}/getMe"`,
+                                total_attempts: attempt,
+                                attempts: attempts
                             }
                         };
                     }
                 } catch (error) {
+                    const attemptTime = Date.now() - attemptStart;
                     lastError = error;
+                    
+                    attempts.push({
+                        attempt: attempt,
+                        success: false,
+                        error: error.message,
+                        error_type: error.code || error.name || 'NetworkError',
+                        response_time: attemptTime,
+                        timestamp: new Date().toISOString()
+                    });
                     this.logger.warn(`Attempt ${attempt} failed: ${error.message}`);
                     
                     if (attempt < this.config.retries) {
@@ -155,15 +195,25 @@ class TelegramModule extends BaseCredentialModule {
             this.logger.warn('API validation failed, falling back to format validation');
             return {
                 success: true,
-                message: 'Token format is valid, but API validation failed (network issue)',
+                message: 'Token格式有效，但API验证失败 (网络问题)',
                 data: {
                     bot: {
                         token_format: 'valid',
-                        api_error: lastError.message
+                        api_error: lastError.message,
+                        error_type: lastError.code || lastError.name || 'NetworkError'
+                    },
+                    validation: {
+                        api_url: `${this.config.apiBaseUrl}/bot${this.maskToken(bot_token)}/getMe`,
+                        curl_command: `curl "${this.config.apiBaseUrl}/bot${bot_token}/getMe"`,
+                        total_attempts: this.config.retries,
+                        successful_attempt: 0,
+                        attempts: attempts,
+                        fallback_reason: 'All API attempts failed, but token format is valid'
                     },
                     validated_at: new Date().toISOString(),
                     mode: 'fallback',
-                    warning: 'Could not connect to Telegram API'
+                    warning: 'Could not connect to Telegram API - 请检查网络连接或防火墙设置',
+                    suggestion: '可以使用提供的curl命令在终端中手动测试API连接'
                 }
             };
             
@@ -173,16 +223,24 @@ class TelegramModule extends BaseCredentialModule {
             // 如果是网络问题，但token格式正确，我们仍然可以返回部分成功
             return {
                 success: true,
-                message: 'Token format is valid (network validation failed)',
+                message: 'Token格式有效 (网络验证失败)',
                 data: {
                     bot: {
                         token_format: 'valid',
-                        network_error: error.message
+                        network_error: error.message,
+                        error_type: error.code || error.name || 'UnknownError'
+                    },
+                    validation: {
+                        api_url: `${this.config.apiBaseUrl}/bot${this.maskToken(bot_token)}/getMe`,
+                        curl_command: `curl "${this.config.apiBaseUrl}/bot${bot_token}/getMe"`,
+                        error_details: error.message,
+                        fallback_reason: 'Validation threw an exception, but token format is valid'
                     },
                     validated_at: new Date().toISOString(),
-                    mode: 'format_only'
-                },
-                warning: 'Could not perform full API validation due to network issues'
+                    mode: 'format_only',
+                    warning: 'Could not perform full API validation due to network issues',
+                    suggestion: '可以使用提供的curl命令在终端中手动测试API连接'
+                }
             };
         }
     }
@@ -608,7 +666,67 @@ class TelegramModule extends BaseCredentialModule {
             };
         }
         
+        if (message.video_note) {
+            media.video_note = {
+                file_id: message.video_note.file_id,
+                file_unique_id: message.video_note.file_unique_id,
+                length: message.video_note.length,
+                duration: message.video_note.duration,
+                file_size: message.video_note.file_size,
+                thumbnail: message.video_note.thumbnail
+            };
+        }
+        
+        if (message.sticker) {
+            media.sticker = {
+                file_id: message.sticker.file_id,
+                file_unique_id: message.sticker.file_unique_id,
+                width: message.sticker.width,
+                height: message.sticker.height,
+                file_size: message.sticker.file_size,
+                emoji: message.sticker.emoji,
+                set_name: message.sticker.set_name
+            };
+        }
+        
+        if (message.animation) {
+            media.animation = {
+                file_id: message.animation.file_id,
+                file_unique_id: message.animation.file_unique_id,
+                width: message.animation.width,
+                height: message.animation.height,
+                duration: message.animation.duration,
+                file_size: message.animation.file_size,
+                file_name: message.animation.file_name,
+                mime_type: message.animation.mime_type
+            };
+        }
+        
         return Object.keys(media).length > 0 ? media : null;
+    }
+
+    /**
+     * 重新处理现有消息的媒体数据
+     */
+    reprocessExistingMessages() {
+        this.logger.info('Reprocessing existing messages for media data...');
+        let reprocessedCount = 0;
+        
+        for (let i = 0; i < this.messageHistory.length; i++) {
+            const message = this.messageHistory[i];
+            if (message.raw && !message.media) {
+                // 重新提取媒体信息
+                const newMedia = this.extractMedia(message.raw);
+                if (newMedia) {
+                    this.messageHistory[i].media = newMedia;
+                    this.messages.set(message.id, this.messageHistory[i]);
+                    reprocessedCount++;
+                }
+            }
+        }
+        
+        this.logger.info(`Reprocessed ${reprocessedCount} messages with media data`);
+        return { reprocessed: reprocessedCount, total: this.messageHistory.length };
     }
 
     // =================
@@ -1556,6 +1674,23 @@ class TelegramModule extends BaseCredentialModule {
         }
         
         this.logger.info('Telegram module disabled');
+    }
+
+    /**
+     * 掩码显示Token (保护敏感信息)
+     */
+    maskToken(token) {
+        if (!token || token.length < 10) return '[INVALID]';
+        const parts = token.split(':');
+        if (parts.length !== 2) return '[INVALID_FORMAT]';
+        
+        const botId = parts[0];
+        const secret = parts[1];
+        const maskedSecret = secret.length > 8 ? 
+            secret.substring(0, 4) + '*'.repeat(secret.length - 8) + secret.substring(secret.length - 4) :
+            '*'.repeat(secret.length);
+        
+        return `${botId}:${maskedSecret}`;
     }
 
     /**
