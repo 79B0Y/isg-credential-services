@@ -263,6 +263,7 @@ class TelegramModule extends BaseCredentialModule {
                 port: urlObj.port || (isHttps ? 443 : 80),
                 path: urlObj.pathname,
                 method: Object.keys(params).length > 0 ? 'POST' : 'GET',
+                family: 4, // 强制使用 IPv4
                 headers: {
                     'Content-Type': 'application/json',
                     'Content-Length': Buffer.byteLength(postData),
@@ -542,16 +543,29 @@ class TelegramModule extends BaseCredentialModule {
             this.pollingFailures = 0; // 重置失败计数器
             this.logger.info('Starting message polling...');
 
-            // 开始轮询
-            this.pollingInterval = setInterval(async () => {
+            // 开始轮询 - 修改为递归方式避免并发冲突
+            const doPoll = async () => {
+                if (!this.isPolling) return;
+                
                 try {
                     await this.pollUpdates(bot_token);
-                    // 成功时重置失败计数器
                     this.pollingFailures = 0;
                 } catch (error) {
                     this.logger.error('Polling error:', error);
+                    this.pollingFailures = (this.pollingFailures || 0) + 1;
+                    
+                    if (this.pollingFailures >= 10) {
+                        this.logger.error('Too many polling failures, stopping polling');
+                        return this.stopPolling();
+                    }
                 }
-            }, this.config.pollingInterval || 1000);
+                
+                // 等待一小段时间后继续下一次轮询
+                setTimeout(doPoll, 100);
+            };
+
+            // 启动轮询
+            doPoll();
 
             return { success: true, message: 'Message polling started' };
         } catch (error) {
@@ -564,10 +578,7 @@ class TelegramModule extends BaseCredentialModule {
      * 停止消息轮询
      */
     async stopPolling() {
-        if (this.pollingInterval) {
-            clearInterval(this.pollingInterval);
-            this.pollingInterval = null;
-        }
+        // 由于改为递归方式，只需要设置标志位即可
         this.isPolling = false;
         this.logger.info('Message polling stopped');
         return { success: true, message: 'Message polling stopped' };
@@ -612,22 +623,8 @@ class TelegramModule extends BaseCredentialModule {
             }
         } catch (error) {
             this.logger.error('Failed to poll updates:', error);
-            
-            // 连续失败计数器
-            this.pollingFailures = (this.pollingFailures || 0) + 1;
-            
-            // 如果连续失败太多次，暂停轮询
-            if (this.pollingFailures >= 10) {
-                this.logger.error('Too many polling failures, pausing polling for 60 seconds');
-                this.stopPolling();
-                
-                // 60秒后重新启动轮询
-                setTimeout(() => {
-                    this.logger.info('Restarting polling after pause');
-                    this.pollingFailures = 0;
-                    this.startPolling();
-                }, 60000);
-            }
+            // 错误处理已移至doPoll函数中
+            throw error; // 重新抛出错误让doPoll处理
         }
     }
 
