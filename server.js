@@ -29,6 +29,11 @@ class CredentialService {
         
         // 初始化标志
         this.initialized = false;
+        
+        // 内存监控
+        this.memoryMonitor = null;
+        this.memoryThreshold = 500 * 1024 * 1024; // 500MB
+        this.lastMemoryCheck = Date.now();
     }
 
     /**
@@ -50,6 +55,9 @@ class CredentialService {
             this.setupMiddleware();
             this.setupRoutes();
             this.setupErrorHandlers();
+            
+            // 启动内存监控
+            this.startMemoryMonitoring();
             
             this.initialized = true;
             this.logger.info('Credential Service initialized successfully');
@@ -884,10 +892,13 @@ class CredentialService {
     async handleHACallService(req, res) {
         try {
             const { module: moduleName } = req.params;
-            const { domain, service, entity_id, data = {} } = req.body;
+            const { domain, device_type, service, entity_id, data = {} } = req.body;
             
-            if (!domain || !service) {
-                return res.status(400).json({ success: false, error: 'domain and service are required' });
+            // 支持 device_type 和 domain (向后兼容)
+            const deviceDomain = device_type || domain;
+            
+            if (!deviceDomain || !service) {
+                return res.status(400).json({ success: false, error: 'device_type (or domain) and service are required' });
             }
             
             const module = this.moduleManager.getModule(moduleName);
@@ -912,7 +923,7 @@ class CredentialService {
             const result = await module.callHomeAssistantAPI(
                 credentials.data.access_token,
                 credentials.data.base_url,
-                `/api/services/${domain}/${service}`,
+                `/api/services/${deviceDomain}/${service}`,
                 'POST',
                 serviceData
             );
@@ -2287,6 +2298,9 @@ class CredentialService {
      */
     async stop() {
         try {
+            // 停止内存监控
+            this.stopMemoryMonitoring();
+            
             if (this.server) {
                 await new Promise((resolve) => {
                     this.server.close(resolve);
@@ -2307,6 +2321,62 @@ class CredentialService {
         }
     }
 
+    /**
+     * 启动内存监控
+     */
+    startMemoryMonitoring() {
+        if (this.memoryMonitor) {
+            clearInterval(this.memoryMonitor);
+        }
+        
+        this.memoryMonitor = setInterval(() => {
+            const memoryUsage = process.memoryUsage();
+            const rssInMB = memoryUsage.rss / 1024 / 1024;
+            const heapUsedInMB = memoryUsage.heapUsed / 1024 / 1024;
+            
+            // 每5分钟记录一次内存使用
+            if (Date.now() - this.lastMemoryCheck > 5 * 60 * 1000) {
+                this.logger.info(`Memory usage - RSS: ${rssInMB.toFixed(2)}MB, Heap: ${heapUsedInMB.toFixed(2)}MB`);
+                this.lastMemoryCheck = Date.now();
+            }
+            
+            // 检查内存阈值
+            if (memoryUsage.rss > this.memoryThreshold) {
+                this.logger.warn(`High memory usage detected: ${rssInMB.toFixed(2)}MB (threshold: ${this.memoryThreshold / 1024 / 1024}MB)`);
+                
+                // 强制垃圾回收
+                if (global.gc) {
+                    this.logger.info('Forcing garbage collection...');
+                    global.gc();
+                } else {
+                    this.logger.warn('Garbage collection not available. Start Node.js with --expose-gc flag.');
+                }
+                
+                // 如果内存依然过高，记录警告
+                setTimeout(() => {
+                    const newMemoryUsage = process.memoryUsage();
+                    if (newMemoryUsage.rss > this.memoryThreshold) {
+                        this.logger.error(`Memory usage still high after GC: ${(newMemoryUsage.rss / 1024 / 1024).toFixed(2)}MB`);
+                        this.logger.error('Consider restarting the service to prevent crashes.');
+                    }
+                }, 5000);
+            }
+        }, 30000); // 每30秒检查一次
+        
+        this.logger.info('Memory monitoring started');
+    }
+    
+    /**
+     * 停止内存监控
+     */
+    stopMemoryMonitoring() {
+        if (this.memoryMonitor) {
+            clearInterval(this.memoryMonitor);
+            this.memoryMonitor = null;
+            this.logger.info('Memory monitoring stopped');
+        }
+    }
+    
     /**
      * 创建日志器
      */

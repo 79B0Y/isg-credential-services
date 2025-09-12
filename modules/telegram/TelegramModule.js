@@ -15,7 +15,11 @@ class TelegramModule extends BaseCredentialModule {
         
         // Telegram API配置
         this.apiBaseUrl = 'https://api.telegram.org';
-        this.defaultTimeout = 10000;
+        this.defaultTimeout = 30000; // Increased to 30s
+        
+        // Request cleanup
+        this.activeRequests = new Set();
+        this.requestCleanupTimer = null;
         
         // 消息轮询配置
         this.pollingInterval = null;
@@ -50,6 +54,9 @@ class TelegramModule extends BaseCredentialModule {
         if (!this.config.timeout) {
             this.config.timeout = this.defaultTimeout;
         }
+        
+        // 初始化请求清理定时器
+        this.startRequestCleanup();
         
         this.logger.info('Telegram module initialized with config:', {
             apiBaseUrl: this.config.apiBaseUrl,
@@ -276,29 +283,58 @@ class TelegramModule extends BaseCredentialModule {
             };
 
             const req = httpModule.request(options, (res) => {
+                cleanup();
                 let data = '';
                 
                 res.on('data', (chunk) => {
                     data += chunk;
+                    // Prevent memory issues with very large responses
+                    if (data.length > 10 * 1024 * 1024) { // 10MB limit
+                        res.destroy();
+                        reject(new Error('Response too large'));
+                        return;
+                    }
                 });
                 
                 res.on('end', () => {
                     try {
+                        if (data.length === 0) {
+                            reject(new Error('Empty response'));
+                            return;
+                        }
                         const response = JSON.parse(data);
                         resolve(response);
                     } catch (parseError) {
                         reject(new Error(`Invalid JSON response: ${parseError.message}`));
                     }
                 });
+                
+                res.on('error', (error) => {
+                    reject(new Error(`Response error: ${error.message}`));
+                });
             });
 
+            // 添加到活跃请求集合
+            this.activeRequests.add(req);
+            
             // 设置超时
-            req.setTimeout(this.config.timeout, () => {
-                req.destroy();
+            const timeoutId = setTimeout(() => {
+                if (!req.destroyed) {
+                    req.destroy();
+                    this.activeRequests.delete(req);
+                }
                 reject(new Error(`Request timeout after ${this.config.timeout}ms`));
-            });
+            }, this.config.timeout);
+            
+            // 清理函数
+            const cleanup = () => {
+                clearTimeout(timeoutId);
+                this.activeRequests.delete(req);
+            };
 
             req.on('error', (error) => {
+                cleanup();
+                
                 // 增强错误信息
                 let errorMessage = `Request failed: ${error.message}`;
                 
@@ -316,6 +352,10 @@ class TelegramModule extends BaseCredentialModule {
                 }
                 
                 reject(new Error(errorMessage));
+            });
+            
+            req.on('close', () => {
+                cleanup();
             });
 
             // 发送POST数据
@@ -1488,27 +1528,46 @@ class TelegramModule extends BaseCredentialModule {
      * 停止WebSocket服务器
      */
     async stopWebSocketServer() {
-        try {
-            if (!this.wss) {
-                return { success: true, message: 'WebSocket server is not running' };
+        return new Promise((resolve) => {
+            try {
+                if (!this.wss) {
+                    resolve({ success: true, message: 'WebSocket server is not running' });
+                    return;
+                }
+
+                // 关闭所有客户端连接
+                this.websocketClients.forEach(ws => {
+                    try {
+                        if (ws.readyState === WebSocket.OPEN) {
+                            ws.close(1000, 'Server shutdown');
+                        }
+                    } catch (error) {
+                        this.logger.warn('Error closing WebSocket client:', error);
+                    }
+                });
+                this.websocketClients.clear();
+
+                // 关闭服务器，并等待完成
+                this.wss.close(() => {
+                    this.wss = null;
+                    this.logger.info('WebSocket server stopped');
+                    resolve({ success: true, message: 'WebSocket server stopped' });
+                });
+                
+                // 超时保护
+                setTimeout(() => {
+                    if (this.wss) {
+                        this.wss = null;
+                        this.logger.warn('WebSocket server force closed due to timeout');
+                        resolve({ success: true, message: 'WebSocket server force stopped' });
+                    }
+                }, 5000);
+                
+            } catch (error) {
+                this.logger.error('Failed to stop WebSocket server:', error);
+                resolve({ success: false, error: error.message });
             }
-
-            // 关闭所有客户端连接
-            this.websocketClients.forEach(ws => {
-                ws.close();
-            });
-            this.websocketClients.clear();
-
-            // 关闭服务器
-            this.wss.close();
-            this.wss = null;
-            
-            this.logger.info('WebSocket server stopped');
-            return { success: true, message: 'WebSocket server stopped' };
-        } catch (error) {
-            this.logger.error('Failed to stop WebSocket server:', error);
-            return { success: false, error: error.message };
-        }
+        });
     }
 
     /**
@@ -1737,6 +1796,47 @@ class TelegramModule extends BaseCredentialModule {
             url: this.wss ? `ws://localhost:${this.websocketPort}` : null
         };
     }
+    
+    /**
+     * 启动请求清理定时器
+     */
+    startRequestCleanup() {
+        if (this.requestCleanupTimer) {
+            clearInterval(this.requestCleanupTimer);
+        }
+        
+        this.requestCleanupTimer = setInterval(() => {
+            // 清理已经被销毁的请求
+            this.activeRequests.forEach(req => {
+                if (req.destroyed) {
+                    this.activeRequests.delete(req);
+                }
+            });
+            
+            // 日志活跃请求数
+            if (this.activeRequests.size > 0) {
+                this.logger.info(`Active requests: ${this.activeRequests.size}`);
+            }
+        }, 30000); // 每30秒清理一次
+    }
+    
+    /**
+     * 停止请求清理定时器
+     */
+    stopRequestCleanup() {
+        if (this.requestCleanupTimer) {
+            clearInterval(this.requestCleanupTimer);
+            this.requestCleanupTimer = null;
+        }
+        
+        // 强制清理所有活跃请求
+        this.activeRequests.forEach(req => {
+            if (!req.destroyed) {
+                req.destroy();
+            }
+        });
+        this.activeRequests.clear();
+    }
 
 
     /**
@@ -1754,6 +1854,9 @@ class TelegramModule extends BaseCredentialModule {
         if (this.wss) {
             await this.stopWebSocketServer();
         }
+        
+        // 停止请求清理
+        this.stopRequestCleanup();
         
         this.logger.info('Telegram module disabled');
     }
