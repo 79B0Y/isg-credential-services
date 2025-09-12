@@ -14,13 +14,14 @@ class Home_assistantModule extends BaseCredentialModule {
         // Home Assistant API配置
         this.defaultTimeout = 10000;
         
-        // 增强状态数据缓存系统
+        // 增强状态数据缓存系统 - 优化时序避免冲突
         this.enhancedStatesCache = {
             data: null,
             lastUpdated: null,
             isUpdating: false,
-            updateInterval: 60000, // 1分钟
-            maxAge: 120000 // 2分钟最大缓存时间
+            updateInterval: 75000, // 1分15秒（避开Telegram默认重试间隔）
+            maxAge: 150000, // 2.5分钟最大缓存时间
+            staggerDelay: Math.floor(Math.random() * 10000) // 随机0-10秒初始延迟
         };
         
         // 缓存更新定时器
@@ -2912,7 +2913,7 @@ class Home_assistantModule extends BaseCredentialModule {
     }
 
     /**
-     * 启动增强状态数据缓存更新定时器
+     * 启动增强状态数据缓存更新定时器 - 使用错峰调度避免冲突
      */
     startEnhancedStatesCacheUpdater() {
         // 清除现有定时器
@@ -2920,17 +2921,50 @@ class Home_assistantModule extends BaseCredentialModule {
             clearInterval(this.cacheUpdateTimer);
         }
 
-        // 立即执行一次更新
-        this.updateEnhancedStatesCache();
+        const { updateInterval, staggerDelay } = this.enhancedStatesCache;
+        
+        this.logger.info(`[TIMING-OPT] 启动错峰缓存更新: 初始延迟 ${Math.round(staggerDelay/1000)}s, 间隔 ${Math.round(updateInterval/1000)}s`);
 
-        // 设置定时更新（绑定this上下文）
-        this.cacheUpdateTimer = setInterval(() => {
+        // 使用错峰延迟避免与Telegram操作冲突
+        setTimeout(() => {
+            // 首次执行更新
             this.updateEnhancedStatesCache().catch(error => {
-                console.error('Cache update error:', error);
+                this.logger.error('[TIMING-OPT] 初始缓存更新失败:', error);
             });
-        }, this.enhancedStatesCache.updateInterval);
 
-        this.logger.info(`Enhanced states cache updater started, updating every ${this.enhancedStatesCache.updateInterval / 1000} seconds`);
+            // 设置定时更新（使用错峰间隔）
+            this.cacheUpdateTimer = setInterval(() => {
+                // 检查当前是否有高负载操作
+                const currentMemory = process.memoryUsage().heapUsed / 1024 / 1024;
+                const activeRequestCount = global.telegramModule ? global.telegramModule.activeRequests.size : 0;
+                
+                // 如果系统负载过高，延迟此次更新
+                if (currentMemory > 180 || activeRequestCount > 3) {
+                    this.logger.warn(`[TIMING-OPT] 系统负载高 (内存: ${Math.round(currentMemory)}MB, 请求: ${activeRequestCount})，延迟缓存更新`);
+                    
+                    // 延迟15-30秒后重试
+                    const retryDelay = 15000 + Math.random() * 15000;
+                    setTimeout(() => {
+                        if (!this.enhancedStatesCache.isUpdating) {
+                            this.updateEnhancedStatesCache().catch(error => {
+                                this.logger.error('[TIMING-OPT] 延迟缓存更新失败:', error);
+                            });
+                        }
+                    }, retryDelay);
+                    
+                    return;
+                }
+
+                // 正常执行缓存更新
+                this.updateEnhancedStatesCache().catch(error => {
+                    this.logger.error('[TIMING-OPT] 定时缓存更新失败:', error);
+                });
+                
+            }, updateInterval);
+
+            this.logger.info(`[TIMING-OPT] 错峰缓存更新已启动`);
+            
+        }, staggerDelay);
     }
 
     /**
@@ -2945,40 +2979,95 @@ class Home_assistantModule extends BaseCredentialModule {
     }
 
     /**
-     * 更新增强状态数据缓存
+     * 更新增强状态数据缓存 - 使用原子锁机制防止竞争条件
      */
     async updateEnhancedStatesCache() {
-        // 如果正在更新中，跳过此次更新
+        // 使用原子锁机制
         if (this.enhancedStatesCache.isUpdating) {
             this.logger.info('Enhanced states cache update already in progress, skipping');
             return;
         }
 
+        // 记录开始时间用于超时保护
+        const startTime = Date.now();
+        const TIMEOUT_MS = 30000; // 30秒超时
+        let timeoutId = null;
+
         try {
             this.enhancedStatesCache.isUpdating = true;
-            this.logger.info('Updating enhanced states cache...');
+            this.logger.info(`[CACHE-ATOMIC] 开始缓存更新 - 时间戳: ${startTime}`);
+
+            // 设置超时保护
+            timeoutId = setTimeout(() => {
+                this.logger.error(`[CACHE-ATOMIC] 缓存更新超时 (${TIMEOUT_MS}ms)，强制释放锁`);
+                this.enhancedStatesCache.isUpdating = false;
+            }, TIMEOUT_MS);
+
+            // 内存使用情况记录
+            const memBefore = process.memoryUsage();
+            this.logger.info(`[CACHE-ATOMIC] 更新前内存: 堆=${Math.round(memBefore.heapUsed/1024/1024)}MB`);
 
             // 获取凭据
             const credResult = await this.getCredentials();
             if (!credResult.success) {
-                this.logger.warn('Failed to get credentials for cache update:', credResult.error);
+                this.logger.warn('[CACHE-ATOMIC] Failed to get credentials for cache update:', credResult.error);
                 return;
             }
 
             // 获取增强状态数据
             const enhancedStatesResult = await this.getEnhancedStatesInternal(credResult.data);
             if (enhancedStatesResult.success) {
+                // 原子性更新缓存数据
+                const oldData = this.enhancedStatesCache.data;
                 this.enhancedStatesCache.data = enhancedStatesResult.data;
                 this.enhancedStatesCache.lastUpdated = Date.now();
-                this.logger.info(`Enhanced states cache updated successfully, ${enhancedStatesResult.data.states.length} entities cached`);
+                
+                // 显式清理旧数据
+                if (oldData && oldData.states) {
+                    this.logger.info(`[CACHE-ATOMIC] 清理旧缓存数据: ${oldData.states.length} 条记录`);
+                    oldData.states = null;
+                }
+
+                // 内存使用情况记录
+                const memAfter = process.memoryUsage();
+                const memDiff = memAfter.heapUsed - memBefore.heapUsed;
+                this.logger.info(`[CACHE-ATOMIC] 缓存更新完成: ${enhancedStatesResult.data.states.length} 实体, 内存变化: ${Math.round(memDiff/1024/1024)}MB`);
+
+                // 强制垃圾回收（如果可用）
+                if (global.gc && Math.abs(memDiff) > 10 * 1024 * 1024) { // 内存变化超过10MB时
+                    this.logger.info('[CACHE-ATOMIC] 触发垃圾回收');
+                    global.gc();
+                }
             } else {
-                this.logger.error('Failed to update enhanced states cache:', enhancedStatesResult.error);
+                this.logger.error('[CACHE-ATOMIC] Failed to update enhanced states cache:', enhancedStatesResult.error);
+            }
+
+            // 清除超时定时器
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
             }
 
         } catch (error) {
-            this.logger.error('Error updating enhanced states cache:', error);
+            this.logger.error('[CACHE-ATOMIC] Error updating enhanced states cache:', error);
+            
+            // 记录详细错误信息
+            if (error.message && error.message.includes('out of memory')) {
+                const mem = process.memoryUsage();
+                this.logger.error(`[CACHE-ATOMIC] 内存不足错误 - 当前内存: 堆=${Math.round(mem.heapUsed/1024/1024)}MB, RSS=${Math.round(mem.rss/1024/1024)}MB`);
+            }
         } finally {
+            // 确保总是释放锁
             this.enhancedStatesCache.isUpdating = false;
+            
+            // 清除超时定时器
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+            
+            const endTime = Date.now();
+            const duration = endTime - startTime;
+            this.logger.info(`[CACHE-ATOMIC] 缓存更新完成 - 耗时: ${duration}ms`);
         }
     }
 

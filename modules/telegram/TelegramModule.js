@@ -21,6 +21,9 @@ class TelegramModule extends BaseCredentialModule {
         this.activeRequests = new Set();
         this.requestCleanupTimer = null;
         
+        // 注册为全局模块以供内存保护访问
+        global.telegramModule = this;
+        
         // 消息轮询配置
         this.pollingInterval = null;
         this.lastUpdateId = 0;
@@ -253,132 +256,238 @@ class TelegramModule extends BaseCredentialModule {
     }
 
     /**
-     * 调用Telegram Bot API
+     * 调用Telegram Bot API - 完全重写请求管理机制
      */
     async callTelegramAPI(botToken, method, params = {}, retryCount = 0) {
+        const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const startTime = Date.now();
+        
+        this.logger.info(`[TELEGRAM-REQ] 开始请求 ${requestId} - 方法: ${method}, 重试: ${retryCount}`);
+
         return new Promise((resolve, reject) => {
-            const url = `${this.config.apiBaseUrl}/bot${botToken}/${method}`;
-            const urlObj = new URL(url);
-            const isHttps = urlObj.protocol === 'https:';
-            const httpModule = isHttps ? https : http;
-            
-            // 准备POST数据
-            const postData = JSON.stringify(params);
-            
-            const options = {
-                hostname: urlObj.hostname,
-                port: urlObj.port || (isHttps ? 443 : 80),
-                path: urlObj.pathname,
-                method: Object.keys(params).length > 0 ? 'POST' : 'GET',
-                family: 4, // 强制使用 IPv4
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(postData),
-                    'User-Agent': 'CredentialService/1.0',
-                    'Connection': 'keep-alive'
-                },
-                // 添加网络选项
-                timeout: this.config.timeout,
-                agent: false // 禁用连接池以避免连接问题
+            let isFinished = false;
+            let req = null;
+            let timeoutId = null;
+            let responseSize = 0;
+            const MAX_RESPONSE_SIZE = 10 * 1024 * 1024; // 10MB限制
+
+            // 原子清理函数 - 确保所有资源被正确释放
+            const atomicCleanup = () => {
+                if (isFinished) return; // 防止重复清理
+                isFinished = true;
+
+                this.logger.debug(`[TELEGRAM-REQ] 清理资源 ${requestId}`);
+
+                // 清理超时定时器
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                    timeoutId = null;
+                }
+
+                // 安全销毁请求对象
+                if (req) {
+                    try {
+                        if (!req.destroyed) {
+                            req.destroy();
+                        }
+                    } catch (destroyError) {
+                        this.logger.warn(`[TELEGRAM-REQ] 请求销毁错误 ${requestId}:`, destroyError.message);
+                    }
+
+                    // 从活跃请求集合中移除
+                    if (this.activeRequests.has(req)) {
+                        this.activeRequests.delete(req);
+                    }
+
+                    // 清理请求对象的自定义属性
+                    req._created = null;
+                    req._requestId = null;
+                    req = null;
+                }
+
+                const duration = Date.now() - startTime;
+                this.logger.debug(`[TELEGRAM-REQ] 请求 ${requestId} 清理完成，耗时: ${duration}ms`);
             };
 
-            const req = httpModule.request(options, (res) => {
-                cleanup();
-                let data = '';
+            try {
+                const url = `${this.config.apiBaseUrl}/bot${botToken}/${method}`;
+                const urlObj = new URL(url);
+                const isHttps = urlObj.protocol === 'https:';
+                const httpModule = isHttps ? https : http;
                 
-                res.on('data', (chunk) => {
-                    data += chunk;
-                    // Prevent memory issues with very large responses
-                    if (data.length > 10 * 1024 * 1024) { // 10MB limit
-                        res.destroy();
-                        reject(new Error('Response too large'));
-                        return;
-                    }
-                });
+                // 准备POST数据
+                const postData = JSON.stringify(params);
                 
-                res.on('end', () => {
-                    try {
-                        if (data.length === 0) {
-                            reject(new Error('Empty response'));
+                const options = {
+                    hostname: urlObj.hostname,
+                    port: urlObj.port || (isHttps ? 443 : 80),
+                    path: urlObj.pathname,
+                    method: Object.keys(params).length > 0 ? 'POST' : 'GET',
+                    family: 4, // 强制使用 IPv4
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Content-Length': Buffer.byteLength(postData),
+                        'User-Agent': 'CredentialService/1.0',
+                        'Connection': 'close' // 避免连接复用导致的内存泄漏
+                    },
+                    timeout: this.config.timeout,
+                    agent: false // 禁用连接池
+                };
+
+                // 创建请求对象
+                req = httpModule.request(options, (res) => {
+                    if (isFinished) return; // 防止重复处理
+
+                    let data = '';
+                    let chunks = [];
+                    
+                    res.on('data', (chunk) => {
+                        if (isFinished) return;
+
+                        responseSize += chunk.length;
+                        
+                        // 响应大小检查
+                        if (responseSize > MAX_RESPONSE_SIZE) {
+                            atomicCleanup();
+                            reject(new Error(`[TELEGRAM-REQ] 响应过大 (${Math.round(responseSize/1024/1024)}MB) ${requestId}`));
                             return;
                         }
-                        const response = JSON.parse(data);
-                        resolve(response);
-                    } catch (parseError) {
-                        reject(new Error(`Invalid JSON response: ${parseError.message}`));
+
+                        chunks.push(chunk);
+                        data += chunk;
+                    });
+                    
+                    res.on('end', () => {
+                        if (isFinished) return;
+                        
+                        try {
+                            // 立即清理chunks数组以释放内存
+                            chunks = null;
+                            
+                            if (data.length === 0) {
+                                atomicCleanup();
+                                reject(new Error(`[TELEGRAM-REQ] 空响应 ${requestId}`));
+                                return;
+                            }
+
+                            const response = JSON.parse(data);
+                            
+                            // 清理响应数据引用
+                            data = null;
+                            
+                            atomicCleanup();
+                            
+                            const duration = Date.now() - startTime;
+                            this.logger.info(`[TELEGRAM-REQ] 请求成功 ${requestId} - 耗时: ${duration}ms, 大小: ${Math.round(responseSize/1024)}KB`);
+                            
+                            resolve(response);
+                        } catch (parseError) {
+                            atomicCleanup();
+                            reject(new Error(`[TELEGRAM-REQ] JSON解析失败 ${requestId}: ${parseError.message}`));
+                        }
+                    });
+                    
+                    res.on('error', (error) => {
+                        if (isFinished) return;
+                        atomicCleanup();
+                        reject(new Error(`[TELEGRAM-REQ] 响应错误 ${requestId}: ${error.message}`));
+                    });
+
+                    res.on('close', () => {
+                        if (!isFinished) {
+                            this.logger.debug(`[TELEGRAM-REQ] 响应连接关闭 ${requestId}`);
+                        }
+                    });
+                });
+
+                // 请求对象配置
+                req._created = startTime;
+                req._requestId = requestId;
+                this.activeRequests.add(req);
+
+                // 超时处理
+                timeoutId = setTimeout(() => {
+                    if (isFinished) return;
+                    
+                    this.logger.warn(`[TELEGRAM-REQ] 请求超时 ${requestId} (${this.config.timeout}ms) - 活跃请求: ${this.activeRequests.size}`);
+                    atomicCleanup();
+                    reject(new Error(`[TELEGRAM-REQ] 请求超时 ${requestId} after ${this.config.timeout}ms`));
+                }, this.config.timeout);
+
+                // 请求错误处理
+                req.on('error', (error) => {
+                    if (isFinished) return;
+                    
+                    this.logger.warn(`[TELEGRAM-REQ] 请求错误 ${requestId}:`, error.message);
+                    
+                    // 增强错误信息
+                    let errorMessage = `请求失败 ${requestId}: ${error.message}`;
+                    
+                    // 根据错误类型提供更详细的信息
+                    if (error.code === 'ECONNRESET') {
+                        errorMessage += ' (连接被重置)';
+                    } else if (error.code === 'ECONNREFUSED') {
+                        errorMessage += ' (连接被拒绝)';
+                    } else if (error.code === 'ENOTFOUND') {
+                        errorMessage += ' (DNS解析失败)';
+                    } else if (error.code === 'ETIMEDOUT') {
+                        errorMessage += ' (连接超时)';
+                    } else if (error.code === 'ECONNABORTED') {
+                        errorMessage += ' (连接中断)';
+                    }
+                    
+                    atomicCleanup();
+                    reject(new Error(errorMessage));
+                });
+                
+                req.on('close', () => {
+                    if (!isFinished) {
+                        this.logger.debug(`[TELEGRAM-REQ] 请求连接关闭 ${requestId}`);
+                        atomicCleanup();
                     }
                 });
-                
-                res.on('error', (error) => {
-                    reject(new Error(`Response error: ${error.message}`));
+
+                req.on('timeout', () => {
+                    if (isFinished) return;
+                    this.logger.warn(`[TELEGRAM-REQ] 套接字超时 ${requestId}`);
+                    atomicCleanup();
+                    reject(new Error(`[TELEGRAM-REQ] 套接字超时 ${requestId}`));
                 });
-            });
 
-            // 添加创建时间戳并加入活跃请求集合
-            req._created = Date.now();
-            this.activeRequests.add(req);
-            
-            // 设置超时
-            const timeoutId = setTimeout(() => {
-                const error = new Error(`Request timeout after ${this.config.timeout}ms`);
-                
-                // 先清理，再拒绝
-                if (!req.destroyed) {
-                    req.destroy();
-                }
-                this.activeRequests.delete(req);
-                
-                // 记录超时请求数量用于调试
-                this.logger.warn(`[MEMORY] Request timeout, active requests: ${this.activeRequests.size}`);
-                
-                reject(error);
-            }, this.config.timeout);
-            
-            // 清理函数
-            const cleanup = () => {
-                clearTimeout(timeoutId);
-                this.activeRequests.delete(req);
-            };
-
-            req.on('error', (error) => {
-                cleanup();
-                
-                // 增强错误信息
-                let errorMessage = `Request failed: ${error.message}`;
-                
-                // 根据错误类型提供更详细的信息
-                if (error.code === 'ECONNRESET') {
-                    errorMessage += ' (Connection reset by peer)';
-                } else if (error.code === 'ECONNREFUSED') {
-                    errorMessage += ' (Connection refused)';
-                } else if (error.code === 'ENOTFOUND') {
-                    errorMessage += ' (DNS resolution failed)';
-                } else if (error.code === 'ETIMEDOUT') {
-                    errorMessage += ' (Connection timeout)';
-                } else if (error.code === 'ECONNABORTED') {
-                    errorMessage += ' (Connection aborted)';
+                // 发送POST数据
+                try {
+                    if (Object.keys(params).length > 0) {
+                        req.write(postData);
+                    }
+                    req.end();
+                    
+                    this.logger.debug(`[TELEGRAM-REQ] 请求已发送 ${requestId}`);
+                } catch (sendError) {
+                    atomicCleanup();
+                    reject(new Error(`[TELEGRAM-REQ] 发送失败 ${requestId}: ${sendError.message}`));
                 }
                 
-                reject(new Error(errorMessage));
-            });
-            
-            req.on('close', () => {
-                cleanup();
-            });
-
-            // 发送POST数据
-            if (Object.keys(params).length > 0) {
-                req.write(postData);
+            } catch (initError) {
+                atomicCleanup();
+                reject(new Error(`[TELEGRAM-REQ] 初始化失败 ${requestId}: ${initError.message}`));
             }
-            
-            req.end();
+
         }).catch(async (error) => {
-            // 重试逻辑
+            // 重试逻辑 - 使用指数退避和最大并发控制
             if (retryCount < this.config.retries && this.shouldRetry(error)) {
-                this.logger.warn(`API call failed, retrying (${retryCount + 1}/${this.config.retries}): ${error.message}`);
+                // 检查并发请求数量
+                if (this.activeRequests.size > 5) {
+                    this.logger.warn(`[TELEGRAM-REQ] 活跃请求过多 (${this.activeRequests.size})，延迟重试`);
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                }
+
+                this.logger.warn(`[TELEGRAM-REQ] 重试 ${retryCount + 1}/${this.config.retries}: ${error.message}`);
                 
-                // 指数退避延迟
-                const delay = Math.min(1000 * Math.pow(2, retryCount), 10000);
+                // 指数退避延迟 + 随机抖动
+                const baseDelay = Math.min(1000 * Math.pow(2, retryCount), 10000);
+                const jitter = Math.random() * 1000;
+                const delay = baseDelay + jitter;
+                
                 await new Promise(resolve => setTimeout(resolve, delay));
                 
                 return this.callTelegramAPI(botToken, method, params, retryCount + 1);
@@ -1806,48 +1915,69 @@ class TelegramModule extends BaseCredentialModule {
     }
     
     /**
-     * 启动请求清理定时器
+     * 启动请求清理定时器 - 使用错峰调度避免与缓存更新冲突
      */
     startRequestCleanup() {
         if (this.requestCleanupTimer) {
             clearInterval(this.requestCleanupTimer);
         }
         
-        this.requestCleanupTimer = setInterval(() => {
-            const sizeBefore = this.activeRequests.size;
-            
-            // 清理已经被销毁的请求
-            this.activeRequests.forEach(req => {
-                if (req.destroyed) {
-                    this.activeRequests.delete(req);
+        // 错峰延迟：在Home Assistant缓存更新的时间间隙中执行
+        const cleanupInterval = 20000; // 20秒间隔
+        const staggerOffset = 5000; // 5秒偏移，避开缓存更新时间
+        
+        this.logger.info(`[TIMING-OPT] 启动错峰请求清理: 间隔 ${cleanupInterval/1000}s, 偏移 ${staggerOffset/1000}s`);
+        
+        setTimeout(() => {
+            this.requestCleanupTimer = setInterval(() => {
+                const startTime = Date.now();
+                const sizeBefore = this.activeRequests.size;
+                
+                // 避免在高负载时进行清理
+                const currentMemory = process.memoryUsage().heapUsed / 1024 / 1024;
+                if (currentMemory > 200) {
+                    this.logger.warn(`[TIMING-OPT] 内存负载高 (${Math.round(currentMemory)}MB)，跳过请求清理`);
+                    return;
                 }
-            });
-            
-            // 强制清理长时间未完成的请求（防止内存泄漏）
-            const now = Date.now();
-            this.activeRequests.forEach(req => {
-                if (req._created && (now - req._created) > 120000) { // 超过2分钟
-                    this.logger.warn(`[MEMORY] Force cleanup stale request (age: ${now - req._created}ms)`);
-                    if (!req.destroyed) {
-                        req.destroy();
+                
+                this.logger.debug(`[TELEGRAM-CLEANUP] 开始请求清理 - 当前活跃: ${sizeBefore}`);
+                
+                // 清理已经被销毁的请求
+                this.activeRequests.forEach(req => {
+                    if (req.destroyed) {
+                        this.activeRequests.delete(req);
                     }
-                    this.activeRequests.delete(req);
+                });
+                
+                // 强制清理长时间未完成的请求（防止内存泄漏）
+                const now = Date.now();
+                this.activeRequests.forEach(req => {
+                    if (req._created && (now - req._created) > 120000) { // 超过2分钟
+                        this.logger.warn(`[TELEGRAM-CLEANUP] 清理陈旧请求 ID:${req._requestId || 'unknown'} (存活: ${Math.round((now - req._created)/1000)}s)`);
+                        if (!req.destroyed) {
+                            req.destroy();
+                        }
+                        this.activeRequests.delete(req);
+                    }
+                });
+                
+                const cleaned = sizeBefore - this.activeRequests.size;
+                const duration = Date.now() - startTime;
+                
+                // 日志活跃请求数和清理情况
+                if (this.activeRequests.size > 0 || cleaned > 0) {
+                    this.logger.info(`[TELEGRAM-CLEANUP] 活跃请求: ${this.activeRequests.size} (清理: ${cleaned}, 耗时: ${duration}ms)`);
                 }
-            });
+                
+                // 内存压力检测 - 如果活跃请求过多，强制清理
+                if (this.activeRequests.size > 8) { // 降低阈值，更积极清理
+                    this.logger.error(`[TELEGRAM-CLEANUP] 活跃请求过多 (${this.activeRequests.size})，强制清理所有`);
+                    this.forceCleanupAllRequests();
+                }
+                
+            }, cleanupInterval);
             
-            const cleaned = sizeBefore - this.activeRequests.size;
-            
-            // 日志活跃请求数和清理情况
-            if (this.activeRequests.size > 0 || cleaned > 0) {
-                this.logger.info(`[MEMORY] Active requests: ${this.activeRequests.size} (cleaned: ${cleaned})`);
-            }
-            
-            // 内存压力检测 - 如果活跃请求过多，强制清理
-            if (this.activeRequests.size > 10) {
-                this.logger.error(`[MEMORY] Too many active requests (${this.activeRequests.size}), force cleanup all`);
-                this.forceCleanupAllRequests();
-            }
-        }, 15000); // 每15秒清理一次，更频繁
+        }, staggerOffset);
     }
     
     /**

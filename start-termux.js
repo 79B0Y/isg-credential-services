@@ -35,28 +35,99 @@ console.log(`  - 最大堆内存: ${memorySettings.maxOldSpaceSize}MB`);
 console.log(`  - 半空间大小: ${memorySettings.maxSemiSpaceSize}MB`);
 console.log(`  - 线程池大小: ${process.env.UV_THREADPOOL_SIZE}`);
 
-// 内存监控
+// 进程级内存保护监控
 const startMemoryMonitoring = () => {
     let lastHeapUsed = 0;
+    let memoryWarningCount = 0;
+    let lastGcTime = Date.now();
+    const MEMORY_THRESHOLD_MB = 200; // 内存警告阈值
+    const CRITICAL_THRESHOLD_MB = 240; // 严重内存阈值
+    const MAX_WARNINGS = 3; // 最大警告次数
     
     const checkMemory = () => {
         const mem = process.memoryUsage();
         const heapMB = Math.round(mem.heapUsed / 1024 / 1024);
         const rssMB = Math.round(mem.rss / 1024 / 1024);
+        const externalMB = Math.round(mem.external / 1024 / 1024);
         
-        console.log(`[MEMORY] 堆: ${heapMB}MB, RSS: ${rssMB}MB`);
+        console.log(`[MEMORY-PROTECT] 堆: ${heapMB}MB, RSS: ${rssMB}MB, 外部: ${externalMB}MB`);
         
-        // 内存增长检测
-        if (heapMB - lastHeapUsed > 20) {
-            console.warn(`[MEMORY] ⚠️  内存快速增长: +${heapMB - lastHeapUsed}MB`);
+        // 内存增长速度检测
+        const memoryGrowth = heapMB - lastHeapUsed;
+        if (memoryGrowth > 20) {
+            console.warn(`[MEMORY-PROTECT] ⚠️  内存快速增长: +${memoryGrowth}MB`);
+            memoryWarningCount++;
         }
-        
-        // 内存过高警告
-        if (heapMB > 200) {
-            console.warn(`[MEMORY] 🔥 内存使用过高: ${heapMB}MB`);
+
+        // 分级内存保护
+        if (heapMB > CRITICAL_THRESHOLD_MB) {
+            console.error(`[MEMORY-PROTECT] 🚨 严重内存警告: ${heapMB}MB (临界值: ${CRITICAL_THRESHOLD_MB}MB)`);
+            
+            // 紧急内存清理
             if (global.gc) {
-                console.log('[MEMORY] 触发垃圾回收...');
+                console.log('[MEMORY-PROTECT] 执行紧急垃圾回收...');
                 global.gc();
+                global.gc(); // 连续执行两次GC
+                lastGcTime = Date.now();
+            }
+
+            // 记录详细内存信息
+            const memAfterGc = process.memoryUsage();
+            const freedMB = Math.round((mem.heapUsed - memAfterGc.heapUsed) / 1024 / 1024);
+            console.log(`[MEMORY-PROTECT] GC释放内存: ${freedMB}MB`);
+
+            // 内存仍然过高，考虑重启
+            if (memAfterGc.heapUsed / 1024 / 1024 > CRITICAL_THRESHOLD_MB - 20) {
+                console.error('[MEMORY-PROTECT] 🔥 内存无法有效释放，建议重启服务');
+                memoryWarningCount = MAX_WARNINGS; // 触发保护机制
+            }
+
+        } else if (heapMB > MEMORY_THRESHOLD_MB) {
+            console.warn(`[MEMORY-PROTECT] ⚠️  内存使用过高: ${heapMB}MB`);
+            memoryWarningCount++;
+            
+            // 预防性垃圾回收
+            const timeSinceLastGc = Date.now() - lastGcTime;
+            if (global.gc && timeSinceLastGc > 30000) { // 30秒间隔
+                console.log('[MEMORY-PROTECT] 预防性垃圾回收...');
+                global.gc();
+                lastGcTime = Date.now();
+            }
+        } else {
+            // 内存正常，重置警告计数
+            if (memoryWarningCount > 0) {
+                memoryWarningCount = Math.max(0, memoryWarningCount - 1);
+            }
+        }
+
+        // 连续内存警告保护机制
+        if (memoryWarningCount >= MAX_WARNINGS) {
+            console.error(`[MEMORY-PROTECT] 🚨 连续内存警告 (${memoryWarningCount})，激活保护机制`);
+            
+            // 尝试强制清理
+            if (global.memoryTracker) {
+                console.log('[MEMORY-PROTECT] 生成内存泄漏报告...');
+                global.memoryTracker.generateReport();
+            }
+
+            // 清理活跃请求（如果存在Telegram模块）
+            try {
+                // 通过全局变量访问模块实例
+                if (global.telegramModule && global.telegramModule.forceCleanupRequests) {
+                    console.log('[MEMORY-PROTECT] 清理Telegram活跃请求...');
+                    global.telegramModule.forceCleanupRequests();
+                }
+            } catch (cleanupError) {
+                console.warn('[MEMORY-PROTECT] 请求清理失败:', cleanupError.message);
+            }
+
+            // 最后手段：延迟重启（给用户时间保存数据）
+            if (memoryWarningCount >= MAX_WARNINGS + 2) {
+                console.error('[MEMORY-PROTECT] 🔥 内存问题严重，5秒后自动重启...');
+                setTimeout(() => {
+                    console.error('[MEMORY-PROTECT] 执行保护性重启');
+                    process.exit(2); // 特殊退出码表示内存问题
+                }, 5000);
             }
         }
         
@@ -65,6 +136,21 @@ const startMemoryMonitoring = () => {
     
     // 每30秒检查一次内存
     setInterval(checkMemory, 30000);
+    
+    // 更频繁的快速检查（仅检查关键指标）
+    setInterval(() => {
+        const mem = process.memoryUsage();
+        const heapMB = Math.round(mem.heapUsed / 1024 / 1024);
+        
+        // 只在内存过高时进行快速干预
+        if (heapMB > CRITICAL_THRESHOLD_MB + 20) { // 260MB以上紧急干预
+            console.error(`[MEMORY-PROTECT-FAST] 🚨 紧急内存干预: ${heapMB}MB`);
+            if (global.gc) {
+                global.gc();
+                console.log('[MEMORY-PROTECT-FAST] 紧急GC执行');
+            }
+        }
+    }, 10000); // 每10秒快速检查
     
     // 初始检查
     checkMemory();
