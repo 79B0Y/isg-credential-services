@@ -2399,26 +2399,52 @@ class Home_assistantModule extends BaseCredentialModule {
             const rooms = roomsResult.data.rooms || [];
             const floors = floorsResult.data.floors || [];
 
-            // 创建查找映射以提高性能
-            const entityMap = new Map();
-            entities.forEach(entity => {
-                entityMap.set(entity.entity_id, entity);
-            });
+            // 创建查找映射以提高性能 - 添加内存安全处理
+            this.logger.info(`[MEMORY] 开始创建查找映射 - entities: ${entities.length}, devices: ${devices.length}, rooms: ${rooms.length}, floors: ${floors.length}`);
+            
+            let entityMap = null;
+            let deviceMap = null; 
+            let roomMap = null;
+            let floorMap = null;
+            
+            try {
+                entityMap = new Map();
+                entities.forEach(entity => {
+                    entityMap.set(entity.entity_id, entity);
+                });
+                this.logger.info(`[MEMORY] entityMap 创建完成, 大小: ${entityMap.size}`);
 
-            const deviceMap = new Map();
-            devices.forEach(device => {
-                deviceMap.set(device.id, device);
-            });
+                deviceMap = new Map();
+                devices.forEach(device => {
+                    deviceMap.set(device.id, device);
+                });
+                this.logger.info(`[MEMORY] deviceMap 创建完成, 大小: ${deviceMap.size}`);
 
-            const roomMap = new Map();
-            rooms.forEach(room => {
-                roomMap.set(room.area_id, room);
-            });
+                roomMap = new Map();
+                rooms.forEach(room => {
+                    roomMap.set(room.area_id, room);
+                });
+                this.logger.info(`[MEMORY] roomMap 创建完成, 大小: ${roomMap.size}`);
 
-            const floorMap = new Map();
-            floors.forEach(floor => {
-                floorMap.set(floor.floor_id, floor);
-            });
+                floorMap = new Map();
+                floors.forEach(floor => {
+                    floorMap.set(floor.floor_id, floor);
+                });
+                this.logger.info(`[MEMORY] floorMap 创建完成, 大小: ${floorMap.size}`);
+                
+                // 内存使用检查
+                const memUsage = process.memoryUsage();
+                this.logger.info(`[MEMORY] 映射创建后内存使用: ${Math.round(memUsage.heapUsed/1024/1024)}MB`);
+                
+            } catch (error) {
+                this.logger.error(`[MEMORY] 创建映射时发生错误: ${error.message}`);
+                // 清理已创建的映射
+                if (entityMap) { entityMap.clear(); entityMap = null; }
+                if (deviceMap) { deviceMap.clear(); deviceMap = null; }
+                if (roomMap) { roomMap.clear(); roomMap = null; }
+                if (floorMap) { floorMap.clear(); floorMap = null; }
+                throw error;
+            }
 
             // 增强每个状态信息
             const enhancedStates = states.map(state => {
@@ -2565,7 +2591,8 @@ class Home_assistantModule extends BaseCredentialModule {
                 missing_floors: new Set(filteredStates.filter(s => s.floor_id && !floorMap.has(s.floor_id)).map(s => s.floor_id)).size
             };
 
-            return {
+            // 内存清理 - 防止内存泄漏
+            const result = {
                 success: true,
                 data: {
                     states: filteredStates,
@@ -2580,6 +2607,45 @@ class Home_assistantModule extends BaseCredentialModule {
                     retrieved_at: new Date().toISOString()
                 }
             };
+            
+            // 显式清理大型映射对象以防止内存泄漏
+            try {
+                if (entityMap) {
+                    this.logger.info(`[MEMORY] 清理 entityMap, 大小: ${entityMap.size}`);
+                    entityMap.clear();
+                    entityMap = null;
+                }
+                if (deviceMap) {
+                    this.logger.info(`[MEMORY] 清理 deviceMap, 大小: ${deviceMap.size}`);
+                    deviceMap.clear();
+                    deviceMap = null;
+                }
+                if (roomMap) {
+                    this.logger.info(`[MEMORY] 清理 roomMap, 大小: ${roomMap.size}`);
+                    roomMap.clear();
+                    roomMap = null;
+                }
+                if (floorMap) {
+                    this.logger.info(`[MEMORY] 清理 floorMap, 大小: ${floorMap.size}`);
+                    floorMap.clear();
+                    floorMap = null;
+                }
+                
+                // 检查清理后的内存使用
+                const memUsageAfter = process.memoryUsage();
+                this.logger.info(`[MEMORY] 清理后内存使用: ${Math.round(memUsageAfter.heapUsed/1024/1024)}MB`);
+                
+                // 在 Termux 环境中，主动触发垃圾回收
+                if (global.gc && process.env.NODE_ENV === 'production') {
+                    global.gc();
+                    this.logger.info(`[MEMORY] 已触发垃圾回收`);
+                }
+                
+            } catch (cleanupError) {
+                this.logger.error(`[MEMORY] 清理映射时发生错误: ${cleanupError.message}`);
+            }
+            
+            return result;
 
         } catch (error) {
             this.logger.error('Failed to get enhanced states:', error);

@@ -6,6 +6,29 @@ const cors = require('cors');
 const ModuleManager = require('./core/ModuleManager');
 const ConfigManager = require('./core/ConfigManager');
 
+// Termux 环境检测和优化
+const isTermuxEnv = process.env.TERMUX_ENV === 'true' || 
+                    process.platform === 'android' ||
+                    process.env.TERMUX_VERSION;
+
+if (isTermuxEnv) {
+    console.log('🤖 检测到 Termux 环境，启用内存优化...');
+    
+    // Termux 环境特殊处理
+    process.env.NODE_OPTIONS = (process.env.NODE_OPTIONS || '') + ' --max-old-space-size=256 --optimize-for-size';
+    
+    // 启用更频繁的垃圾回收
+    if (global.gc) {
+        setInterval(() => {
+            try {
+                global.gc();
+            } catch (e) {
+                // 忽略 GC 错误
+            }
+        }, 60000); // 每分钟 GC 一次
+    }
+}
+
 /**
  * CredentialService - 主服务器
  * 提供RESTful API和Web管理界面
