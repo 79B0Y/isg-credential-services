@@ -2,6 +2,7 @@ const BaseCredentialModule = require('../../core/BaseCredentialModule');
 const https = require('https');
 const http = require('http');
 const WebSocket = require('ws');
+const WorkerManager = require('../../lib/WorkerManager');
 
 /**
  * Home_assistantModule - Home Assistant API凭据管理模块
@@ -14,18 +15,22 @@ class Home_assistantModule extends BaseCredentialModule {
         // Home Assistant API配置
         this.defaultTimeout = 10000;
         
-        // 增强状态数据缓存系统 - 优化时序避免冲突
+        // 增强状态数据缓存系统 - Termux环境优化（延长间隔减少内存压力）
         this.enhancedStatesCache = {
             data: null,
             lastUpdated: null,
             isUpdating: false,
-            updateInterval: 75000, // 1分15秒（避开Telegram默认重试间隔）
-            maxAge: 150000, // 2.5分钟最大缓存时间
-            staggerDelay: Math.floor(Math.random() * 10000) // 随机0-10秒初始延迟
+            updateInterval: 180000, // 3分钟（大幅延长避免内存压力）
+            maxAge: 360000, // 6分钟最大缓存时间
+            staggerDelay: Math.floor(Math.random() * 30000) // 随机0-30秒初始延迟
         };
         
         // 缓存更新定时器
         this.cacheUpdateTimer = null;
+        
+        // 工作进程管理器 - 用于内存安全的API处理
+        this.workerManager = null;
+        this.workerInitialized = false;
     }
 
     /**
@@ -38,10 +43,21 @@ class Home_assistantModule extends BaseCredentialModule {
             this.config.timeout = this.defaultTimeout;
         }
         
+        // 初始化工作进程管理器
+        try {
+            this.workerManager = new WorkerManager(this.logger);
+            await this.workerManager.startWorker();
+            this.workerInitialized = true;
+            this.logger.info('[WORKER-INIT] Home Assistant工作进程已启动');
+        } catch (error) {
+            this.logger.error('[WORKER-INIT] 工作进程启动失败:', error.message);
+            this.workerInitialized = false;
+        }
+        
         // 启动增强状态数据缓存更新定时器
         this.startEnhancedStatesCacheUpdater();
         
-        this.logger.info('Home Assistant module initialized with enhanced states cache');
+        this.logger.info('Home Assistant module initialized with enhanced states cache and worker process');
     }
 
     /**
@@ -3160,12 +3176,8 @@ class Home_assistantModule extends BaseCredentialModule {
      * 内部方法：获取增强状态数据（不使用缓存）
      */
     async getEnhancedStatesInternal(credentials, areaNames = null, deviceTypes = null) {
-        // 内存安全的增强状态处理 - 防止内存corruption
+        // 使用工作进程进行内存安全的增强状态处理 - 防止内存corruption
         const startTime = Date.now();
-        let entityMap = null;
-        let deviceMap = null;
-        let roomMap = null;
-        let floorMap = null;
         
         try {
             if (!credentials) {
@@ -3176,341 +3188,195 @@ class Home_assistantModule extends BaseCredentialModule {
                 credentials = credResult.data;
             }
 
-            // 内存检查 - 如果内存已经很高，跳过更新
+            // 检查工作进程状态
+            if (!this.workerInitialized || !this.workerManager) {
+                this.logger.warn('[WORKER-SAFE] 工作进程未初始化，尝试启动...');
+                try {
+                    this.workerManager = new WorkerManager(this.logger);
+                    await this.workerManager.startWorker();
+                    this.workerInitialized = true;
+                    this.logger.info('[WORKER-SAFE] 工作进程启动成功');
+                } catch (workerError) {
+                    this.logger.error('[WORKER-SAFE] 工作进程启动失败，使用降级处理:', workerError.message);
+                    return this.getEnhancedStatesLegacy(credentials, areaNames, deviceTypes);
+                }
+            }
+
+            // 内存检查 - 如果主进程内存已经很高，必须使用工作进程
             const memBefore = process.memoryUsage();
             const heapMB = Math.round(memBefore.heapUsed / 1024 / 1024);
             
-            this.logger.info(`[MEMORY-SAFE] 开始增强状态处理 - 堆内存: ${heapMB}MB`);
+            this.logger.info(`[WORKER-SAFE] 开始工作进程状态处理 - 主进程堆内存: ${heapMB}MB`);
             
-            if (heapMB > 150) {
-                this.logger.warn(`[MEMORY-SAFE] 内存使用过高 (${heapMB}MB), 跳过本次更新`);
-                return { success: false, error: 'Memory too high, skipping update' };
+            if (heapMB > 120) {
+                this.logger.warn(`[WORKER-SAFE] 主进程内存使用过高 (${heapMB}MB), 强制使用工作进程`);
             }
 
-            this.logger.info('Fetching enhanced states with entity registry, devices, and rooms data');
-
-            // 分阶段获取数据，避免同时加载太多数据
-            this.logger.info('[MEMORY-SAFE] 获取状态数据...');
-            const statesResult = await this.getStates(credentials);
-            if (!statesResult.success) {
-                return { success: false, error: 'Failed to get states: ' + statesResult.error };
-            }
-
-            this.logger.info('[MEMORY-SAFE] 获取实体注册信息...');
-            const entitiesResult = await this.getEntityRegistry(credentials);
-            if (!entitiesResult.success) {
-                return { success: false, error: 'Failed to get entity registry: ' + entitiesResult.error };
-            }
-
-            this.logger.info('[MEMORY-SAFE] 获取设备信息...');
-            const devicesResult = await this.getDevices(credentials);
-            if (!devicesResult.success) {
-                return { success: false, error: 'Failed to get devices: ' + devicesResult.error };
-            }
-
-            this.logger.info('[MEMORY-SAFE] 获取房间信息...');
-            const roomsResult = await this.getRooms(credentials);
-            if (!roomsResult.success) {
-                return { success: false, error: 'Failed to get rooms: ' + roomsResult.error };
-            }
-
-            this.logger.info('[MEMORY-SAFE] 获取楼层信息...');
-            const floorsResult = await this.getFloors(credentials);
-            if (!floorsResult.success) {
-                return { success: false, error: 'Failed to get floors: ' + floorsResult.error };
-            }
-
-            const states = statesResult.data.states || [];
-            const entities = entitiesResult.data.entities || [];
-            const devices = devicesResult.data.devices || [];
-            const rooms = roomsResult.data.rooms || [];
-            const floors = floorsResult.data.floors || [];
-
-            this.logger.info(`[MEMORY-SAFE] 开始创建查找映射 - entities: ${entities.length}, devices: ${devices.length}, rooms: ${rooms.length}, floors: ${floors.length}`);
-
-            // 创建映射表以提高查询效率 - 使用内存安全方式
-            entityMap = new Map();
-            entities.forEach((entity, index) => {
-                entityMap.set(entity.entity_id, entity);
-                // 每100个实体检查一次内存
-                if (index % 100 === 0) {
-                    const currentMem = process.memoryUsage().heapUsed / 1024 / 1024;
-                    if (currentMem > 200) {
-                        throw new Error('Memory exceeded during entity mapping');
-                    }
-                }
-            });
-            this.logger.info(`[MEMORY-SAFE] entityMap 创建完成, 大小: ${entityMap.size}`);
-
-            deviceMap = new Map();
-            devices.forEach((device, index) => {
-                deviceMap.set(device.device_id, device);
-                if (index % 50 === 0) {
-                    const currentMem = process.memoryUsage().heapUsed / 1024 / 1024;
-                    if (currentMem > 200) {
-                        throw new Error('Memory exceeded during device mapping');
-                    }
-                }
-            });
-            this.logger.info(`[MEMORY-SAFE] deviceMap 创建完成, 大小: ${deviceMap.size}`);
-
-            roomMap = new Map();
-            rooms.forEach(room => {
-                roomMap.set(room.area_id, room);
-            });
-            this.logger.info(`[MEMORY-SAFE] roomMap 创建完成, 大小: ${roomMap.size}`);
-
-            floorMap = new Map();
-            floors.forEach(floor => {
-                floorMap.set(floor.floor_id, floor);
-            });
-            this.logger.info(`[MEMORY-SAFE] floorMap 创建完成, 大小: ${floorMap.size}`);
-
-            // 检查映射创建后的内存使用
-            const memAfterMaps = process.memoryUsage();
-            const memUsed = Math.round(memAfterMaps.heapUsed / 1024 / 1024);
-            this.logger.info(`[MEMORY-SAFE] 映射创建后内存使用: ${memUsed}MB`);
-
-            if (memUsed > 180) {
-                this.logger.warn(`[MEMORY-SAFE] 内存使用过高 (${memUsed}MB), 强制GC`);
-                if (global.gc) {
-                    global.gc();
-                    const memAfterGC = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
-                    this.logger.info(`[MEMORY-SAFE] GC后内存: ${memAfterGC}MB`);
-                }
-            }
-
-            // 内存安全的状态增强处理
-            this.logger.info(`[MEMORY-SAFE] 开始处理 ${states.length} 个状态实体`);
-            const enhancedStates = [];
-            const batchSize = 50; // 分批处理，防止内存峰值
+            // 使用工作进程处理状态数据
+            this.logger.info('[WORKER-SAFE] 向工作进程发送状态处理请求...');
             
-            for (let i = 0; i < states.length; i += batchSize) {
-                const batch = states.slice(i, i + batchSize);
-                
-                const batchProcessed = batch.map((state, batchIndex) => {
-                    const globalIndex = i + batchIndex;
-                    
-                    // 每处理100个状态检查内存
-                    if (globalIndex % 100 === 0) {
-                        const currentMem = process.memoryUsage().heapUsed / 1024 / 1024;
-                        if (currentMem > 220) {
-                            throw new Error(`Memory exceeded during state processing at index ${globalIndex}`);
-                        }
-                    }
-                    
-                    const entityInfo = entityMap.get(state.entity_id) || {};
-                    const deviceInfo = deviceMap.get(entityInfo.device_id) || {};
-
-                    const enhancedState = {
-                        ...state,
-                        device_id: entityInfo.device_id || null,
-                        device_name: deviceInfo.device_name || deviceInfo.name_by_user || deviceInfo.name || null,
-                        device_manufacturer: deviceInfo.manufacturer || null,
-                        device_model: deviceInfo.model || null,
-                        area_id: entityInfo.area_id || null,
-                        area_name: null,
-                        floor_id: null,
-                        floor_name: null,
-                        device_type: null
-                    };
-
-                    // 获取area_id，优先使用entity的area_id，如果为null则使用device的area_id
-                    if (!enhancedState.area_id && deviceInfo.area_id) {
-                        enhancedState.area_id = deviceInfo.area_id;
-                    }
-
-                    // 获取区域名称和楼层信息
-                    if (enhancedState.area_id) {
-                        const roomInfo = roomMap.get(enhancedState.area_id);
-                        if (roomInfo) {
-                            enhancedState.area_name = roomInfo.name || null;
-                            enhancedState.floor_id = roomInfo.floor_id || null;
-                            
-                            if (roomInfo.floor_id) {
-                                const floorInfo = floorMap.get(roomInfo.floor_id);
-                                enhancedState.floor_name = floorInfo ? floorInfo.name : null;
-                            } else {
-                                enhancedState.floor_name = null;
-                            }
-                        } else {
-                            // 如果roomMap中没有找到，尝试从deviceInfo获取
-                            if (entityInfo.device_id) {
-                                const deviceInfo = deviceMap.get(entityInfo.device_id);
-                                if (deviceInfo && deviceInfo.area_name) {
-                                    enhancedState.area_name = deviceInfo.area_name;
-                                }
-                            }
-                        }
-                    }
-
-                    // 获取device_type：优先使用device_class，其次使用entity_id前缀
-                    if (state.attributes && state.attributes.device_class) {
-                        enhancedState.device_type = state.attributes.device_class;
-                    } else {
-                        const entityIdParts = state.entity_id.split('.');
-                        if (entityIdParts.length > 0) {
-                            enhancedState.device_type = entityIdParts[0];
-                        }
-                    }
-
-                    return enhancedState;
-                });
-                
-                enhancedStates.push(...batchProcessed);
-                
-                // 每批次后强制清理
-                if (i % (batchSize * 4) === 0) { // 每4个批次
-                    if (global.gc) {
-                        global.gc();
-                    }
+            const workerResult = await this.workerManager.sendRequest('get_states', {
+                credentials: {
+                    home_assistant_url: credentials.base_url,
+                    access_token: credentials.access_token
                 }
+            });
+
+            if (!workerResult || workerResult.length === 0) {
+                this.logger.warn('[WORKER-SAFE] 工作进程返回空结果，使用降级处理');
+                return this.getEnhancedStatesLegacy(credentials, areaNames, deviceTypes);
             }
 
-            this.logger.info(`[MEMORY-SAFE] 状态增强完成: ${enhancedStates.length} 个实体`);
-
-            // 应用筛选条件
-            let filteredStates = enhancedStates;
-
-            // 按区域名称筛选
+            // 应用过滤器
+            let filteredStates = workerResult;
+            
             if (areaNames && Array.isArray(areaNames) && areaNames.length > 0) {
-                const normalizedAreaNames = areaNames.map(name => name.toLowerCase().trim()).filter(name => name);
-                if (normalizedAreaNames.length > 0) {
-                    filteredStates = filteredStates.filter(state => {
-                        if (!state.area_name) return false;
-                        const normalizedAreaName = state.area_name.toLowerCase().trim();
-                        return normalizedAreaNames.some(filterName =>
-                            normalizedAreaName.includes(filterName) ||
-                            filterName.includes(normalizedAreaName)
-                        );
-                    });
-                }
+                filteredStates = filteredStates.filter(state => 
+                    areaNames.some(areaName => 
+                        state.area_name && state.area_name.toLowerCase().includes(areaName.toLowerCase())
+                    )
+                );
             }
 
-            // 按设备类型筛选
             if (deviceTypes && Array.isArray(deviceTypes) && deviceTypes.length > 0) {
-                const normalizedDeviceTypes = deviceTypes.map(type => type.toLowerCase().trim()).filter(type => type);
-                if (normalizedDeviceTypes.length > 0) {
-                    filteredStates = filteredStates.filter(state => {
-                        if (!state.device_type) return false;
-                        const normalizedDeviceType = state.device_type.toLowerCase().trim();
-                        return normalizedDeviceTypes.some(filterType =>
-                            normalizedDeviceType.includes(filterType) ||
-                            filterType.includes(normalizedDeviceType)
-                        );
-                    });
-                }
+                filteredStates = filteredStates.filter(state => 
+                    deviceTypes.includes(state.domain) ||
+                    deviceTypes.some(deviceType => 
+                        state.entity_id.startsWith(deviceType + '.')
+                    )
+                );
             }
 
-            // 统计信息
-            const uniqueEntityIds = new Set(enhancedStates.map(s => s.entity_id));
-            const uniqueDeviceIds = new Set(enhancedStates.map(s => s.device_id).filter(id => id));
-            const uniqueAreaIds = new Set(enhancedStates.map(s => s.area_id).filter(id => id));
-            const uniqueFloorIds = new Set(enhancedStates.map(s => s.floor_id).filter(id => id));
-            const uniqueDeviceTypes = new Set(enhancedStates.map(s => s.device_type).filter(type => type));
-
-            const statistics = {
-                total_states: filteredStates.length,
-                total_states_before_filter: enhancedStates.length,
-                total_entities: uniqueEntityIds.size,
-                total_devices: uniqueDeviceIds.size,
-                areas_count: uniqueAreaIds.size,
-                floors_count: uniqueFloorIds.size,
-                with_device_info: enhancedStates.filter(s => s.device_id).length,
-                with_area_info: enhancedStates.filter(s => s.area_name).length,
-                with_floor_info: enhancedStates.filter(s => s.floor_name).length,
-                with_device_type: enhancedStates.filter(s => s.device_type).length,
-                unique_device_types: uniqueDeviceTypes.size,
-                missing_devices: enhancedStates.filter(s => !s.device_id).length,
-                missing_areas: enhancedStates.filter(s => !s.area_name).length,
-                missing_floors: enhancedStates.filter(s => !s.floor_name).length,
-                filters_applied: {
-                    area_names: areaNames,
-                    device_types: deviceTypes
-                }
-            };
-
-            // 显式清理大型映射对象以防止内存泄漏
-            try {
-                if (entityMap) {
-                    this.logger.info(`[MEMORY-SAFE] 清理 entityMap, 大小: ${entityMap.size}`);
-                    entityMap.clear();
-                    entityMap = null;
-                }
-                if (deviceMap) {
-                    this.logger.info(`[MEMORY-SAFE] 清理 deviceMap, 大小: ${deviceMap.size}`);
-                    deviceMap.clear();
-                    deviceMap = null;
-                }
-                if (roomMap) {
-                    this.logger.info(`[MEMORY-SAFE] 清理 roomMap, 大小: ${roomMap.size}`);
-                    roomMap.clear();
-                    roomMap = null;
-                }
-                if (floorMap) {
-                    this.logger.info(`[MEMORY-SAFE] 清理 floorMap, 大小: ${floorMap.size}`);
-                    floorMap.clear();
-                    floorMap = null;
-                }
-            } catch (cleanupError) {
-                this.logger.warn('[MEMORY-SAFE] 清理映射时出错:', cleanupError.message);
-            }
-
-            // 检查最终内存使用
-            const memFinal = process.memoryUsage();
-            const finalHeapMB = Math.round(memFinal.heapUsed / 1024 / 1024);
-            const duration = Date.now() - startTime;
-            this.logger.info(`[MEMORY-SAFE] 处理完成 - 最终内存: ${finalHeapMB}MB, 耗时: ${duration}ms`);
-
-            // 如果处理完成后内存使用仍然很高，触发GC
-            if (finalHeapMB > 100 && global.gc) {
-                this.logger.info('[MEMORY-SAFE] 已触发垃圾回收');
-                global.gc();
-                const memAfterGC = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
-                this.logger.info(`[MEMORY-SAFE] GC后内存: ${memAfterGC}MB`);
-            }
+            const processingTime = Date.now() - startTime;
+            this.logger.info(`[WORKER-SAFE] 工作进程处理完成 - 处理时间: ${processingTime}ms, 结果: ${filteredStates.length} 个状态`);
 
             return {
                 success: true,
                 data: {
                     states: filteredStates,
-                    statistics: statistics,
-                    source_data: {
-                        states_count: states.length,
-                        entities_count: entities.length,
-                        devices_count: devices.length,
-                        rooms_count: rooms.length,
-                        floors_count: floors.length
-                    },
-                    retrieved_at: new Date().toISOString()
+                    metadata: {
+                        total_states: workerResult.length,
+                        filtered_states: filteredStates.length,
+                        processing_time_ms: processingTime,
+                        processed_by: 'worker_process',
+                        timestamp: new Date().toISOString()
+                    }
                 }
             };
 
         } catch (error) {
-            this.logger.error('[MEMORY-SAFE] Failed to get enhanced states:', error);
-            return { success: false, error: error.message };
-        } finally {
-            // 确保在任何情况下都清理内存
-            try {
-                if (entityMap) {
-                    entityMap.clear();
-                    entityMap = null;
-                }
-                if (deviceMap) {
-                    deviceMap.clear();
-                    deviceMap = null;
-                }
-                if (roomMap) {
-                    roomMap.clear();
-                    roomMap = null;
-                }
-                if (floorMap) {
-                    floorMap.clear();
-                    floorMap = null;
-                }
-            } catch (finalCleanupError) {
-                this.logger.warn('[MEMORY-SAFE] 最终清理时出错:', finalCleanupError.message);
+            this.logger.error('[WORKER-SAFE] 工作进程处理失败:', error.message);
+            
+            // 工作进程失败时使用降级处理
+            this.logger.warn('[WORKER-SAFE] 切换到降级处理模式');
+            return this.getEnhancedStatesLegacy(credentials, areaNames, deviceTypes);
+        }
+    }
+
+    /**
+     * 降级处理方法：不使用工作进程的传统处理方式
+     * 仅在工作进程失败时使用，具有更严格的内存限制
+     */
+    async getEnhancedStatesLegacy(credentials, areaNames = null, deviceTypes = null) {
+        this.logger.warn('[TERMUX-SAFE] 使用Termux环境极致安全模式');
+        
+        const startTime = Date.now();
+        const memBefore = process.memoryUsage();
+        const heapMB = Math.round(memBefore.heapUsed / 1024 / 1024);
+        
+        // Termux环境极严格内存限制
+        if (heapMB > 50) {
+            this.logger.error(`[TERMUX-SAFE] Termux环境内存过高 (${heapMB}MB)，拒绝处理`);
+            return { 
+                success: false, 
+                error: 'Memory too high for Termux environment',
+                suggested_action: 'Wait for memory to decrease or restart'
+            };
+        }
+
+        try {
+            // Termux环境：只获取最基础状态数据，完全避免任何映射处理
+            this.logger.info('[TERMUX-SAFE] 获取基础状态数据...');
+            const statesResult = await this.getStates(credentials);
+            if (!statesResult.success) {
+                return { success: false, error: 'Failed to get states: ' + statesResult.error };
             }
+
+            const states = statesResult.data.states || [];
+            this.logger.info(`[TERMUX-SAFE] 获取到 ${states.length} 个状态实体`);
+
+            // Termux环境：超简化处理 - 不创建任何新对象，避免内存分配
+            let filteredStates = states;
+            
+            // 只进行最基本的过滤，不修改对象结构
+            if (deviceTypes && Array.isArray(deviceTypes) && deviceTypes.length > 0) {
+                filteredStates = [];
+                for (let i = 0; i < states.length; i++) {
+                    const state = states[i];
+                    const domain = state.entity_id.split('.')[0];
+                    if (deviceTypes.includes(domain)) {
+                        // 直接使用原始对象，不创建新对象
+                        filteredStates.push(state);
+                    }
+                }
+            }
+
+            // 强制垃圾回收
+            if (global.gc) {
+                global.gc();
+            }
+
+            const processingTime = Date.now() - startTime;
+            const memAfter = process.memoryUsage();
+            const finalHeapMB = Math.round(memAfter.heapUsed / 1024 / 1024);
+            
+            this.logger.info(`[LEGACY-SAFE] 降级处理完成 - 内存: ${heapMB}MB -> ${finalHeapMB}MB, 耗时: ${processingTime}ms`);
+
+            return {
+                success: true,
+                data: {
+                    states: filteredStates,
+                    metadata: {
+                        total_states: states.length,
+                        filtered_states: filteredStates.length,
+                        processing_time_ms: processingTime,
+                        processed_by: 'legacy_fallback',
+                        memory_usage_mb: finalHeapMB,
+                        timestamp: new Date().toISOString(),
+                        note: 'Simplified processing due to memory constraints'
+                    }
+                }
+            };
+
+        } catch (error) {
+            this.logger.error('[LEGACY-SAFE] 降级处理也失败:', error.message);
+            return { 
+                success: false, 
+                error: 'Both worker and legacy processing failed: ' + error.message 
+            };
+        }
+    }
+
+    /**
+     * 清理工作进程和相关资源
+     */
+    async cleanup() {
+        try {
+            if (this.workerManager) {
+                await this.workerManager.cleanup();
+                this.workerManager = null;
+                this.workerInitialized = false;
+                this.logger.info('[CLEANUP] Home Assistant工作进程已清理');
+            }
+        } catch (error) {
+            this.logger.error('[CLEANUP] 清理工作进程失败:', error.message);
+        }
+
+        // 清理定时器
+        if (this.cacheUpdateTimer) {
+            clearInterval(this.cacheUpdateTimer);
+            this.cacheUpdateTimer = null;
+            this.logger.info('[CLEANUP] 缓存更新定时器已清理');
         }
     }
 }

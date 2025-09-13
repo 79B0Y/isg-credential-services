@@ -66,6 +66,51 @@ class TelegramModule extends BaseCredentialModule {
             timeout: this.config.timeout,
             retries: this.config.retries || 3
         });
+
+        // 检查是否已有有效凭据，如果有则自动启动功能
+        try {
+            const credentialsResult = await this.getCredentials();
+            if (credentialsResult.success && credentialsResult.data.bot_token) {
+                this.logger.info('[AUTO-START] 发现已保存的凭据，验证并自动启动功能...');
+                
+                // 验证现有凭据
+                const validationResult = await this.performValidation(credentialsResult.data);
+                if (validationResult.success) {
+                    this.logger.info('[AUTO-START] 凭据验证成功，启动自动功能');
+                    
+                    // 延迟启动，避免初始化冲突
+                    setTimeout(async () => {
+                        try {
+                            // 启动WebSocket服务器
+                            if (!this.wss) {
+                                this.logger.info('[AUTO-START] 初始化时启动WebSocket服务器...');
+                                await this.startWebSocketServer();
+                                this.logger.info('[AUTO-START] ✅ WebSocket服务器启动成功');
+                            }
+
+                            // 启动消息轮询
+                            if (!this.isPolling) {
+                                this.logger.info('[AUTO-START] 初始化时启动消息轮询...');
+                                const pollingResult = await this.startPolling(credentialsResult.data);
+                                if (pollingResult.success) {
+                                    this.logger.info('[AUTO-START] ✅ 消息轮询启动成功');
+                                } else {
+                                    this.logger.warn('[AUTO-START] 消息轮询启动失败:', pollingResult.message);
+                                }
+                            }
+                        } catch (autoStartError) {
+                            this.logger.warn('[AUTO-START] 自动启动过程中出错:', autoStartError.message);
+                        }
+                    }, 2000); // 2秒延迟
+                } else {
+                    this.logger.info('[AUTO-START] 凭据验证失败，跳过自动启动:', validationResult.error);
+                }
+            } else {
+                this.logger.info('[AUTO-START] 未找到有效凭据，等待用户配置');
+            }
+        } catch (autoStartError) {
+            this.logger.warn('[AUTO-START] 检查自动启动失败:', autoStartError.message);
+        }
     }
 
     /**
@@ -252,6 +297,78 @@ class TelegramModule extends BaseCredentialModule {
                     suggestion: '可以使用提供的curl命令在终端中手动测试API连接'
                 }
             };
+        }
+    }
+
+    /**
+     * 重写setCredentials方法 - 保存凭据后自动启动WebSocket和轮询
+     */
+    async setCredentials(credentials) {
+        try {
+            // 先调用父类的setCredentials方法保存凭据
+            const saveResult = await super.setCredentials(credentials);
+            
+            if (!saveResult.success) {
+                return saveResult;
+            }
+
+            this.logger.info('[AUTO-START] 凭据保存成功，准备自动启动WebSocket和轮询功能');
+
+            // 验证凭据有效性
+            const validationResult = await this.performValidation(credentials);
+            if (!validationResult.success) {
+                this.logger.warn('[AUTO-START] 凭据验证失败，不启动自动功能:', validationResult.error);
+                return {
+                    success: true,
+                    message: 'Credentials saved but validation failed - auto-start skipped',
+                    validation_error: validationResult.error
+                };
+            }
+
+            this.logger.info('[AUTO-START] 凭据验证成功，开始自动启动功能');
+
+            // 自动启动WebSocket服务器
+            try {
+                if (!this.wss) {
+                    this.logger.info('[AUTO-START] 启动WebSocket服务器...');
+                    await this.startWebSocketServer();
+                    this.logger.info('[AUTO-START] ✅ WebSocket服务器启动成功');
+                } else {
+                    this.logger.info('[AUTO-START] WebSocket服务器已在运行');
+                }
+            } catch (wsError) {
+                this.logger.warn('[AUTO-START] WebSocket服务器启动失败:', wsError.message);
+            }
+
+            // 自动启动消息轮询
+            try {
+                if (!this.isPolling) {
+                    this.logger.info('[AUTO-START] 启动消息轮询...');
+                    const pollingResult = await this.startPolling(credentials);
+                    if (pollingResult.success) {
+                        this.logger.info('[AUTO-START] ✅ 消息轮询启动成功');
+                    } else {
+                        this.logger.warn('[AUTO-START] 消息轮询启动失败:', pollingResult.message);
+                    }
+                } else {
+                    this.logger.info('[AUTO-START] 消息轮询已在运行');
+                }
+            } catch (pollError) {
+                this.logger.warn('[AUTO-START] 消息轮询启动失败:', pollError.message);
+            }
+
+            return {
+                success: true,
+                message: 'Credentials saved and auto-start features initiated',
+                auto_start: {
+                    websocket: this.wss ? 'started' : 'failed',
+                    polling: this.isPolling ? 'started' : 'failed'
+                }
+            };
+
+        } catch (error) {
+            this.logger.error('[AUTO-START] setCredentials失败:', error.message);
+            return { success: false, error: error.message };
         }
     }
 
@@ -624,7 +741,7 @@ class TelegramModule extends BaseCredentialModule {
             timeout: 10000,
             retries: 3,
             cacheTimeout: 300000, // 5分钟缓存
-            pollingInterval: 1000, // 轮询间隔（毫秒）
+            pollingInterval: 300, // 轮询间隔（毫秒）- Termux优化
             maxMessageHistory: 1000, // 最大消息历史数量
             features: {
                 webhookInfo: true,
