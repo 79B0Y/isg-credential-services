@@ -1,6 +1,6 @@
 {
   "apiBaseUrl": "https://api.telegram.org",
-  "timeout": 30000,
+  "timeout": 35000,
   "retries": 3,
   "cacheTimeout": 300000,
   "pollingInterval": 300,

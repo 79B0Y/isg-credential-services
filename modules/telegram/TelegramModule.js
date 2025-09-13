@@ -817,25 +817,44 @@ class TelegramModule extends BaseCredentialModule {
             this.pollingFailures = 0; // 重置失败计数器
             this.logger.info('Starting message polling...');
 
-            // 开始轮询 - 修改为递归方式避免并发冲突
+            // 开始轮询 - 修改为递归方式避免并发冲突，加强网络错误处理
             const doPoll = async () => {
                 if (!this.isPolling) return;
                 
+                let retryDelay = 100; // 基础延迟
+                
                 try {
                     await this.pollUpdates(bot_token);
-                    this.pollingFailures = 0;
+                    this.pollingFailures = 0; // 成功则重置失败计数
                 } catch (error) {
-                    this.logger.error('Polling error:', error);
                     this.pollingFailures = (this.pollingFailures || 0) + 1;
                     
-                    if (this.pollingFailures >= 10) {
-                        this.logger.error('Too many polling failures, stopping polling');
+                    // 判断错误类型决定重试策略
+                    const isNetworkError = error.message.includes('超时') || 
+                                         error.message.includes('timeout') ||
+                                         error.code === 'ENOTFOUND' ||
+                                         error.code === 'ECONNRESET' ||
+                                         error.code === 'ETIMEDOUT';
+                    
+                    if (isNetworkError) {
+                        // 网络错误使用指数退避，最大延迟30秒
+                        retryDelay = Math.min(1000 * Math.pow(2, this.pollingFailures - 1), 30000);
+                        this.logger.warn(`[NETWORK-ERROR] 网络连接问题 (失败${this.pollingFailures}次), ${retryDelay}ms后重试: ${error.message}`);
+                    } else {
+                        // 非网络错误
+                        this.logger.error(`[POLLING-ERROR] 轮询错误 (失败${this.pollingFailures}次): ${error.message}`);
+                    }
+                    
+                    // 超过阈值停止轮询 - 网络错误允许更多重试
+                    const maxFailures = isNetworkError ? 20 : 10;
+                    if (this.pollingFailures >= maxFailures) {
+                        this.logger.error(`连续失败${this.pollingFailures}次，停止轮询`);
                         return this.stopPolling();
                     }
                 }
                 
-                // 等待一小段时间后继续下一次轮询
-                setTimeout(doPoll, 100);
+                // 根据失败情况调整延迟
+                setTimeout(doPoll, retryDelay);
             };
 
             // 启动轮询
@@ -865,7 +884,7 @@ class TelegramModule extends BaseCredentialModule {
         try {
             const params = {
                 offset: this.lastUpdateId + 1,
-                timeout: 30,
+                timeout: 25,
                 allowed_updates: ['message', 'edited_message', 'channel_post', 'edited_channel_post']
             };
 

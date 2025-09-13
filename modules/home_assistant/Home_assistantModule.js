@@ -2705,24 +2705,41 @@ class Home_assistantModule extends BaseCredentialModule {
             for (const intentDevice of intentData.devices) {
                 const { room_name, device_type, device_name, action } = intentDevice;
                 
-                // 1. 匹配空间（房间）
-                const roomEntities = allEntities.filter(entity => {
-                    if (!entity.area_name) return false;
-                    return this.normalizeRoomName(entity.area_name) === this.normalizeRoomName(room_name);
-                });
-
-                if (roomEntities.length === 0) {
-                    this.logger.warn(`No entities found for room: ${room_name}`);
-                    continue;
-                }
-
-                // 2. 严格匹配设备类型
-                const typeMatchedEntities = roomEntities.filter(entity => {
-                    return this.strictDeviceTypeMatch(entity.device_type, device_type);
+                // 1. 基于entity_id模式匹配设备类型和房间
+                const typeMatchedEntities = allEntities.filter(entity => {
+                    // 首先按设备类型筛选（基于entity_id前缀）
+                    const entityDomain = entity.entity_id.split('.')[0];
+                    const domainMatches = this.matchEntityDomainToDeviceType(entityDomain, device_type);
+                    
+                    // Debug logging for first few entities
+                    if (allEntities.indexOf(entity) < 5) {
+                        this.logger.info(`[FILTER-DEBUG] Entity: ${entity.entity_id}, Domain: ${entityDomain}, DeviceType: ${device_type}, DomainMatches: ${domainMatches}`);
+                    }
+                    
+                    if (!domainMatches) {
+                        return false;
+                    }
+                    
+                    // 检查房间匹配 - 优先使用area_name，其次使用entity_id模式
+                    if (entity.area_name) {
+                        const roomMatches = this.normalizeRoomName(entity.area_name) === this.normalizeRoomName(room_name);
+                        this.logger.info(`[ROOM-DEBUG] Area name match: ${entity.area_name} vs ${room_name} = ${roomMatches}`);
+                        return roomMatches;
+                    } else {
+                        // 如果room_name是"any"或为空，返回所有该类型的设备
+                        if (!room_name || room_name.toLowerCase() === 'any') {
+                            this.logger.info(`[ROOM-DEBUG] Any room match for ${entity.entity_id}`);
+                            return true;
+                        }
+                        // 否则基于entity_id中的房间名称进行匹配
+                        const roomMatches = this.matchRoomFromEntityId(entity.entity_id, room_name);
+                        this.logger.info(`[ROOM-DEBUG] Entity ID room match: ${entity.entity_id} vs ${room_name} = ${roomMatches}`);
+                        return roomMatches;
+                    }
                 });
 
                 if (typeMatchedEntities.length === 0) {
-                    this.logger.warn(`No entities with device type '${device_type}' found in room: ${room_name}`);
+                    this.logger.warn(`No entities with device type '${device_type}' found for room: ${room_name}`);
                     continue;
                 }
 
@@ -2752,14 +2769,24 @@ class Home_assistantModule extends BaseCredentialModule {
                     // 避免同一个实体被重复添加
                     if (!matchedEntityIds.has(entity.entity_id)) {
                         matchedEntityIds.add(entity.entity_id);
-                        matchedDevices.push({
-                            ...entity, // 保留增强状态的所有字段
+                        
+                        // 增强实体数据结构
+                        const enhancedEntity = {
+                            ...entity, // 保留所有原始字段
+                            // 添加增强字段
+                            friendly_name: entity.attributes?.friendly_name || entity.entity_id,
+                            area_name: entity.area_name || this.extractRoomFromEntityId(entity.entity_id),
+                            device_type: entity.device_type || entity.entity_id.split('.')[0],
+                            device_name: entity.attributes?.friendly_name || entity.entity_id,
+                            // 添加意图和动作字段
                             action: action,
                             intent_room: room_name,
                             intent_device_type: device_type,
                             intent_device_name: device_name,
-                            match_confidence: this.calculateMatchConfidence(intentDevice, entity)
-                        });
+                            match_confidence: this.calculateMatchConfidenceFromEntityId(intentDevice, entity)
+                        };
+                        
+                        matchedDevices.push(enhancedEntity);
                     }
                 });
 
@@ -3355,6 +3382,113 @@ class Home_assistantModule extends BaseCredentialModule {
                 error: 'Both worker and legacy processing failed: ' + error.message 
             };
         }
+    }
+
+    /**
+     * 匹配实体域到设备类型
+     */
+    matchEntityDomainToDeviceType(entityDomain, deviceType) {
+        const domainMappings = {
+            'light': ['light'],
+            'switch': ['switch'],
+            'fan': ['fan'],
+            'climate': ['climate'],
+            'cover': ['cover'],
+            'lock': ['lock'],
+            'camera': ['camera'],
+            'sensor': ['sensor'],
+            'binary_sensor': ['sensor'],
+            'media_player': ['media_player']
+        };
+
+        const allowedDomains = domainMappings[deviceType] || [];
+        return allowedDomains.includes(entityDomain);
+    }
+
+    /**
+     * 从entity_id中匹配房间名称
+     */
+    matchRoomFromEntityId(entityId, roomName) {
+        const normalizedEntityId = entityId.toLowerCase().replace(/[_-]/g, '');
+        const normalizedRoomName = this.normalizeRoomName(roomName);
+        
+        // 常见房间名称映射
+        const roomMappings = {
+            'guest bedroom': ['guest', 'guestbedroom'],
+            'jayden\'s bedroom': ['jayden', 'jaydenbedroom', 'jaydens'],
+            'jacquelyn\'s bedroom': ['jacquelyn', 'jacquelynbedroom', 'jacquelyns'],
+            'master bedroom': ['master', 'masterbedroom'],
+            'living room': ['living', 'livingroom'],
+            'kitchen': ['kitchen'],
+            'dining room': ['dining', 'diningroom'],
+            'tv room': ['tv', 'tvroom'],
+            'study room': ['study', 'studyroom']
+        };
+
+        const roomKeywords = roomMappings[normalizedRoomName.toLowerCase()] || [normalizedRoomName];
+        
+        return roomKeywords.some(keyword => normalizedEntityId.includes(keyword));
+    }
+
+    /**
+     * 从entity_id提取房间名称
+     */
+    extractRoomFromEntityId(entityId) {
+        const id = entityId.toLowerCase();
+        
+        // 房间关键词映射
+        const roomPatterns = {
+            'master': 'Master Bedroom',
+            'jayden': 'Jayden\'s Bedroom', 
+            'jacquelyn': 'Jacquelyn\'s Bedroom',
+            'guest': 'Guest Bedroom',
+            'living': 'Living Room',
+            'kitchen': 'Kitchen',
+            'dining': 'Dining Room',
+            'tv': 'TV Room',
+            'study': 'Study Room'
+        };
+
+        for (const [keyword, roomName] of Object.entries(roomPatterns)) {
+            if (id.includes(keyword)) {
+                return roomName;
+            }
+        }
+
+        return 'Unknown Room';
+    }
+
+    /**
+     * 基于entity_id计算匹配置信度
+     */
+    calculateMatchConfidenceFromEntityId(intentDevice, entity) {
+        let confidence = 0;
+
+        // 设备类型匹配 (40%)
+        const entityDomain = entity.entity_id.split('.')[0];
+        if (this.matchEntityDomainToDeviceType(entityDomain, intentDevice.device_type)) {
+            confidence += 0.4;
+        }
+
+        // 房间匹配 (40%)
+        if (this.matchRoomFromEntityId(entity.entity_id, intentDevice.room_name)) {
+            confidence += 0.4;
+        }
+
+        // 设备名称匹配 (20%)
+        if (intentDevice.device_name && entity.attributes?.friendly_name) {
+            const entityName = this.normalizeDeviceName(entity.attributes.friendly_name);
+            const intentName = this.normalizeDeviceName(intentDevice.device_name);
+            
+            if (entityName.includes(intentName) || intentName.includes(entityName)) {
+                confidence += 0.2;
+            }
+        } else {
+            // 如果没有设备名称，给予部分分数
+            confidence += 0.1;
+        }
+
+        return Math.max(0, Math.min(1, confidence));
     }
 
     /**
