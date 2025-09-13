@@ -1441,9 +1441,7 @@ class Home_assistantModule extends BaseCredentialModule {
      */
     normalizeRoomName(roomName) {
         if (!roomName) return '';
-        return roomName.toLowerCase()
-            .replace(/\s+/g, '_')
-            .replace(/[^a-z0-9_]/g, '');
+        return roomName.toLowerCase().trim().replace(/[^\w\s]/g, '').replace(/\s+/g, '_');
     }
 
     /**
@@ -2713,7 +2711,7 @@ class Home_assistantModule extends BaseCredentialModule {
                         return false;
                     }
                     
-                    // 检查房间匹配 - 优先使用area_name，其次使用entity_id模式
+                    // 检查房间匹配 - 优先使用area_name，其次使用entity_id模式和friendly_name
                     if (entity.area_name) {
                         return this.normalizeRoomName(entity.area_name) === this.normalizeRoomName(room_name);
                     } else {
@@ -2721,8 +2719,17 @@ class Home_assistantModule extends BaseCredentialModule {
                         if (!room_name || room_name.toLowerCase() === 'any') {
                             return true;
                         }
-                        // 否则基于entity_id中的房间名称进行匹配
-                        return this.matchRoomFromEntityId(entity.entity_id, room_name);
+                        // 基于entity_id中的房间名称进行匹配
+                        const entityIdMatch = this.matchRoomFromEntityId(entity.entity_id, room_name);
+                        if (entityIdMatch) {
+                            return true;
+                        }
+                        // 如果entity_id匹配失败，尝试从friendly_name匹配
+                        const friendlyName = entity.attributes?.friendly_name || '';
+                        if (friendlyName) {
+                            return this.matchRoomFromFriendlyName(friendlyName, room_name);
+                        }
+                        return false;
                     }
                 });
 
@@ -2818,7 +2825,7 @@ class Home_assistantModule extends BaseCredentialModule {
      */
     normalizeRoomName(roomName) {
         if (!roomName) return '';
-        return roomName.toLowerCase().trim().replace(/[^\w\s]/g, '');
+        return roomName.toLowerCase().trim().replace(/[^\w\s]/g, '').replace(/\s+/g, '_');
     }
 
     /**
@@ -3400,22 +3407,65 @@ class Home_assistantModule extends BaseCredentialModule {
         const normalizedEntityId = entityId.toLowerCase().replace(/[_-]/g, '');
         const normalizedRoomName = this.normalizeRoomName(roomName);
         
-        // 常见房间名称映射
+        // 常见房间名称映射 - 使用正确的normalized key格式
         const roomMappings = {
-            'guest bedroom': ['guest', 'guestbedroom'],
-            'jayden\'s bedroom': ['jayden', 'jaydenbedroom', 'jaydens'],
-            'jacquelyn\'s bedroom': ['jacquelyn', 'jacquelynbedroom', 'jacquelyns'],
+            'guest_bedroom': ['guest', 'guestbedroom', 'guestroom'],
+            'jaydens_bedroom': ['jayden', 'jaydenbedroom', 'jaydens'],
+            'jacquelyns_bedroom': ['jacquelyn', 'jacquelynbedroom', 'jacquelyns'],
+            'master_bedroom': ['master', 'masterbedroom'],
+            'living_room': ['living', 'livingroom'],
+            'kitchen': ['kitchen'],
+            'dining_room': ['dining', 'diningroom'],
+            'tv_room': ['tv', 'tvroom'],
+            'study_room': ['study', 'studyroom'],
+            // 添加更多变体
+            'guest bedroom': ['guest', 'guestbedroom', 'guestroom'],
+            'jaydens bedroom': ['jayden', 'jaydenbedroom', 'jaydens'],
+            'jacquelyns bedroom': ['jacquelyn', 'jacquelynbedroom', 'jacquelyns'],
             'master bedroom': ['master', 'masterbedroom'],
             'living room': ['living', 'livingroom'],
-            'kitchen': ['kitchen'],
             'dining room': ['dining', 'diningroom'],
             'tv room': ['tv', 'tvroom'],
             'study room': ['study', 'studyroom']
         };
 
-        const roomKeywords = roomMappings[normalizedRoomName.toLowerCase()] || [normalizedRoomName];
+        const roomKeywords = roomMappings[normalizedRoomName] || roomMappings[normalizedRoomName.toLowerCase()] || [normalizedRoomName];
         
         return roomKeywords.some(keyword => normalizedEntityId.includes(keyword));
+    }
+
+    /**
+     * 从friendly_name中匹配房间名称
+     */
+    matchRoomFromFriendlyName(friendlyName, roomName) {
+        const normalizedFriendlyName = friendlyName.toLowerCase().replace(/[_-]/g, '');
+        const normalizedRoomName = this.normalizeRoomName(roomName);
+        
+        // 房间名称映射（与entity_id匹配相同）
+        const roomMappings = {
+            'guest_bedroom': ['guest', 'guestbedroom', 'guestroom'],
+            'jaydens_bedroom': ['jayden', 'jaydenbedroom', 'jaydens'],
+            'jacquelyns_bedroom': ['jacquelyn', 'jacquelynbedroom', 'jacquelyns'],
+            'master_bedroom': ['master', 'masterbedroom'],
+            'living_room': ['living', 'livingroom'],
+            'kitchen': ['kitchen'],
+            'dining_room': ['dining', 'diningroom'],
+            'tv_room': ['tv', 'tvroom'],
+            'study_room': ['study', 'studyroom'],
+            // 添加更多变体
+            'guest bedroom': ['guest', 'guestbedroom', 'guestroom'],
+            'jaydens bedroom': ['jayden', 'jaydenbedroom', 'jaydens'],
+            'jacquelyns bedroom': ['jacquelyn', 'jacquelynbedroom', 'jacquelyns'],
+            'master bedroom': ['master', 'masterbedroom'],
+            'living room': ['living', 'livingroom'],
+            'dining room': ['dining', 'diningroom'],
+            'tv room': ['tv', 'tvroom'],
+            'study room': ['study', 'studyroom']
+        };
+
+        const roomKeywords = roomMappings[normalizedRoomName] || roomMappings[normalizedRoomName.toLowerCase()] || [normalizedRoomName];
+        
+        return roomKeywords.some(keyword => normalizedFriendlyName.includes(keyword));
     }
 
     /**
