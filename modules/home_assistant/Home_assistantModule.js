@@ -2709,32 +2709,20 @@ class Home_assistantModule extends BaseCredentialModule {
                 const typeMatchedEntities = allEntities.filter(entity => {
                     // 首先按设备类型筛选（基于entity_id前缀）
                     const entityDomain = entity.entity_id.split('.')[0];
-                    const domainMatches = this.matchEntityDomainToDeviceType(entityDomain, device_type);
-                    
-                    // Debug logging for first few entities
-                    if (allEntities.indexOf(entity) < 5) {
-                        this.logger.info(`[FILTER-DEBUG] Entity: ${entity.entity_id}, Domain: ${entityDomain}, DeviceType: ${device_type}, DomainMatches: ${domainMatches}`);
-                    }
-                    
-                    if (!domainMatches) {
+                    if (!this.matchEntityDomainToDeviceType(entityDomain, device_type)) {
                         return false;
                     }
                     
                     // 检查房间匹配 - 优先使用area_name，其次使用entity_id模式
                     if (entity.area_name) {
-                        const roomMatches = this.normalizeRoomName(entity.area_name) === this.normalizeRoomName(room_name);
-                        this.logger.info(`[ROOM-DEBUG] Area name match: ${entity.area_name} vs ${room_name} = ${roomMatches}`);
-                        return roomMatches;
+                        return this.normalizeRoomName(entity.area_name) === this.normalizeRoomName(room_name);
                     } else {
                         // 如果room_name是"any"或为空，返回所有该类型的设备
                         if (!room_name || room_name.toLowerCase() === 'any') {
-                            this.logger.info(`[ROOM-DEBUG] Any room match for ${entity.entity_id}`);
                             return true;
                         }
                         // 否则基于entity_id中的房间名称进行匹配
-                        const roomMatches = this.matchRoomFromEntityId(entity.entity_id, room_name);
-                        this.logger.info(`[ROOM-DEBUG] Entity ID room match: ${entity.entity_id} vs ${room_name} = ${roomMatches}`);
-                        return roomMatches;
+                        return this.matchRoomFromEntityId(entity.entity_id, room_name);
                     }
                 });
 
