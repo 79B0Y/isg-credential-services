@@ -1,9 +1,9 @@
 {
   "apiBaseUrl": "https://api.telegram.org",
-  "timeout": 15000,
-  "retries": 2,
+  "timeout": 35000,
+  "retries": 3,
   "cacheTimeout": 300000,
-  "pollingInterval": 1000,
+  "pollingInterval": 300,
   "maxMessageHistory": 1000,
   "features": {
     "webhookInfo": true,
@@ -23,7 +23,7 @@
     "strictMode": true,
     "checkBotPermissions": true,
     "verifyWebhookUrl": false,
-    "quickValidation": false
+    "quickValidation": true
   },
   "network": {
     "keepAlive": true,

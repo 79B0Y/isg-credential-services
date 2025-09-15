@@ -297,55 +297,6 @@
             border: 1px solid #e9ecef;
         }
 
-        .batch-results {
-            margin-top: 1rem;
-        }
-
-        .batch-item {
-            margin-bottom: 1.5rem;
-            padding: 1rem;
-            border: 1px solid #dee2e6;
-            border-radius: 0.5rem;
-            background: #f8f9fa;
-        }
-
-        .batch-item h4 {
-            margin: 0 0 0.5rem 0;
-            color: #495057;
-            font-size: 1.1rem;
-        }
-
-        .request-info {
-            margin-bottom: 0.75rem;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        .request-info .success {
-            color: #28a745;
-            font-weight: bold;
-        }
-
-        .request-info .error {
-            color: #dc3545;
-            font-weight: bold;
-        }
-
-        .result-data {
-            margin-top: 0.75rem;
-        }
-
-        .result-data pre {
-            background: #ffffff;
-            border: 1px solid #dee2e6;
-            border-radius: 0.25rem;
-            padding: 0.75rem;
-            margin: 0;
-            font-size: 0.85rem;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
         .endpoint-input label {
             font-weight: 600;
             color: var(--gray-700);
@@ -628,9 +579,7 @@
                     <li><a href="#rooms">房间列表</a></li>
                     <li><a href="#floors">楼层列表</a></li>
                     <li><a href="#services">服务调用</a></li>
-                    <li><a href="#device-matching">智能设备匹配</a></li>
-                    <li><a href="#control-device-matching">控制设备匹配</a></li>
-                    <li><a href="#batch-control">批量设备控制</a></li>
+                    <li><a href="#device-matching">设备匹配</a></li>
                 </ul>
             </div>
 
@@ -937,6 +886,68 @@
 }</code></pre>
                 </div>
 
+                <h3>🔧 直接调用Home Assistant API</h3>
+                <p>您也可以直接调用Home Assistant的原始API：</p>
+                <div class="endpoint-example">
+                    <pre><code># 获取设备注册表
+curl -X GET \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  http://your-home-assistant-url:8123/api/config/device_registry/list
+
+# 获取所有实体状态
+curl -X GET \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  http://your-home-assistant-url:8123/api/states</code></pre>
+                </div>
+
+                <h3>🐍 Python示例</h3>
+                <div class="endpoint-example">
+                    <pre><code>import requests
+import json
+
+# 配置信息
+HA_URL = "http://your-home-assistant-url:8123"
+TOKEN = "YOUR_ACCESS_TOKEN"
+
+headers = {
+    "Authorization": f"Bearer {TOKEN}",
+    "Content-Type": "application/json",
+}
+
+# 查询设备注册表
+def get_device_registry():
+    response = requests.get(f"{HA_URL}/api/config/device_registry/list", headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"错误: {response.status_code}")
+        return None
+
+# 查询所有实体
+def get_all_entities():
+    response = requests.get(f"{HA_URL}/api/states", headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"错误: {response.status_code}")
+        return None
+
+# 执行查询
+devices = get_device_registry()
+entities = get_all_entities()
+
+if devices:
+    print(f"找到 {len(devices)} 个设备")
+    for device in devices[:5]:
+        print(f"- {device['name']}: {device['manufacturer']}")
+
+if entities:
+    print(f"找到 {len(entities)} 个实体")
+    for entity in entities[:5]:
+        print(f"- {entity['entity_id']}: {entity['state']}")</code></pre>
+                </div>
             </div>
 
             <!-- 房间列表 -->
@@ -1019,6 +1030,47 @@
 }</code></pre>
                 </div>
 
+                <h3>🔧 直接调用Home Assistant API</h3>
+                <p>您也可以直接调用Home Assistant的原始API：</p>
+                <div class="endpoint-example">
+                    <pre><code># 获取楼层注册表
+curl -X GET \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  http://your-home-assistant-url:8123/api/config/floor_registry/list</code></pre>
+                </div>
+
+                <h3>🐍 Python示例</h3>
+                <div class="endpoint-example">
+                    <pre><code>import requests
+import json
+
+# 配置信息
+HA_URL = "http://your-home-assistant-url:8123"
+TOKEN = "YOUR_ACCESS_TOKEN"
+
+headers = {
+    "Authorization": f"Bearer {TOKEN}",
+    "Content-Type": "application/json",
+}
+
+# 查询楼层注册表
+def get_floor_registry():
+    response = requests.get(f"{HA_URL}/api/config/floor_registry/list", headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"错误: {response.status_code}")
+        return None
+
+# 执行查询
+floors = get_floor_registry()
+
+if floors:
+    print(f"找到 {len(floors)} 个楼层")
+    for floor in floors:
+        print(f"- {floor['name']} (ID: {floor['floor_id']})")</code></pre>
+                </div>
             </div>
 
             <!-- 服务调用 -->
@@ -1034,8 +1086,9 @@
                     <div class="endpoint-description">调用Home Assistant服务</div>
                     <div class="endpoint-input">
                         <div style="margin-bottom: 10px;">
-                            <label for="call-service-device-type-input">Device Type:</label>
-                            <input type="text" id="call-service-device-type-input" value="light" placeholder="例如: light, switch, fan" style="width: 100px; margin: 0 10px; padding: 5px; border: 1px solid #ccc; border-radius: 3px;">
+                            <label for="call-service-domain-input">Device Type:</label>
+                            <input type="text" id="call-service-domain-input" value="light" placeholder="例如: light, switch, fan" style="width: 100px; margin: 0 10px; padding: 5px; border: 1px solid #ccc; border-radius: 3px;">
+                            <small style="color: #666; margin-left: 10px;">(也支持 domain)</small>
                         </div>
                         <div style="margin-bottom: 10px;">
                             <label for="call-service-service-input">Service:</label>
@@ -1047,44 +1100,8 @@
                         </div>
                         <div style="margin-bottom: 10px;">
                             <label for="call-service-data-input">Service Data (JSON):</label>
-                            <input type="text" id="call-service-data-input" value='{}' placeholder='例如: {"brightness": 255}' style="width: 300px; margin: 0 10px; padding: 5px; border: 1px solid #ccc; border-radius: 3px;">
+                            <input type="text" id="call-service-data-input" value='{"rgb_color": [255, 0, 0]}' placeholder='例如: {"brightness": 255, "rgb_color": [255, 0, 0]}' style="width: 300px; margin: 0 10px; padding: 5px; border: 1px solid #ccc; border-radius: 3px;">
                         </div>
-                    </div>
-
-                    <h3>🔧 自定义请求体测试</h3>
-                    <p>支持单个对象或数组格式进行批量服务调用。数组格式可以一次执行多个服务调用。</p>
-                    <div class="endpoint-input">
-                        <label for="call-service-custom-body">完整请求体 (JSON) - 支持单个对象或数组格式:</label>
-                        <textarea id="call-service-custom-body" rows="25" style="width: 100%; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.4; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;">[
-  {
-    "device_type": "light",
-    "service": "turn_on",
-    "entity_id": "light.wiz_rgbw_tunable_244d3e",
-    "data": {
-      "rgb_color": [255, 0, 0],
-      "brightness": 128
-    },
-    "metadata": {
-      "device_name": "Living Room Light",
-      "area_name": "Living Room",
-      "current_state": "off",
-      "match_confidence": 0.9
-    }
-  },
-  {
-    "device_type": "light",
-    "service": "turn_off",
-    "entity_id": "light.wiz_rgbw_tunable_295fdc",
-    "data": {},
-    "metadata": {
-      "device_name": "Dinning Room Light",
-      "area_name": "Dinning Room",
-      "current_state": "on"
-    }
-  }
-]</textarea>
-                        <button class="btn btn-sm btn-secondary" onclick="testCallServiceWithCustomBody('call-service-custom-test')" style="margin-top: 10px;">使用自定义请求体测试</button>
-                        <div id="call-service-custom-test" class="test-result-container"></div>
                     </div>
                     <div class="endpoint-example">
                         <pre><code id="call-service-curl-example">curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-service \\
@@ -1111,7 +1128,22 @@ curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-servic
 # 设置亮度
 curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-service \
   -H "Content-Type: application/json" \
-  -d '{"device_type": "light", "service": "turn_on", "entity_id": "light.living_room", "data": {"brightness_pct": 50}}'</code></pre>
+  -d '{"device_type": "light", "service": "turn_on", "entity_id": "light.living_room", "data": {"brightness": 128}}'
+
+# 设置红色
+curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-service \
+  -H "Content-Type: application/json" \
+  -d '{"device_type": "light", "service": "turn_on", "entity_id": "light.living_room", "data": {"rgb_color": [255, 0, 0]}}'
+
+# 设置蓝色带亮度
+curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-service \
+  -H "Content-Type: application/json" \
+  -d '{"device_type": "light", "service": "turn_on", "entity_id": "light.living_room", "data": {"rgb_color": [0, 0, 255], "brightness": 200}}'
+
+# 设置色温 (暖白光)
+curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-service \
+  -H "Content-Type: application/json" \
+  -d '{"device_type": "light", "service": "turn_on", "entity_id": "light.living_room", "data": {"color_temp_kelvin": 2700}}'</code></pre>
                 </div>
 
                 <h4>开关控制</h4>
@@ -1136,433 +1168,178 @@ curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-servic
                 </div>
             </div>
 
-            <!-- 智能设备匹配 -->
+            <!-- 设备匹配 -->
             <div class="api-section" id="device-matching">
-                <h2>🤖 智能设备匹配</h2>
-                <p>根据OpenAI返回的结构化数据智能匹配Home Assistant设备，支持空间名称/类型匹配和设备名称/类型匹配。</p>
-                
-                <div class="api-endpoint">
-                    <div class="endpoint-header">
-                        <span class="method post">POST</span>
-                        <span class="url">/api/home_assistant/home_assistant/match-devices</span>
-                        <button class="btn btn-primary" onclick="testMatchDevicesAPI('quick-test')">测试</button>
-                    </div>
-                    <div class="endpoint-description">根据意图数据智能匹配Home Assistant设备</div>
-                    <div id="quick-test" class="test-result-container"></div>
-                    <div class="endpoint-example">
-                        <pre><code>curl -X POST http://localhost:3000/api/home_assistant/home_assistant/match-devices \
-  -H "Content-Type: application/json" \
-  -d '{
-    "intent_data": {
-      "intent": "Control Device",
-      "confidence": 0.95,
-      "user_input": "把卧室的灯和空调关了 把厨房的空调调到20度",
-      "devices": [
-        {
-          "space_name": "卧室",
-          "space_type": "Bedroom",
-          "device_name": "灯",
-          "device_type": "Light",
-          "action": "关"
-        },
-        {
-          "space_name": "卧室",
-          "space_type": "Bedroom", 
-          "device_name": "空调",
-          "device_type": "Air Conditioner",
-          "action": "关"
-        },
-        {
-          "space_name": "厨房",
-          "space_type": "Kitchen",
-          "device_name": "空调", 
-          "device_type": "Air Conditioner",
-          "action": "调到20度"
-        }
-      ]
-    }
-  }'</code></pre>
-                    </div>
-                    <div class="endpoint-params">
-                        <strong>参数:</strong>
-                        <ul>
-                            <li><code>intent_data</code> (必需): 意图数据对象</li>
-                            <li><code>intent_data.devices</code> (必需): 设备数组</li>
-                            <li><code>devices[].space_name</code> (必需): 空间名称</li>
-                            <li><code>devices[].space_type</code> (必需): 空间类型</li>
-                            <li><code>devices[].device_name</code> (必需): 设备名称</li>
-                            <li><code>devices[].device_type</code> (必需): 设备类型</li>
-                            <li><code>devices[].action</code> (必需): 操作动作</li>
-                        </ul>
-                    </div>
-
-                    <h3>🔧 智能设备匹配参数输入</h3>
-                    <div class="endpoint-input">
-                        <label for="intent-input">意图数据 (JSON):</label>
-                        <textarea id="intent-input" rows="15" style="width: 100%; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.4; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;">{
-  "intent": "Control Device",
-  "confidence": 0.95,
-  "user_input": "把卧室的灯和空调关了 把厨房的空调调到20度",
-  "devices": [
-    {
-      "space_name": "卧室",
-      "space_type": "Bedroom",
-      "device_name": "灯",
-      "device_type": "Light",
-      "action": "关"
-    },
-    {
-      "space_name": "卧室",
-      "space_type": "Bedroom",
-      "device_name": "空调",
-      "device_type": "Air Conditioner",
-      "action": "关"
-    },
-    {
-      "space_name": "厨房",
-      "space_type": "Kitchen",
-      "device_name": "空调",
-      "device_type": "Air Conditioner",
-      "action": "调到20度"
-    }
-  ]
-}</textarea>
-                    </div>
-                    <div class="endpoint-input">
-                        <button class="btn btn-primary" onclick="testMatchDevicesAPI()">🤖 开始匹配设备</button>
-                        <button class="btn btn-secondary" onclick="clearMatchDevicesInputs()">🗑️ 清空输入</button>
-                        <button class="btn btn-info" onclick="formatJSON('intent-input')">📝 格式化JSON</button>
-                        <button class="btn btn-warning" onclick="validateJSON('intent-input')">✅ 验证JSON</button>
-                    </div>
-                    <div id="match-devices-test" class="test-result-container"></div>
-                </div>
-
-                <div class="api-info">
-                    <h3>📋 匹配规则</h3>
-                    <ul>
-                        <li><strong>空间匹配</strong>: 优先精确匹配空间名称，失败则匹配空间类型</li>
-                        <li><strong>设备匹配</strong>: 优先精确匹配设备名称，失败则匹配设备类型</li>
-                        <li><strong>功能推断</strong>: 根据设备类型和操作动作推断可用功能</li>
-                        <li><strong>置信度计算</strong>: 基于匹配精度计算匹配置信度</li>
-                    </ul>
-
-                    <h3>📊 返回格式</h3>
-                    <pre><code>{
-  "success": true,
-  "data": {
-    "matched_devices": [
-      {
-        "entity_id": "light.bedroom_light",
-        "entity_name": "卧室灯",
-        "entity_functions": ["turn_on", "turn_off"],
-        "device_name": "卧室灯",
-        "device_type": "Light",
-        "space_name": "卧室",
-        "space_type": "卧室",
-        "action": "关",
-        "confidence": 0.9
-      }
-    ],
-    "total_matched": 3,
-    "intent_devices": 3,
-    "match_rate": "100%",
-    "matched_at": "2025-09-10T06:33:07.000Z"
-  }
-}</code></pre>
-                </div>
-            </div>
-
-            <!-- 控制设备匹配 -->
-            <div class="api-section" id="control-device-matching">
-                <h2>🎯 控制设备匹配</h2>
-                <p>基于意图数据智能匹配需要控制的设备实体，支持精确的房间、设备类型、设备名称匹配，并保留增强状态数据的所有字段。</p>
+                <h2>🎯 设备匹配</h2>
+                <p>基于意图识别数据智能匹配Home Assistant中的设备实体，支持房间、设备类型和设备名称的多维度匹配。</p>
                 
                 <div class="api-endpoint">
                     <div class="endpoint-header">
                         <span class="method post">POST</span>
                         <span class="url">/api/home_assistant/home_assistant/match-control-devices</span>
-                        <button class="btn btn-sm btn-primary" onclick="testControlDeviceMatchingAPI()">测试</button>
+                        <button class="btn btn-sm btn-primary" onclick="testDeviceMatchingApi('device-matching-test')">测试</button>
                     </div>
                     <div class="endpoint-description">
-                        基于意图数据匹配控制设备
+                        基于意图识别数据匹配相应的Home Assistant设备实体
                         <br>
-                        <small class="text-muted">🎯 智能匹配房间、设备类型、设备名称，返回增强状态数据</small>
+                        <small class="text-muted">🤖 支持中英文房间名称、设备类型映射和模糊匹配</small>
                     </div>
+                    
+                    <div class="endpoint-input">
+                        <div style="margin-bottom: 10px;">
+                            <label for="device-matching-input"><strong>意图数据 (JSON格式):</strong></label>
+                            <textarea 
+                                id="device-matching-input" 
+                                rows="12" 
+                                style="width: 100%; font-family: 'Courier New', monospace; font-size: 14px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                                placeholder='请输入意图识别数据，例如：
+{
+  "intent": "Control Device",
+  "confidence": 0.95,
+  "user_input": "打开客卧的灯",
+  "matched_rooms": ["Jayden'\''s Bedroom", "Jacquelyn'\''s Bedroom", "Guest Bedroom"],
+  "device_types": ["light"],
+  "devices": [
+    {
+      "room_name": "Jayden'\''s Bedroom",
+      "device_type": "light",
+      "device_name": "灯",
+      "action": "打开"
+    }
+  ]
+}'></textarea>
+                        </div>
+                        
+                        <div class="filter-actions">
+                            <button class="btn btn-info" onclick="loadDeviceMatchingTemplate()">加载示例数据</button>
+                            <button class="btn btn-warning" onclick="formatJSON('device-matching-input')">格式化JSON</button>
+                            <button class="btn btn-secondary" onclick="clearDeviceMatchingInput()">清空</button>
+                        </div>
+                    </div>
+                    
                     <div class="endpoint-example">
                         <pre><code>curl -X POST http://localhost:3000/api/home_assistant/home_assistant/match-control-devices \
   -H "Content-Type: application/json" \
   -d '{
     "intent": "Control Device",
     "confidence": 0.95,
-    "user_input": "卧室的灯和空调关掉 书房的空调温度调到20度",
-    "matched_rooms": ["Master Bedroom", "Study Room"],
-    "device_types": ["light", "climate"],
+    "user_input": "打开客卧的灯",
     "devices": [
       {
-        "room_name": "Master Bedroom",
+        "room_name": "Jayden'\''s Bedroom",
         "device_type": "light",
         "device_name": "灯",
-        "action": "关掉"
-      },
-      {
-        "room_name": "Master Bedroom",
-        "device_type": "climate",
-        "device_name": "空调",
-        "action": "关掉"
+        "action": "打开"
       }
     ]
   }'</code></pre>
                     </div>
                     
-                    <h3>📋 请求参数</h3>
-                    <div class="api-info">
-                        <ul>
-                            <li><code>intent</code> (必需): 意图类型，如 "Control Device"</li>
-                            <li><code>confidence</code> (可选): 置信度，0-1之间的数值</li>
-                            <li><code>user_input</code> (可选): 用户原始输入</li>
-                            <li><code>matched_rooms</code> (可选): 匹配的房间列表</li>
-                            <li><code>device_types</code> (可选): 设备类型列表</li>
-                            <li><code>devices</code> (必需): 设备数组，每个设备包含：
-                                <ul>
-                                    <li><code>room_name</code> (必需): 房间名称</li>
-                                    <li><code>device_type</code> (必需): 设备类型</li>
-                                    <li><code>device_name</code> (可选): 设备名称</li>
-                                    <li><code>action</code> (必需): 操作动作</li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </div>
+                    <div id="device-matching-test" class="test-result-container"></div>
+                </div>
 
-                    <h3>🔧 控制设备匹配参数输入</h3>
-                    <div class="endpoint-input">
-                        <label for="control-intent-input">意图数据 (JSON):</label>
-                        <textarea id="control-intent-input" rows="20" style="width: 100%; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.4; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;">{
-  "intent": "Control Device",
-  "confidence": 0.95,
-  "user_input": "卧室的灯和空调关掉 书房的空调温度调到20度",
-  "matched_rooms": ["Master Bedroom", "Study Room"],
-  "device_types": ["light", "climate"],
-  "devices": [
+                <h3>📋 输入数据格式</h3>
+                <div class="endpoint-example">
+                    <pre><code>{
+  "intent": "Control Device",              // 意图类型
+  "confidence": 0.95,                     // 识别置信度
+  "user_input": "打开客卧的灯",              // 用户原始输入
+  "matched_rooms": ["Guest Bedroom"],     // 可选：匹配到的房间列表
+  "device_types": ["light"],              // 可选：设备类型列表
+  "devices": [                            // 设备控制意图列表
     {
-      "room_name": "Master Bedroom",
-      "device_type": "light",
-      "device_name": "灯",
-      "action": "关掉"
-    },
-    {
-      "room_name": "Master Bedroom",
-      "device_type": "climate",
-      "device_name": "空调",
-      "action": "关掉"
-    },
-    {
-      "room_name": "Study Room",
-      "device_type": "climate",
-      "device_name": "空调",
-      "action": "调到20度"
+      "room_name": "Guest Bedroom",       // 房间名称
+      "device_type": "light",             // 设备类型 (light, switch, climate, fan, etc.)
+      "device_name": "灯",                 // 设备名称 (可为空)
+      "action": "打开"                     // 控制动作
     }
   ]
-}</textarea>
-                        <div style="margin-top: 10px;">
-                            <button class="btn btn-primary" onclick="testControlDeviceMatchingAPI()">测试控制设备匹配</button>
-                            <button class="btn btn-secondary" onclick="clearControlDeviceMatchingInputs()">清空输入</button>
-                        </div>
-                    </div>
-
-                    <h3>📊 响应格式</h3>
-                    <div class="api-info">
-                        <pre><code>{
-  "success": true,
-  "data": {
-    "matched_devices": [
-      {
-        "entity_id": "light.master_bedroom_light",
-        "state": "on",
-        "device_id": "abc123",
-        "device_name": "Master Bedroom Light",
-        "device_manufacturer": "Philips",
-        "device_model": "Hue White",
-        "device_type": "light",
-        "area_id": "master_bedroom",
-        "area_name": "Master Bedroom",
-        "floor_id": "second_floor",
-        "floor_name": "Second Floor",
-        "action": "关掉",
-        "intent_room": "Master Bedroom",
-        "intent_device_type": "light",
-        "intent_device_name": "灯",
-        "match_confidence": 0.95
-      }
-    ],
-    "statistics": {
-      "total_intent_devices": 3,
-      "matched_entities": 2,
-      "unique_rooms": 2,
-      "unique_device_types": 2,
-      "actions": ["关掉", "调到20度"],
-      "confidence_scores": {
-        "high": 2,
-        "medium": 0,
-        "low": 0
-      }
-    },
-    "intent_data": { ... },
-    "retrieved_at": "2025-09-11T10:30:00.000Z"
-  }
 }</code></pre>
-                    </div>
-
-                    <h3>🎯 匹配规则</h3>
-                    <div class="api-info">
-                        <ol>
-                            <li><strong>空间匹配</strong>: 首先根据房间名称匹配实体</li>
-                            <li><strong>设备名称匹配</strong>: 优先按设备名称精确匹配</li>
-                            <li><strong>设备类型匹配</strong>: 如果设备名称匹配失败，则按设备类型匹配</li>
-                            <li><strong>置信度计算</strong>: 基于房间匹配(40%)、设备类型匹配(30%)、设备名称匹配(30%)</li>
-                        </ol>
-                    </div>
-
-                    <h3>💡 使用场景</h3>
-                    <div class="api-info">
-                        <ul>
-                            <li><strong>智能语音控制</strong>: 将自然语言转换为具体的设备控制命令</li>
-                            <li><strong>批量设备操作</strong>: 同时控制多个房间的多个设备</li>
-                            <li><strong>设备状态查询</strong>: 获取需要控制的设备当前状态</li>
-                            <li><strong>自动化流程</strong>: 基于用户意图自动执行设备控制</li>
-                        </ul>
-                    </div>
-                    
-                    <div id="control-device-matching-test" class="test-result-container"></div>
-                </div>
-            </div>
-
-            <!-- 批量设备控制 -->
-            <div class="api-section" id="batch-control">
-                <h2>🎛️ 批量设备控制</h2>
-                <p>根据OpenAI返回的控制命令批量执行Home Assistant设备控制，支持多种设备类型和操作。</p>
-                
-                <div class="api-endpoint">
-                    <div class="endpoint-header">
-                        <span class="method post">POST</span>
-                        <span class="url">/api/home_assistant/home_assistant/batch-control</span>
-                        <button class="btn btn-primary" onclick="testBatchControlAPI('quick-batch-test')">测试</button>
-                    </div>
-                    <div class="endpoint-description">批量执行设备控制命令并返回执行状态</div>
-                    <div id="quick-batch-test" class="test-result-container"></div>
-                    <div class="endpoint-example">
-                        <pre><code>curl -X POST http://localhost:3000/api/home_assistant/home_assistant/batch-control \
-  -H "Content-Type: application/json" \
-  -d '{
-    "control_commands": [
-      {
-        "entity_id": "light.bedroom_light",
-        "entity_functions": ["turn_on", "turn_off"],
-        "action": "关",
-        "parameters": {}
-      },
-      {
-        "entity_id": "climate.bedroom_ac",
-        "entity_functions": ["turn_on", "turn_off", "set_temperature"],
-        "action": "关",
-        "parameters": {}
-      },
-      {
-        "entity_id": "climate.kitchen_ac",
-        "entity_functions": ["turn_on", "turn_off", "set_temperature"],
-        "action": "调到20度",
-        "parameters": {"temperature": 20}
-      }
-    ]
-  }'</code></pre>
-                    </div>
-                    <div class="endpoint-params">
-                        <strong>参数:</strong>
-                        <ul>
-                            <li><code>control_commands</code> (必需): 控制命令数组</li>
-                            <li><code>control_commands[].entity_id</code> (必需): 实体ID</li>
-                            <li><code>control_commands[].entity_functions</code> (必需): 实体功能数组</li>
-                            <li><code>control_commands[].action</code> (必需): 操作动作</li>
-                            <li><code>control_commands[].parameters</code> (可选): 额外参数</li>
-                        </ul>
-                    </div>
-
-                    <h3>🔧 批量控制参数输入</h3>
-                    <div class="endpoint-input">
-                        <label for="control-commands-input">控制命令 (JSON):</label>
-                        <textarea id="control-commands-input" rows="15" style="width: 100%; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.4; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;">[
-  {
-    "entity_id": "light.bedroom_light",
-    "entity_functions": ["turn_on", "turn_off"],
-    "action": "关",
-    "parameters": {}
-  },
-  {
-    "entity_id": "climate.bedroom_ac",
-    "entity_functions": ["turn_on", "turn_off", "set_temperature"],
-    "action": "关",
-    "parameters": {}
-  },
-  {
-    "entity_id": "climate.kitchen_ac",
-    "entity_functions": ["turn_on", "turn_off", "set_temperature"],
-    "action": "调到20度",
-    "parameters": {"temperature": 20}
-  }
-]</textarea>
-                    </div>
-                    <div class="endpoint-input">
-                        <button class="btn btn-primary" onclick="testBatchControlAPI()">🎛️ 执行批量控制</button>
-                        <button class="btn btn-secondary" onclick="clearBatchControlInputs()">🗑️ 清空输入</button>
-                        <button class="btn btn-info" onclick="formatJSON('control-commands-input')">📝 格式化JSON</button>
-                        <button class="btn btn-warning" onclick="validateJSON('control-commands-input')">✅ 验证JSON</button>
-                    </div>
-                    <div id="batch-control-test" class="test-result-container"></div>
                 </div>
 
-                <div class="api-info">
-                    <h3>📋 支持的操作类型</h3>
-                    <ul>
-                        <li><strong>开关控制</strong>: 开/关 (turn_on/turn_off)</li>
-                        <li><strong>温度控制</strong>: 调到X度 (set_temperature)</li>
-                        <li><strong>亮度控制</strong>: 亮度X% (set_brightness)</li>
-                        <li><strong>颜色控制</strong>: 设置颜色 (set_color)</li>
-                        <li><strong>速度控制</strong>: 低/中/高/最高 (set_speed)</li>
-                        <li><strong>窗帘控制</strong>: 开/关窗帘 (open_cover/close_cover)</li>
-                        <li><strong>锁控制</strong>: 开锁/锁门 (unlock/lock)</li>
-                    </ul>
-
-                    <h3>📊 返回格式</h3>
+                <h3>📤 输出数据格式</h3>
+                <div class="endpoint-example">
                     <pre><code>{
   "success": true,
   "data": {
-    "total_commands": 3,
-    "successful_commands": 3,
-    "failed_commands": 0,
-    "success_rate": "100%",
-    "results": [
+    "matched_devices": [                  // 匹配到的设备实体数组
       {
-        "index": 0,
-        "entity_id": "light.bedroom_light",
-        "success": true,
-        "result": {
-          "service_called": "light.turn_off",
-          "service_data": {"entity_id": "light.bedroom_light"},
-          "result": {...}
-        }
-      }
-    ],
-    "entity_states": [
-      {
-        "entity_id": "light.bedroom_light",
+        "entity_id": "light.guest_bedroom_light",
+        "friendly_name": "Guest Bedroom Light",
+        "area_name": "Guest Bedroom",
+        "device_type": "light",
+        "device_name": "Guest Bedroom Light",
         "state": "off",
-        "attributes": {...},
-        "last_changed": "2025-09-10T06:33:07.000Z",
-        "last_updated": "2025-09-10T06:33:07.000Z"
+        "attributes": { ... },            // Home Assistant 实体属性
+        "action": "打开",                  // 来自意图的控制动作
+        "intent_room": "Guest Bedroom",   // 意图中的房间名称
+        "intent_device_type": "light",    // 意图中的设备类型
+        "intent_device_name": "灯",       // 意图中的设备名称
+        "match_confidence": 0.8           // 匹配置信度 (0-1)
       }
     ],
-    "executed_at": "2025-09-10T06:33:07.000Z"
+    "statistics": {                       // 匹配统计信息
+      "total_intent_devices": 1,         // 意图中的设备数量
+      "matched_entities": 1,             // 成功匹配的实体数量
+      "unique_rooms": 1,                 // 涉及的房间数量
+      "unique_device_types": 1,          // 涉及的设备类型数量
+      "actions": ["打开"],                // 所有动作列表
+      "confidence_scores": {             // 置信度分布
+        "high": 0,    // 高置信度 (≥0.8)
+        "medium": 1,  // 中等置信度 (0.5-0.8)
+        "low": 0      // 低置信度 (<0.5)
+      }
+    }
   }
 }</code></pre>
+                </div>
+
+                <h3>🔧 支持的设备类型</h3>
+                <div class="api-info">
+                    <ul>
+                        <li><strong>light</strong>: 灯光设备</li>
+                        <li><strong>switch</strong>: 开关设备</li>
+                        <li><strong>climate</strong>: 空调/恒温器</li>
+                        <li><strong>fan</strong>: 风扇</li>
+                        <li><strong>cover</strong>: 窗帘/遮阳帘</li>
+                        <li><strong>lock</strong>: 门锁</li>
+                        <li><strong>camera</strong>: 摄像头</li>
+                        <li><strong>sensor</strong>: 传感器 (包括binary_sensor)</li>
+                        <li><strong>media_player</strong>: 媒体播放器</li>
+                    </ul>
+                </div>
+
+                <h3>🏠 房间名称匹配</h3>
+                <div class="api-info">
+                    <p>系统支持多种房间名称格式，包括中英文混合：</p>
+                    <ul>
+                        <li><strong>英文标准名称</strong>: "Living Room", "Guest Bedroom", "Master Bedroom"</li>
+                        <li><strong>中文名称</strong>: "客厅", "客卧", "主卧"</li>
+                        <li><strong>简称匹配</strong>: "jacquelyn" → "Jacquelyn's Bedroom"</li>
+                        <li><strong>Entity ID模式匹配</strong>: 从entity_id中提取房间信息</li>
+                    </ul>
+                </div>
+
+                <h3>🎯 匹配算法</h3>
+                <div class="api-info">
+                    <p>设备匹配采用多层次匹配策略：</p>
+                    <ol>
+                        <li><strong>设备类型匹配</strong>: 基于entity_id的domain前缀 (40%权重)</li>
+                        <li><strong>房间匹配</strong>: 基于area_name或entity_id模式 (40%权重)</li>
+                        <li><strong>设备名称匹配</strong>: 基于friendly_name的模糊匹配 (20%权重)</li>
+                    </ol>
+                    <p>最终的匹配置信度综合以上三个维度计算得出。</p>
+                </div>
+
+                <h3>💡 使用场景</h3>
+                <div class="api-info">
+                    <ul>
+                        <li><strong>智能音箱集成</strong>: 将语音命令转换为具体的设备控制</li>
+                        <li><strong>NLP意图识别</strong>: 将自然语言意图映射到Home Assistant实体</li>
+                        <li><strong>场景自动化</strong>: 基于意图批量匹配和控制设备</li>
+                        <li><strong>第三方集成</strong>: 为其他系统提供设备匹配能力</li>
+                        <li><strong>多语言支持</strong>: 处理中英文混合的设备控制请求</li>
+                    </ul>
                 </div>
             </div>
 
@@ -1664,160 +1441,6 @@ curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-servic
             }
         }
 
-        // 测试智能设备匹配API
-        async function testMatchDevicesAPI(containerId = 'match-devices-test') {
-            const container = document.getElementById(containerId);
-            const timestamp = new Date().toLocaleTimeString();
-            
-            let intentInput = document.getElementById('intent-input').value.trim();
-            
-            // 如果是快速测试且没有输入数据，使用默认测试数据
-            if (!intentInput && containerId === 'quick-test') {
-                intentInput = JSON.stringify({
-                    intent: "Control Device",
-                    confidence: 0.95,
-                    user_input: "把卧室的灯和空调关了 把厨房的空调调到20度",
-                    devices: [
-                        {
-                            space_name: "卧室",
-                            space_type: "Bedroom",
-                            device_name: "灯",
-                            device_type: "Light",
-                            action: "关"
-                        },
-                        {
-                            space_name: "卧室",
-                            space_type: "Bedroom",
-                            device_name: "空调",
-                            device_type: "Air Conditioner",
-                            action: "关"
-                        },
-                        {
-                            space_name: "厨房",
-                            space_type: "Kitchen",
-                            device_name: "空调",
-                            device_type: "Air Conditioner",
-                            action: "调到20度"
-                        }
-                    ]
-                });
-            }
-            
-            if (!intentInput) {
-                container.innerHTML = `
-                    <div class="test-result error">
-                        <div><strong>❌ 错误</strong></div>
-                        <div>请输入意图数据</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            let intentData;
-            try {
-                intentData = JSON.parse(intentInput);
-            } catch (error) {
-                container.innerHTML = `
-                    <div class="test-result error">
-                        <div><strong>❌ 错误</strong></div>
-                        <div>JSON格式错误: ${error.message}</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            const testId = `match-devices-test-${Date.now()}`;
-            container.innerHTML = `
-                <div class="test-result-container" id="${testId}">
-                    <div class="test-result-header" onclick="toggleTestResult('${testId}')">
-                        <span>🤖 测试智能设备匹配API</span>
-                        <span class="test-result-toggle">▶</span>
-                    </div>
-                    <div class="test-result-content">
-                        <div class="test-result info">
-                            <div>时间: ${timestamp}</div>
-                            <div>状态: 正在匹配设备...</div>
-                            <div>意图: ${intentData.intent || 'Unknown'}</div>
-                            <div>设备数量: ${intentData.devices ? intentData.devices.length : 0}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            try {
-                const response = await fetch('/api/home_assistant/home_assistant/match-devices', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ intent_data: intentData })
-                });
-                
-                const data = await response.json();
-                const resultClass = response.ok ? 'success' : 'error';
-                const statusText = response.ok ? '✅ 成功' : '❌ 失败';
-                
-                let resultsHtml = `
-                    <div class="test-result ${resultClass}">
-                        <div><strong>智能设备匹配API测试结果</strong></div>
-                        <div>状态: ${statusText}</div>
-                `;
-                
-                if (data.success && data.data) {
-                    resultsHtml += `
-                        <div>匹配设备数量: ${data.data.total_matched || 0}</div>
-                        <div>匹配率: ${data.data.match_rate || '0%'}</div>
-                    `;
-                    
-                    if (data.data.matched_devices && data.data.matched_devices.length > 0) {
-                        resultsHtml += `
-                            <div><strong>匹配的设备:</strong></div>
-                        `;
-                        
-                        data.data.matched_devices.forEach((device, index) => {
-                            resultsHtml += `
-                                <div class="matched-device">
-                                    <div><strong>设备 ${index + 1}:</strong></div>
-                                    <div>实体ID: ${device.entity_id}</div>
-                                    <div>实体名称: ${device.entity_name}</div>
-                                    <div>设备名称: ${device.device_name}</div>
-                                    <div>设备类型: ${device.device_type}</div>
-                                    <div>空间名称: ${device.space_name}</div>
-                                    <div>操作动作: ${device.action}</div>
-                                    <div>可用功能: ${device.entity_functions ? device.entity_functions.join(', ') : 'N/A'}</div>
-                                    <div>置信度: ${(device.confidence * 100).toFixed(1)}%</div>
-                                </div>
-                            `;
-                        });
-                    }
-                } else if (data.error) {
-                    resultsHtml += `
-                        <div><strong>错误信息:</strong></div>
-                        <div class="error-message">${data.error}</div>
-                    `;
-                }
-                
-                resultsHtml += `
-                        <div><strong>完整响应:</strong></div>
-                        <pre class="json-response">${JSON.stringify(data, null, 2)}</pre>
-                    </div>
-                `;
-                
-                document.querySelector(`#${testId} .test-result-content`).innerHTML = resultsHtml;
-            } catch (error) {
-                document.querySelector(`#${testId} .test-result-content`).innerHTML = `
-                    <div class="test-result error">
-                        <div><strong>❌ 网络错误</strong></div>
-                        <div>${error.message}</div>
-                    </div>
-                `;
-            }
-        }
-
-        // 清空智能设备匹配输入
-        function clearMatchDevicesInputs() {
-            document.getElementById('intent-input').value = '';
-        }
 
         // 格式化JSON
         function formatJSON(textareaId) {
@@ -1873,176 +1496,6 @@ curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-servic
         }
 
         // 测试批量控制API
-        async function testBatchControlAPI(containerId = 'batch-control-test') {
-            const container = document.getElementById(containerId);
-            const timestamp = new Date().toLocaleTimeString();
-            
-            let commandsInput = document.getElementById('control-commands-input').value.trim();
-            
-            // 如果是快速测试且没有输入数据，使用默认测试数据
-            if (!commandsInput && containerId === 'quick-batch-test') {
-                commandsInput = JSON.stringify([
-                    {
-                        entity_id: "light.bedroom_light",
-                        entity_functions: ["turn_on", "turn_off"],
-                        action: "关",
-                        parameters: {}
-                    },
-                    {
-                        entity_id: "climate.bedroom_ac",
-                        entity_functions: ["turn_on", "turn_off", "set_temperature"],
-                        action: "关",
-                        parameters: {}
-                    },
-                    {
-                        entity_id: "climate.kitchen_ac",
-                        entity_functions: ["turn_on", "turn_off", "set_temperature"],
-                        action: "调到20度",
-                        parameters: { temperature: 20 }
-                    }
-                ]);
-            }
-            
-            if (!commandsInput) {
-                container.innerHTML = `
-                    <div class="test-result error">
-                        <div><strong>❌ 错误</strong></div>
-                        <div>请输入控制命令</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            let controlCommands;
-            try {
-                controlCommands = JSON.parse(commandsInput);
-            } catch (error) {
-                container.innerHTML = `
-                    <div class="test-result error">
-                        <div><strong>❌ 错误</strong></div>
-                        <div>JSON格式错误: ${error.message}</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            const testId = `batch-control-test-${Date.now()}`;
-            container.innerHTML = `
-                <div class="test-result-container" id="${testId}">
-                    <div class="test-result-header" onclick="toggleTestResult('${testId}')">
-                        <span>🎛️ 测试批量控制API</span>
-                        <span class="test-result-toggle">▶</span>
-                    </div>
-                    <div class="test-result-content">
-                        <div class="test-result info">
-                            <div>时间: ${timestamp}</div>
-                            <div>状态: 正在执行批量控制...</div>
-                            <div>命令数量: ${controlCommands.length}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            try {
-                const response = await fetch('/api/home_assistant/home_assistant/batch-control', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ control_commands: controlCommands })
-                });
-                
-                const data = await response.json();
-                const resultClass = response.ok ? 'success' : 'error';
-                const statusText = response.ok ? '✅ 成功' : '❌ 失败';
-                
-                let resultsHtml = `
-                    <div class="test-result ${resultClass}">
-                        <div><strong>批量控制API测试结果</strong></div>
-                        <div>状态: ${statusText}</div>
-                `;
-                
-                if (data.success && data.data) {
-                    resultsHtml += `
-                        <div>总命令数: ${data.data.total_commands || 0}</div>
-                        <div>成功命令数: ${data.data.successful_commands || 0}</div>
-                        <div>失败命令数: ${data.data.failed_commands || 0}</div>
-                        <div>成功率: ${data.data.success_rate || '0%'}</div>
-                    `;
-                    
-                    if (data.data.results && data.data.results.length > 0) {
-                        resultsHtml += `
-                            <div><strong>执行结果:</strong></div>
-                        `;
-                        
-                        data.data.results.forEach((result, index) => {
-                            const statusIcon = result.success ? '✅' : '❌';
-                            resultsHtml += `
-                                <div class="matched-device">
-                                    <div><strong>命令 ${index + 1}: ${statusIcon}</strong></div>
-                                    <div>实体ID: ${result.entity_id}</div>
-                                    <div>状态: ${result.success ? '成功' : '失败'}</div>
-                            `;
-                            
-                            if (result.success && result.result) {
-                                resultsHtml += `
-                                    <div>调用服务: ${result.result.service_called}</div>
-                                    <div>服务数据: ${JSON.stringify(result.result.service_data)}</div>
-                                `;
-                            } else if (result.error) {
-                                resultsHtml += `
-                                    <div>错误信息: ${result.error}</div>
-                                `;
-                            }
-                            
-                            resultsHtml += `</div>`;
-                        });
-                    }
-                    
-                    if (data.data.entity_states && data.data.entity_states.length > 0) {
-                        resultsHtml += `
-                            <div><strong>实体状态:</strong></div>
-                        `;
-                        
-                        data.data.entity_states.forEach((state, index) => {
-                            resultsHtml += `
-                                <div class="matched-device">
-                                    <div><strong>实体 ${index + 1}:</strong></div>
-                                    <div>实体ID: ${state.entity_id}</div>
-                                    <div>状态: ${state.state || 'N/A'}</div>
-                                    <div>最后更新: ${state.last_updated || 'N/A'}</div>
-                                </div>
-                            `;
-                        });
-                    }
-                } else if (data.error) {
-                    resultsHtml += `
-                        <div><strong>错误信息:</strong></div>
-                        <div class="error-message">${data.error}</div>
-                    `;
-                }
-                
-                resultsHtml += `
-                        <div><strong>完整响应:</strong></div>
-                        <pre class="json-response">${JSON.stringify(data, null, 2)}</pre>
-                    </div>
-                `;
-                
-                document.querySelector(`#${testId} .test-result-content`).innerHTML = resultsHtml;
-            } catch (error) {
-                document.querySelector(`#${testId} .test-result-content`).innerHTML = `
-                    <div class="test-result error">
-                        <div><strong>❌ 网络错误</strong></div>
-                        <div>${error.message}</div>
-                    </div>
-                `;
-            }
-        }
-
-        // 清空批量控制输入
-        function clearBatchControlInputs() {
-            document.getElementById('control-commands-input').value = '';
-        }
 
         // 测试实体匹配API
         async function testEntityMatchingAPI(containerId = 'entity-matching-test') {
@@ -2471,16 +1924,16 @@ curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-servic
 
         // 测试服务调用API
         async function testCallServiceApi(containerId) {
-            const deviceType = document.getElementById('call-service-device-type-input').value;
+            const domain = document.getElementById('call-service-domain-input').value;
             const service = document.getElementById('call-service-service-input').value;
             const entityId = document.getElementById('call-service-entity-input').value;
             const serviceDataStr = document.getElementById('call-service-data-input').value;
-
-            if (!deviceType || !service) {
-                alert('请输入Device Type和Service');
+            
+            if (!domain || !service) {
+                alert('请输入Domain和Service');
                 return;
             }
-
+            
             let serviceData = {};
             if (serviceDataStr) {
                 try {
@@ -2490,124 +1943,24 @@ curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-servic
                     return;
                 }
             }
-
-            const data = { device_type: deviceType, service, data: serviceData };
+            
+            const data = { device_type: domain, service };
             if (entityId) {
                 data.entity_id = entityId;
             }
-
+            if (Object.keys(serviceData).length > 0) {
+                data.data = serviceData;
+            }
+            
             const url = '/api/home_assistant/home_assistant/call-service';
             await testApi('POST', url, data, containerId);
-
+            
             // 更新curl示例
             const curlExample = document.getElementById('call-service-curl-example');
             if (curlExample) {
                 curlExample.textContent = `curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-service \\
   -H "Content-Type: application/json" \\
   -d '${JSON.stringify(data)}'`;
-            }
-        }
-
-        // 使用自定义请求体测试服务调用API
-        async function testCallServiceWithCustomBody(containerId) {
-            const customBodyStr = document.getElementById('call-service-custom-body').value;
-
-            if (!customBodyStr) {
-                alert('请输入完整的请求体');
-                return;
-            }
-
-            let customBody = {};
-            try {
-                customBody = JSON.parse(customBodyStr);
-            } catch (e) {
-                alert('请求体JSON格式错误: ' + e.message);
-                return;
-            }
-
-            // 支持数组格式（批量调用）和单个对象格式
-            if (Array.isArray(customBody)) {
-                // 验证数组中的每个对象
-                for (let i = 0; i < customBody.length; i++) {
-                    const item = customBody[i];
-                    if (!item.device_type || !item.service) {
-                        alert(`数组中第${i + 1}个对象缺少device_type或service字段`);
-                        return;
-                    }
-                }
-
-                // 批量调用服务
-                const container = document.getElementById(containerId);
-                container.innerHTML = `
-                    <div class="test-result-header">
-                        <span class="toggle-btn" onclick="toggleTestResult('${containerId}')">▼</span>
-                        批量服务调用测试结果 (${customBody.length}个请求)
-                    </div>
-                    <div class="test-result-content">
-                        <div class="loading">正在执行批量服务调用...</div>
-                    </div>
-                `;
-
-                const results = [];
-                const url = '/api/home_assistant/home_assistant/call-service';
-
-                for (let i = 0; i < customBody.length; i++) {
-                    const item = customBody[i];
-                    try {
-                        const response = await fetch(url, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(item)
-                        });
-
-                        const result = await response.json();
-                        results.push({
-                            index: i + 1,
-                            request: item,
-                            response: result,
-                            status: response.status
-                        });
-                    } catch (error) {
-                        results.push({
-                            index: i + 1,
-                            request: item,
-                            error: error.message,
-                            status: 'error'
-                        });
-                    }
-                }
-
-                // 显示批量结果
-                const content = container.querySelector('.test-result-content');
-                content.innerHTML = `
-                    <div class="batch-results">
-                        ${results.map(result => `
-                            <div class="batch-item">
-                                <h4>请求 ${result.index}</h4>
-                                <div class="request-info">
-                                    <strong>设备:</strong> ${result.request.entity_id || 'N/A'}<br>
-                                    <strong>服务:</strong> ${result.request.device_type}.${result.request.service}<br>
-                                    <strong>状态:</strong> <span class="${result.status === 200 ? 'success' : 'error'}">${result.status}</span>
-                                </div>
-                                <div class="result-data">
-                                    <pre>${JSON.stringify(result.response || result.error, null, 2)}</pre>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-
-            } else {
-                // 单个对象格式
-                if (!customBody.device_type || !customBody.service) {
-                    alert('请求体必须包含device_type和service字段');
-                    return;
-                }
-
-                const url = '/api/home_assistant/home_assistant/call-service';
-                await testApi('POST', url, customBody, containerId);
             }
         }
 
@@ -2838,42 +2191,53 @@ curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-servic
             document.getElementById('device-types-filter').value = '';
         }
 
-        // 测试控制设备匹配API
-        async function testControlDeviceMatchingAPI() {
-            const container = document.getElementById('control-device-matching-test');
+        // 测试设备匹配API
+        async function testDeviceMatchingApi(containerId) {
+            const container = document.getElementById(containerId);
             const timestamp = new Date().toLocaleTimeString();
             
-            let intentInput = document.getElementById('control-intent-input').value.trim();
+            let intentInput = document.getElementById('device-matching-input').value.trim();
             
             if (!intentInput) {
-                alert('请输入意图数据');
+                container.innerHTML = `
+                    <div class="test-result error">
+                        <div><strong>❌ 错误</strong></div>
+                        <div>请输入意图数据</div>
+                    </div>
+                `;
                 return;
             }
             
             let intentData;
             try {
                 intentData = JSON.parse(intentInput);
-            } catch (e) {
-                alert('JSON格式错误: ' + e.message);
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="test-result error">
+                        <div><strong>❌ JSON格式错误</strong></div>
+                        <div>${error.message}</div>
+                    </div>
+                `;
                 return;
             }
-            
-            const testId = `control-device-matching-test-${Date.now()}`;
+
+            // 显示测试开始信息
+            const testId = `device-matching-test-${Date.now()}`;
             container.innerHTML = `
                 <div class="test-result-container" id="${testId}">
                     <div class="test-result-header" onclick="toggleTestResult('${testId}')">
-                        <span>🎯 测试控制设备匹配API</span>
+                        <span>🎯 测试设备匹配</span>
                         <span class="test-result-toggle">▶</span>
                     </div>
                     <div class="test-result-content">
                         <div class="test-result info">
                             <div>时间: ${timestamp}</div>
-                            <div>状态: 正在测试...</div>
+                            <div>状态: 正在匹配设备...</div>
                         </div>
                     </div>
                 </div>
             `;
-            
+
             try {
                 const response = await fetch('/api/home_assistant/home_assistant/match-control-devices', {
                     method: 'POST',
@@ -2882,84 +2246,134 @@ curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-servic
                     },
                     body: JSON.stringify(intentData)
                 });
-                
+
                 const data = await response.json();
                 const resultClass = response.ok ? 'success' : 'error';
                 const statusText = response.ok ? '✅ 成功' : '❌ 失败';
-                
+
                 let resultsHtml = `
                     <div class="test-result ${resultClass}">
-                        <div><strong>控制设备匹配API测试结果</strong></div>
-                        <div>状态: ${statusText}</div>
+                        <div><strong>🎯 设备匹配结果</strong></div>
+                        <div>时间: ${timestamp}</div>
+                        <div>状态: ${statusText} (HTTP ${response.status})</div>
                 `;
-                
-                if (data.success && data.data) {
-                    const { matched_devices, statistics } = data.data;
+
+                if (data.success) {
+                    const stats = data.data.statistics;
                     resultsHtml += `
-                        <div>匹配设备数量: ${matched_devices.length}</div>
-                        <div>意图设备数量: ${statistics.total_intent_devices}</div>
-                        <div>匹配房间数: ${statistics.unique_rooms}</div>
-                        <div>设备类型数: ${statistics.unique_device_types}</div>
-                        <div>操作动作: ${statistics.actions.join(', ')}</div>
-                        <div>置信度分布: 高(${statistics.confidence_scores.high}) 中(${statistics.confidence_scores.medium}) 低(${statistics.confidence_scores.low})</div>
+                        <div><strong>📊 匹配统计:</strong></div>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-label">意图设备</span>
+                                <span class="stat-value">${stats.total_intent_devices}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">匹配实体</span>
+                                <span class="stat-value">${stats.matched_entities}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">涉及房间</span>
+                                <span class="stat-value">${stats.unique_rooms}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">设备类型</span>
+                                <span class="stat-value">${stats.unique_device_types}</span>
+                            </div>
+                        </div>
+                        <div><strong>🎬 动作列表:</strong> ${stats.actions.join(', ')}</div>
+                        <div><strong>📈 置信度分布:</strong> 高(${stats.confidence_scores.high}) 中(${stats.confidence_scores.medium}) 低(${stats.confidence_scores.low})</div>
                     `;
-                    
-                    if (matched_devices.length > 0) {
-                        resultsHtml += `
-                            <div style="margin-top: 15px;">
-                                <strong>匹配的设备:</strong>
-                                <div style="max-height: 300px; overflow-y: auto; margin-top: 10px;">
-                        `;
-                        
-                        matched_devices.forEach((device, index) => {
+
+                    // 显示匹配到的设备
+                    if (data.data.matched_devices && data.data.matched_devices.length > 0) {
+                        resultsHtml += `<div><strong>🏠 匹配设备列表:</strong></div>`;
+                        data.data.matched_devices.forEach((device, index) => {
+                            const confidenceBadge = device.match_confidence >= 0.8 ? 'badge-success' : 
+                                                   device.match_confidence >= 0.5 ? 'badge-warning' : 'badge';
                             resultsHtml += `
-                                <div style="background: #f8f9fa; padding: 10px; margin: 5px 0; border-radius: 4px; border-left: 4px solid #007bff;">
-                                    <div><strong>${index + 1}. ${device.entity_id}</strong></div>
-                                    <div>设备名称: ${device.device_name || 'N/A'}</div>
-                                    <div>设备类型: ${device.device_type}</div>
-                                    <div>房间: ${device.area_name || 'N/A'}</div>
-                                    <div>楼层: ${device.floor_name || 'N/A'}</div>
-                                    <div>当前状态: ${device.state}</div>
-                                    <div>操作动作: ${device.action}</div>
-                                    <div>匹配置信度: ${(device.match_confidence * 100).toFixed(1)}%</div>
+                                <div class="matched-device">
+                                    <div><strong>设备 ${index + 1}: ${device.entity_id}</strong></div>
+                                    <div><strong>友好名称:</strong> ${device.friendly_name}</div>
+                                    <div><strong>房间:</strong> ${device.area_name || 'Unknown'}</div>
+                                    <div><strong>设备类型:</strong> ${device.device_type}</div>
+                                    <div><strong>当前状态:</strong> ${device.state}</div>
+                                    <div><strong>动作:</strong> <span class="badge badge-success">${device.action}</span></div>
+                                    <div><strong>匹配置信度:</strong> <span class="badge ${confidenceBadge}">${(device.match_confidence * 100).toFixed(1)}%</span></div>
                                 </div>
                             `;
                         });
-                        
-                        resultsHtml += `
-                                </div>
-                            </div>
-                        `;
+                    } else {
+                        resultsHtml += `<div style="color: #dc3545;">❌ 未找到匹配的设备</div>`;
                     }
                 } else {
-                    resultsHtml += `<div>错误: ${data.error || '未知错误'}</div>`;
+                    resultsHtml += `<div>错误: ${data.error}</div>`;
                 }
-                
+
                 resultsHtml += `
-                    </div>
-                    <div style="margin-top: 10px;">
-                        <strong>完整响应:</strong>
-                        <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px;">${JSON.stringify(data, null, 2)}</pre>
+                        <details style="margin-top: 10px;">
+                            <summary>🔍 查看完整响应</summary>
+                            <pre style="background-color: var(--gray-100); padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 0.8em;">${JSON.stringify(data, null, 2)}</pre>
+                        </details>
                     </div>
                 `;
+
+                // 更新结果
+                const contentElement = document.getElementById(testId).querySelector('.test-result-content');
+                contentElement.innerHTML = resultsHtml;
                 
-                document.querySelector(`#${testId} .test-result-content`).innerHTML = resultsHtml;
-                
+                // 自动展开结果
+                contentElement.classList.add('expanded');
+                document.getElementById(testId).querySelector('.test-result-toggle').classList.add('expanded');
+
             } catch (error) {
-                document.querySelector(`#${testId} .test-result-content`).innerHTML = `
+                const contentElement = document.getElementById(testId).querySelector('.test-result-content');
+                contentElement.innerHTML = `
                     <div class="test-result error">
-                        <div><strong>控制设备匹配API测试结果</strong></div>
-                        <div>状态: ❌ 网络错误</div>
+                        <div><strong>❌ 请求失败</strong></div>
+                        <div>时间: ${timestamp}</div>
                         <div>错误: ${error.message}</div>
                     </div>
                 `;
             }
         }
 
-        // 清空控制设备匹配输入
-        function clearControlDeviceMatchingInputs() {
-            document.getElementById('control-intent-input').value = '';
+        // 加载设备匹配示例数据
+        function loadDeviceMatchingTemplate() {
+            const exampleData = {
+                "intent": "Control Device",
+                "confidence": 0.95,
+                "user_input": "打开客卧的灯",
+                "matched_rooms": ["Jayden's Bedroom", "Jacquelyn's Bedroom", "Guest Bedroom"],
+                "device_types": ["light"],
+                "devices": [
+                    {
+                        "room_name": "Jayden's Bedroom",
+                        "device_type": "light",
+                        "device_name": "灯",
+                        "action": "打开"
+                    },
+                    {
+                        "room_name": "Jacquelyn's Bedroom",
+                        "device_type": "light",
+                        "device_name": "灯",
+                        "action": "打开"
+                    },
+                    {
+                        "room_name": "Guest Bedroom",
+                        "device_type": "light",
+                        "device_name": "灯",
+                        "action": "打开"
+                    }
+                ]
+            };
+            document.getElementById('device-matching-input').value = JSON.stringify(exampleData, null, 2);
         }
+
+        // 清空设备匹配输入
+        function clearDeviceMatchingInput() {
+            document.getElementById('device-matching-input').value = '';
+        }
+
     </script>
 </body>
 </html>

@@ -15,7 +15,14 @@ class TelegramModule extends BaseCredentialModule {
         
         // Telegram API配置
         this.apiBaseUrl = 'https://api.telegram.org';
-        this.defaultTimeout = 10000;
+        this.defaultTimeout = 30000; // Increased to 30s
+        
+        // Request cleanup
+        this.activeRequests = new Set();
+        this.requestCleanupTimer = null;
+        
+        // 注册为全局模块以供内存保护访问
+        global.telegramModule = this;
         
         // 消息轮询配置
         this.pollingInterval = null;
@@ -51,11 +58,59 @@ class TelegramModule extends BaseCredentialModule {
             this.config.timeout = this.defaultTimeout;
         }
         
+        // 初始化请求清理定时器
+        this.startRequestCleanup();
+        
         this.logger.info('Telegram module initialized with config:', {
             apiBaseUrl: this.config.apiBaseUrl,
             timeout: this.config.timeout,
             retries: this.config.retries || 3
         });
+
+        // 检查是否已有有效凭据，如果有则自动启动功能
+        try {
+            const credentialsResult = await this.getCredentials();
+            if (credentialsResult.success && credentialsResult.data.bot_token) {
+                this.logger.info('[AUTO-START] 发现已保存的凭据，验证并自动启动功能...');
+                
+                // 验证现有凭据
+                const validationResult = await this.performValidation(credentialsResult.data);
+                if (validationResult.success) {
+                    this.logger.info('[AUTO-START] 凭据验证成功，启动自动功能');
+                    
+                    // 延迟启动，避免初始化冲突
+                    setTimeout(async () => {
+                        try {
+                            // 启动WebSocket服务器
+                            if (!this.wss) {
+                                this.logger.info('[AUTO-START] 初始化时启动WebSocket服务器...');
+                                await this.startWebSocketServer();
+                                this.logger.info('[AUTO-START] ✅ WebSocket服务器启动成功');
+                            }
+
+                            // 启动消息轮询
+                            if (!this.isPolling) {
+                                this.logger.info('[AUTO-START] 初始化时启动消息轮询...');
+                                const pollingResult = await this.startPolling(credentialsResult.data);
+                                if (pollingResult.success) {
+                                    this.logger.info('[AUTO-START] ✅ 消息轮询启动成功');
+                                } else {
+                                    this.logger.warn('[AUTO-START] 消息轮询启动失败:', pollingResult.message);
+                                }
+                            }
+                        } catch (autoStartError) {
+                            this.logger.warn('[AUTO-START] 自动启动过程中出错:', autoStartError.message);
+                        }
+                    }, 2000); // 2秒延迟
+                } else {
+                    this.logger.info('[AUTO-START] 凭据验证失败，跳过自动启动:', validationResult.error);
+                }
+            } else {
+                this.logger.info('[AUTO-START] 未找到有效凭据，等待用户配置');
+            }
+        } catch (autoStartError) {
+            this.logger.warn('[AUTO-START] 检查自动启动失败:', autoStartError.message);
+        }
     }
 
     /**
@@ -86,7 +141,11 @@ class TelegramModule extends BaseCredentialModule {
             this.logger.info('Validating Telegram bot token...');
             
             // 在网络问题的环境中，我们可以提供一个快速验证模式
-            if (process.env.QUICK_VALIDATION === 'true' || this.config.quickValidation === true) {
+            const quickValidationEnabled = process.env.QUICK_VALIDATION === 'true' || 
+                                          this.config.validation?.quickValidation === true ||
+                                          this.config.quickValidation === true;
+            
+            if (quickValidationEnabled) {
                 this.logger.info('Using quick validation mode');
                 return {
                     success: true,
@@ -104,10 +163,21 @@ class TelegramModule extends BaseCredentialModule {
             
             // 尝试调用getMe API验证token（带重试）
             let lastError;
+            let attempts = [];
+            
             for (let attempt = 1; attempt <= this.config.retries; attempt++) {
+                const attemptStart = Date.now();
                 try {
                     this.logger.info(`API validation attempt ${attempt}/${this.config.retries}`);
                     const botInfo = await this.callTelegramAPI(bot_token, 'getMe');
+                    const attemptTime = Date.now() - attemptStart;
+                    
+                    attempts.push({
+                        attempt: attempt,
+                        success: true,
+                        response_time: attemptTime,
+                        timestamp: new Date().toISOString()
+                    });
                     
                     if (botInfo.ok && botInfo.result) {
                         const bot = botInfo.result;
@@ -115,7 +185,7 @@ class TelegramModule extends BaseCredentialModule {
                         // 成功获取bot信息
                         return {
                             success: true,
-                            message: 'Telegram bot token is valid',
+                            message: `Telegram bot token验证成功 - Bot: ${bot.first_name}${bot.username ? ' (@' + bot.username + ')' : ''}`,
                             data: {
                                 bot: {
                                     id: bot.id,
@@ -124,24 +194,49 @@ class TelegramModule extends BaseCredentialModule {
                                     is_bot: bot.is_bot,
                                     can_join_groups: bot.can_join_groups,
                                     can_read_all_group_messages: bot.can_read_all_group_messages,
-                                    supports_inline_queries: bot.supports_inline_queries
+                                    supports_inline_queries: bot.supports_inline_queries,
+                                    can_connect_to_business: bot.can_connect_to_business || false,
+                                    has_main_web_app: bot.has_main_web_app || false
+                                },
+                                validation: {
+                                    api_url: `${this.config.apiBaseUrl}/bot${this.maskToken(bot_token)}/getMe`,
+                                    curl_command: `curl "${this.config.apiBaseUrl}/bot${bot_token}/getMe"`,
+                                    total_attempts: attempt,
+                                    successful_attempt: attempt,
+                                    response_time: attemptTime,
+                                    attempts: attempts
                                 },
                                 validated_at: new Date().toISOString(),
                                 mode: 'full'
                             }
                         };
                     } else {
+                        // API返回了错误
                         return {
                             success: false,
-                            error: botInfo.description || 'Invalid bot token',
+                            error: `Telegram API错误: ${botInfo.description || 'Invalid bot token'}`,
                             details: {
                                 error_code: botInfo.error_code,
-                                description: botInfo.description
+                                description: botInfo.description,
+                                api_url: `${this.config.apiBaseUrl}/bot${this.maskToken(bot_token)}/getMe`,
+                                curl_command: `curl "${this.config.apiBaseUrl}/bot${bot_token}/getMe"`,
+                                total_attempts: attempt,
+                                attempts: attempts
                             }
                         };
                     }
                 } catch (error) {
+                    const attemptTime = Date.now() - attemptStart;
                     lastError = error;
+                    
+                    attempts.push({
+                        attempt: attempt,
+                        success: false,
+                        error: error.message,
+                        error_type: error.code || error.name || 'NetworkError',
+                        response_time: attemptTime,
+                        timestamp: new Date().toISOString()
+                    });
                     this.logger.warn(`Attempt ${attempt} failed: ${error.message}`);
                     
                     if (attempt < this.config.retries) {
@@ -155,15 +250,25 @@ class TelegramModule extends BaseCredentialModule {
             this.logger.warn('API validation failed, falling back to format validation');
             return {
                 success: true,
-                message: 'Token format is valid, but API validation failed (network issue)',
+                message: 'Token格式有效，但API验证失败 (网络问题)',
                 data: {
                     bot: {
                         token_format: 'valid',
-                        api_error: lastError.message
+                        api_error: lastError.message,
+                        error_type: lastError.code || lastError.name || 'NetworkError'
+                    },
+                    validation: {
+                        api_url: `${this.config.apiBaseUrl}/bot${this.maskToken(bot_token)}/getMe`,
+                        curl_command: `curl "${this.config.apiBaseUrl}/bot${bot_token}/getMe"`,
+                        total_attempts: this.config.retries,
+                        successful_attempt: 0,
+                        attempts: attempts,
+                        fallback_reason: 'All API attempts failed, but token format is valid'
                     },
                     validated_at: new Date().toISOString(),
                     mode: 'fallback',
-                    warning: 'Could not connect to Telegram API'
+                    warning: 'Could not connect to Telegram API - 请检查网络连接或防火墙设置',
+                    suggestion: '可以使用提供的curl命令在终端中手动测试API连接'
                 }
             };
             
@@ -173,79 +278,358 @@ class TelegramModule extends BaseCredentialModule {
             // 如果是网络问题，但token格式正确，我们仍然可以返回部分成功
             return {
                 success: true,
-                message: 'Token format is valid (network validation failed)',
+                message: 'Token格式有效 (网络验证失败)',
                 data: {
                     bot: {
                         token_format: 'valid',
-                        network_error: error.message
+                        network_error: error.message,
+                        error_type: error.code || error.name || 'UnknownError'
+                    },
+                    validation: {
+                        api_url: `${this.config.apiBaseUrl}/bot${this.maskToken(bot_token)}/getMe`,
+                        curl_command: `curl "${this.config.apiBaseUrl}/bot${bot_token}/getMe"`,
+                        error_details: error.message,
+                        fallback_reason: 'Validation threw an exception, but token format is valid'
                     },
                     validated_at: new Date().toISOString(),
-                    mode: 'format_only'
-                },
-                warning: 'Could not perform full API validation due to network issues'
+                    mode: 'format_only',
+                    warning: 'Could not perform full API validation due to network issues',
+                    suggestion: '可以使用提供的curl命令在终端中手动测试API连接'
+                }
             };
         }
     }
 
     /**
-     * 调用Telegram Bot API
+     * 重写setCredentials方法 - 保存凭据后自动启动WebSocket和轮询
      */
-    async callTelegramAPI(botToken, method, params = {}) {
-        return new Promise((resolve, reject) => {
-            const url = `${this.config.apiBaseUrl}/bot${botToken}/${method}`;
-            const urlObj = new URL(url);
-            const isHttps = urlObj.protocol === 'https:';
-            const httpModule = isHttps ? https : http;
+    async setCredentials(credentials) {
+        try {
+            // 先调用父类的setCredentials方法保存凭据
+            const saveResult = await super.setCredentials(credentials);
             
-            // 准备POST数据
-            const postData = JSON.stringify(params);
-            
-            const options = {
-                hostname: urlObj.hostname,
-                port: urlObj.port || (isHttps ? 443 : 80),
-                path: urlObj.pathname,
-                method: Object.keys(params).length > 0 ? 'POST' : 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(postData),
-                    'User-Agent': 'CredentialService/1.0'
+            if (!saveResult.success) {
+                return saveResult;
+            }
+
+            this.logger.info('[AUTO-START] 凭据保存成功，准备自动启动WebSocket和轮询功能');
+
+            // 验证凭据有效性
+            const validationResult = await this.performValidation(credentials);
+            if (!validationResult.success) {
+                this.logger.warn('[AUTO-START] 凭据验证失败，不启动自动功能:', validationResult.error);
+                return {
+                    success: true,
+                    message: 'Credentials saved but validation failed - auto-start skipped',
+                    validation_error: validationResult.error
+                };
+            }
+
+            this.logger.info('[AUTO-START] 凭据验证成功，开始自动启动功能');
+
+            // 自动启动WebSocket服务器
+            try {
+                if (!this.wss) {
+                    this.logger.info('[AUTO-START] 启动WebSocket服务器...');
+                    await this.startWebSocketServer();
+                    this.logger.info('[AUTO-START] ✅ WebSocket服务器启动成功');
+                } else {
+                    this.logger.info('[AUTO-START] WebSocket服务器已在运行');
+                }
+            } catch (wsError) {
+                this.logger.warn('[AUTO-START] WebSocket服务器启动失败:', wsError.message);
+            }
+
+            // 自动启动消息轮询
+            try {
+                if (!this.isPolling) {
+                    this.logger.info('[AUTO-START] 启动消息轮询...');
+                    const pollingResult = await this.startPolling(credentials);
+                    if (pollingResult.success) {
+                        this.logger.info('[AUTO-START] ✅ 消息轮询启动成功');
+                    } else {
+                        this.logger.warn('[AUTO-START] 消息轮询启动失败:', pollingResult.message);
+                    }
+                } else {
+                    this.logger.info('[AUTO-START] 消息轮询已在运行');
+                }
+            } catch (pollError) {
+                this.logger.warn('[AUTO-START] 消息轮询启动失败:', pollError.message);
+            }
+
+            return {
+                success: true,
+                message: 'Credentials saved and auto-start features initiated',
+                auto_start: {
+                    websocket: this.wss ? 'started' : 'failed',
+                    polling: this.isPolling ? 'started' : 'failed'
                 }
             };
 
-            const req = httpModule.request(options, (res) => {
-                let data = '';
+        } catch (error) {
+            this.logger.error('[AUTO-START] setCredentials失败:', error.message);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * 调用Telegram Bot API - 完全重写请求管理机制
+     */
+    async callTelegramAPI(botToken, method, params = {}, retryCount = 0) {
+        const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const startTime = Date.now();
+        
+        this.logger.info(`[TELEGRAM-REQ] 开始请求 ${requestId} - 方法: ${method}, 重试: ${retryCount}`);
+
+        return new Promise((resolve, reject) => {
+            let isFinished = false;
+            let req = null;
+            let timeoutId = null;
+            let responseSize = 0;
+            const MAX_RESPONSE_SIZE = 10 * 1024 * 1024; // 10MB限制
+
+            // 原子清理函数 - 确保所有资源被正确释放
+            const atomicCleanup = () => {
+                if (isFinished) return; // 防止重复清理
+                isFinished = true;
+
+                this.logger.info(`[TELEGRAM-REQ] 清理资源 ${requestId}`);
+
+                // 清理超时定时器
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                    timeoutId = null;
+                }
+
+                // 安全销毁请求对象
+                if (req) {
+                    try {
+                        if (!req.destroyed) {
+                            req.destroy();
+                        }
+                    } catch (destroyError) {
+                        this.logger.warn(`[TELEGRAM-REQ] 请求销毁错误 ${requestId}:`, destroyError.message);
+                    }
+
+                    // 从活跃请求集合中移除
+                    if (this.activeRequests.has(req)) {
+                        this.activeRequests.delete(req);
+                    }
+
+                    // 清理请求对象的自定义属性
+                    req._created = null;
+                    req._requestId = null;
+                    req = null;
+                }
+
+                const duration = Date.now() - startTime;
+                this.logger.info(`[TELEGRAM-REQ] 请求 ${requestId} 清理完成，耗时: ${duration}ms`);
+            };
+
+            try {
+                const url = `${this.config.apiBaseUrl}/bot${botToken}/${method}`;
+                const urlObj = new URL(url);
+                const isHttps = urlObj.protocol === 'https:';
+                const httpModule = isHttps ? https : http;
                 
-                res.on('data', (chunk) => {
-                    data += chunk;
+                // 准备POST数据
+                const postData = JSON.stringify(params);
+                
+                const options = {
+                    hostname: urlObj.hostname,
+                    port: urlObj.port || (isHttps ? 443 : 80),
+                    path: urlObj.pathname,
+                    method: Object.keys(params).length > 0 ? 'POST' : 'GET',
+                    family: 4, // 强制使用 IPv4
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Content-Length': Buffer.byteLength(postData),
+                        'User-Agent': 'CredentialService/1.0',
+                        'Connection': 'close' // 避免连接复用导致的内存泄漏
+                    },
+                    timeout: this.config.timeout,
+                    agent: false // 禁用连接池
+                };
+
+                // 创建请求对象
+                req = httpModule.request(options, (res) => {
+                    if (isFinished) return; // 防止重复处理
+
+                    let data = '';
+                    let chunks = [];
+                    
+                    res.on('data', (chunk) => {
+                        if (isFinished) return;
+
+                        responseSize += chunk.length;
+                        
+                        // 响应大小检查
+                        if (responseSize > MAX_RESPONSE_SIZE) {
+                            atomicCleanup();
+                            reject(new Error(`[TELEGRAM-REQ] 响应过大 (${Math.round(responseSize/1024/1024)}MB) ${requestId}`));
+                            return;
+                        }
+
+                        chunks.push(chunk);
+                        data += chunk;
+                    });
+                    
+                    res.on('end', () => {
+                        if (isFinished) return;
+                        
+                        try {
+                            // 立即清理chunks数组以释放内存
+                            chunks = null;
+                            
+                            if (data.length === 0) {
+                                atomicCleanup();
+                                reject(new Error(`[TELEGRAM-REQ] 空响应 ${requestId}`));
+                                return;
+                            }
+
+                            const response = JSON.parse(data);
+                            
+                            // 清理响应数据引用
+                            data = null;
+                            
+                            atomicCleanup();
+                            
+                            const duration = Date.now() - startTime;
+                            this.logger.info(`[TELEGRAM-REQ] 请求成功 ${requestId} - 耗时: ${duration}ms, 大小: ${Math.round(responseSize/1024)}KB`);
+                            
+                            resolve(response);
+                        } catch (parseError) {
+                            atomicCleanup();
+                            reject(new Error(`[TELEGRAM-REQ] JSON解析失败 ${requestId}: ${parseError.message}`));
+                        }
+                    });
+                    
+                    res.on('error', (error) => {
+                        if (isFinished) return;
+                        atomicCleanup();
+                        reject(new Error(`[TELEGRAM-REQ] 响应错误 ${requestId}: ${error.message}`));
+                    });
+
+                    res.on('close', () => {
+                        if (!isFinished) {
+                            // Response connection closed - no logging needed for normal operation
+                        }
+                    });
+                });
+
+                // 请求对象配置
+                req._created = startTime;
+                req._requestId = requestId;
+                this.activeRequests.add(req);
+
+                // 超时处理
+                timeoutId = setTimeout(() => {
+                    if (isFinished) return;
+                    
+                    this.logger.warn(`[TELEGRAM-REQ] 请求超时 ${requestId} (${this.config.timeout}ms) - 活跃请求: ${this.activeRequests.size}`);
+                    atomicCleanup();
+                    reject(new Error(`[TELEGRAM-REQ] 请求超时 ${requestId} after ${this.config.timeout}ms`));
+                }, this.config.timeout);
+
+                // 请求错误处理
+                req.on('error', (error) => {
+                    if (isFinished) return;
+                    
+                    this.logger.warn(`[TELEGRAM-REQ] 请求错误 ${requestId}:`, error.message);
+                    
+                    // 增强错误信息
+                    let errorMessage = `请求失败 ${requestId}: ${error.message}`;
+                    
+                    // 根据错误类型提供更详细的信息
+                    if (error.code === 'ECONNRESET') {
+                        errorMessage += ' (连接被重置)';
+                    } else if (error.code === 'ECONNREFUSED') {
+                        errorMessage += ' (连接被拒绝)';
+                    } else if (error.code === 'ENOTFOUND') {
+                        errorMessage += ' (DNS解析失败)';
+                    } else if (error.code === 'ETIMEDOUT') {
+                        errorMessage += ' (连接超时)';
+                    } else if (error.code === 'ECONNABORTED') {
+                        errorMessage += ' (连接中断)';
+                    }
+                    
+                    atomicCleanup();
+                    reject(new Error(errorMessage));
                 });
                 
-                res.on('end', () => {
-                    try {
-                        const response = JSON.parse(data);
-                        resolve(response);
-                    } catch (parseError) {
-                        reject(new Error(`Invalid JSON response: ${parseError.message}`));
+                req.on('close', () => {
+                    if (!isFinished) {
+                        // Request connection closed - normal cleanup will handle this
+                        atomicCleanup();
                     }
                 });
-            });
 
-            // 设置超时
-            req.setTimeout(this.config.timeout, () => {
-                req.destroy();
-                reject(new Error(`Request timeout after ${this.config.timeout}ms`));
-            });
+                req.on('timeout', () => {
+                    if (isFinished) return;
+                    this.logger.warn(`[TELEGRAM-REQ] 套接字超时 ${requestId}`);
+                    atomicCleanup();
+                    reject(new Error(`[TELEGRAM-REQ] 套接字超时 ${requestId}`));
+                });
 
-            req.on('error', (error) => {
-                reject(new Error(`Request failed: ${error.message}`));
-            });
+                // 发送POST数据
+                try {
+                    if (Object.keys(params).length > 0) {
+                        req.write(postData);
+                    }
+                    req.end();
+                    
+                    this.logger.info(`[TELEGRAM-REQ] 请求已发送 ${requestId}`);
+                } catch (sendError) {
+                    atomicCleanup();
+                    reject(new Error(`[TELEGRAM-REQ] 发送失败 ${requestId}: ${sendError.message}`));
+                }
+                
+            } catch (initError) {
+                atomicCleanup();
+                reject(new Error(`[TELEGRAM-REQ] 初始化失败 ${requestId}: ${initError.message}`));
+            }
 
-            // 发送POST数据
-            if (Object.keys(params).length > 0) {
-                req.write(postData);
+        }).catch(async (error) => {
+            // 重试逻辑 - 使用指数退避和最大并发控制
+            if (retryCount < this.config.retries && this.shouldRetry(error)) {
+                // 检查并发请求数量
+                if (this.activeRequests.size > 5) {
+                    this.logger.warn(`[TELEGRAM-REQ] 活跃请求过多 (${this.activeRequests.size})，延迟重试`);
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                }
+
+                this.logger.warn(`[TELEGRAM-REQ] 重试 ${retryCount + 1}/${this.config.retries}: ${error.message}`);
+                
+                // 指数退避延迟 + 随机抖动
+                const baseDelay = Math.min(1000 * Math.pow(2, retryCount), 10000);
+                const jitter = Math.random() * 1000;
+                const delay = baseDelay + jitter;
+                
+                await new Promise(resolve => setTimeout(resolve, delay));
+                
+                return this.callTelegramAPI(botToken, method, params, retryCount + 1);
             }
             
-            req.end();
+            throw error;
         });
+    }
+
+    /**
+     * 判断是否应该重试
+     */
+    shouldRetry(error) {
+        const retryableErrors = [
+            'ECONNRESET',
+            'ECONNREFUSED', 
+            'ETIMEDOUT',
+            'ECONNABORTED',
+            'ENOTFOUND',
+            'Request timeout'
+        ];
+        
+        return retryableErrors.some(errorType => 
+            error.message.includes(errorType) || error.code === errorType
+        );
     }
 
     /**
@@ -357,7 +741,7 @@ class TelegramModule extends BaseCredentialModule {
             timeout: 10000,
             retries: 3,
             cacheTimeout: 300000, // 5分钟缓存
-            pollingInterval: 1000, // 轮询间隔（毫秒）
+            pollingInterval: 300, // 轮询间隔（毫秒）- Termux优化
             maxMessageHistory: 1000, // 最大消息历史数量
             features: {
                 webhookInfo: true,
@@ -430,16 +814,51 @@ class TelegramModule extends BaseCredentialModule {
             }
 
             this.isPolling = true;
+            this.pollingFailures = 0; // 重置失败计数器
             this.logger.info('Starting message polling...');
 
-            // 开始轮询
-            this.pollingInterval = setInterval(async () => {
+            // 开始轮询 - 修改为递归方式避免并发冲突，加强网络错误处理
+            const doPoll = async () => {
+                if (!this.isPolling) return;
+                
+                let retryDelay = 100; // 基础延迟
+                
                 try {
                     await this.pollUpdates(bot_token);
+                    this.pollingFailures = 0; // 成功则重置失败计数
                 } catch (error) {
-                    this.logger.error('Polling error:', error);
+                    this.pollingFailures = (this.pollingFailures || 0) + 1;
+                    
+                    // 判断错误类型决定重试策略
+                    const isNetworkError = error.message.includes('超时') || 
+                                         error.message.includes('timeout') ||
+                                         error.code === 'ENOTFOUND' ||
+                                         error.code === 'ECONNRESET' ||
+                                         error.code === 'ETIMEDOUT';
+                    
+                    if (isNetworkError) {
+                        // 网络错误使用指数退避，最大延迟30秒
+                        retryDelay = Math.min(1000 * Math.pow(2, this.pollingFailures - 1), 30000);
+                        this.logger.warn(`[NETWORK-ERROR] 网络连接问题 (失败${this.pollingFailures}次), ${retryDelay}ms后重试: ${error.message}`);
+                    } else {
+                        // 非网络错误
+                        this.logger.error(`[POLLING-ERROR] 轮询错误 (失败${this.pollingFailures}次): ${error.message}`);
+                    }
+                    
+                    // 超过阈值停止轮询 - 网络错误允许更多重试
+                    const maxFailures = isNetworkError ? 20 : 10;
+                    if (this.pollingFailures >= maxFailures) {
+                        this.logger.error(`连续失败${this.pollingFailures}次，停止轮询`);
+                        return this.stopPolling();
+                    }
                 }
-            }, this.config.pollingInterval || 1000);
+                
+                // 根据失败情况调整延迟
+                setTimeout(doPoll, retryDelay);
+            };
+
+            // 启动轮询
+            doPoll();
 
             return { success: true, message: 'Message polling started' };
         } catch (error) {
@@ -452,10 +871,7 @@ class TelegramModule extends BaseCredentialModule {
      * 停止消息轮询
      */
     async stopPolling() {
-        if (this.pollingInterval) {
-            clearInterval(this.pollingInterval);
-            this.pollingInterval = null;
-        }
+        // 由于改为递归方式，只需要设置标志位即可
         this.isPolling = false;
         this.logger.info('Message polling stopped');
         return { success: true, message: 'Message polling stopped' };
@@ -468,7 +884,7 @@ class TelegramModule extends BaseCredentialModule {
         try {
             const params = {
                 offset: this.lastUpdateId + 1,
-                timeout: 30,
+                timeout: 25,
                 allowed_updates: ['message', 'edited_message', 'channel_post', 'edited_channel_post']
             };
 
@@ -478,13 +894,30 @@ class TelegramModule extends BaseCredentialModule {
                 for (const update of response.result) {
                     // 确保不重复处理相同的update_id
                     if (update.update_id > this.lastUpdateId) {
-                        await this.processUpdate(update);
-                        this.lastUpdateId = update.update_id;
+                        try {
+                            await this.processUpdate(update);
+                            this.lastUpdateId = update.update_id;
+                        } catch (processError) {
+                            this.logger.error('Failed to process update:', processError);
+                            // 即使处理失败，也要更新lastUpdateId以避免重复处理
+                            this.lastUpdateId = update.update_id;
+                        }
                     }
+                }
+            } else if (response.error_code) {
+                // 处理Telegram API错误
+                this.logger.warn(`Telegram API error: ${response.description} (code: ${response.error_code})`);
+                
+                // 如果是严重错误，停止轮询
+                if (response.error_code === 401) {
+                    this.logger.error('Invalid bot token, stopping polling');
+                    this.stopPolling();
                 }
             }
         } catch (error) {
             this.logger.error('Failed to poll updates:', error);
+            // 错误处理已移至doPoll函数中
+            throw error; // 重新抛出错误让doPoll处理
         }
     }
 
@@ -608,7 +1041,67 @@ class TelegramModule extends BaseCredentialModule {
             };
         }
         
+        if (message.video_note) {
+            media.video_note = {
+                file_id: message.video_note.file_id,
+                file_unique_id: message.video_note.file_unique_id,
+                length: message.video_note.length,
+                duration: message.video_note.duration,
+                file_size: message.video_note.file_size,
+                thumbnail: message.video_note.thumbnail
+            };
+        }
+        
+        if (message.sticker) {
+            media.sticker = {
+                file_id: message.sticker.file_id,
+                file_unique_id: message.sticker.file_unique_id,
+                width: message.sticker.width,
+                height: message.sticker.height,
+                file_size: message.sticker.file_size,
+                emoji: message.sticker.emoji,
+                set_name: message.sticker.set_name
+            };
+        }
+        
+        if (message.animation) {
+            media.animation = {
+                file_id: message.animation.file_id,
+                file_unique_id: message.animation.file_unique_id,
+                width: message.animation.width,
+                height: message.animation.height,
+                duration: message.animation.duration,
+                file_size: message.animation.file_size,
+                file_name: message.animation.file_name,
+                mime_type: message.animation.mime_type
+            };
+        }
+        
         return Object.keys(media).length > 0 ? media : null;
+    }
+
+    /**
+     * 重新处理现有消息的媒体数据
+     */
+    reprocessExistingMessages() {
+        this.logger.info('Reprocessing existing messages for media data...');
+        let reprocessedCount = 0;
+        
+        for (let i = 0; i < this.messageHistory.length; i++) {
+            const message = this.messageHistory[i];
+            if (message.raw && !message.media) {
+                // 重新提取媒体信息
+                const newMedia = this.extractMedia(message.raw);
+                if (newMedia) {
+                    this.messageHistory[i].media = newMedia;
+                    this.messages.set(message.id, this.messageHistory[i]);
+                    reprocessedCount++;
+                }
+            }
+        }
+        
+        this.logger.info(`Reprocessed ${reprocessedCount} messages with media data`);
+        return { reprocessed: reprocessedCount, total: this.messageHistory.length };
     }
 
     // =================
@@ -1288,27 +1781,46 @@ class TelegramModule extends BaseCredentialModule {
      * 停止WebSocket服务器
      */
     async stopWebSocketServer() {
-        try {
-            if (!this.wss) {
-                return { success: true, message: 'WebSocket server is not running' };
+        return new Promise((resolve) => {
+            try {
+                if (!this.wss) {
+                    resolve({ success: true, message: 'WebSocket server is not running' });
+                    return;
+                }
+
+                // 关闭所有客户端连接
+                this.websocketClients.forEach(ws => {
+                    try {
+                        if (ws.readyState === WebSocket.OPEN) {
+                            ws.close(1000, 'Server shutdown');
+                        }
+                    } catch (error) {
+                        this.logger.warn('Error closing WebSocket client:', error);
+                    }
+                });
+                this.websocketClients.clear();
+
+                // 关闭服务器，并等待完成
+                this.wss.close(() => {
+                    this.wss = null;
+                    this.logger.info('WebSocket server stopped');
+                    resolve({ success: true, message: 'WebSocket server stopped' });
+                });
+                
+                // 超时保护
+                setTimeout(() => {
+                    if (this.wss) {
+                        this.wss = null;
+                        this.logger.warn('WebSocket server force closed due to timeout');
+                        resolve({ success: true, message: 'WebSocket server force stopped' });
+                    }
+                }, 5000);
+                
+            } catch (error) {
+                this.logger.error('Failed to stop WebSocket server:', error);
+                resolve({ success: false, error: error.message });
             }
-
-            // 关闭所有客户端连接
-            this.websocketClients.forEach(ws => {
-                ws.close();
-            });
-            this.websocketClients.clear();
-
-            // 关闭服务器
-            this.wss.close();
-            this.wss = null;
-            
-            this.logger.info('WebSocket server stopped');
-            return { success: true, message: 'WebSocket server stopped' };
-        } catch (error) {
-            this.logger.error('Failed to stop WebSocket server:', error);
-            return { success: false, error: error.message };
-        }
+        });
     }
 
     /**
@@ -1537,6 +2049,116 @@ class TelegramModule extends BaseCredentialModule {
             url: this.wss ? `ws://localhost:${this.websocketPort}` : null
         };
     }
+    
+    /**
+     * 启动请求清理定时器 - 使用错峰调度避免与缓存更新冲突
+     */
+    startRequestCleanup() {
+        if (this.requestCleanupTimer) {
+            clearInterval(this.requestCleanupTimer);
+        }
+        
+        // 错峰延迟：在Home Assistant缓存更新的时间间隙中执行
+        const cleanupInterval = 20000; // 20秒间隔
+        const staggerOffset = 5000; // 5秒偏移，避开缓存更新时间
+        
+        this.logger.info(`[TIMING-OPT] 启动错峰请求清理: 间隔 ${cleanupInterval/1000}s, 偏移 ${staggerOffset/1000}s`);
+        
+        setTimeout(() => {
+            this.requestCleanupTimer = setInterval(() => {
+                const startTime = Date.now();
+                const sizeBefore = this.activeRequests.size;
+                
+                // 避免在高负载时进行清理
+                const currentMemory = process.memoryUsage().heapUsed / 1024 / 1024;
+                if (currentMemory > 200) {
+                    this.logger.warn(`[TIMING-OPT] 内存负载高 (${Math.round(currentMemory)}MB)，跳过请求清理`);
+                    return;
+                }
+                
+                this.logger.info(`[TELEGRAM-CLEANUP] 开始请求清理 - 当前活跃: ${sizeBefore}`);
+                
+                // 清理已经被销毁的请求
+                this.activeRequests.forEach(req => {
+                    if (req.destroyed) {
+                        this.activeRequests.delete(req);
+                    }
+                });
+                
+                // 强制清理长时间未完成的请求（防止内存泄漏）
+                const now = Date.now();
+                this.activeRequests.forEach(req => {
+                    if (req._created && (now - req._created) > 120000) { // 超过2分钟
+                        this.logger.warn(`[TELEGRAM-CLEANUP] 清理陈旧请求 ID:${req._requestId || 'unknown'} (存活: ${Math.round((now - req._created)/1000)}s)`);
+                        if (!req.destroyed) {
+                            req.destroy();
+                        }
+                        this.activeRequests.delete(req);
+                    }
+                });
+                
+                const cleaned = sizeBefore - this.activeRequests.size;
+                const duration = Date.now() - startTime;
+                
+                // 日志活跃请求数和清理情况
+                if (this.activeRequests.size > 0 || cleaned > 0) {
+                    this.logger.info(`[TELEGRAM-CLEANUP] 活跃请求: ${this.activeRequests.size} (清理: ${cleaned}, 耗时: ${duration}ms)`);
+                }
+                
+                // 内存压力检测 - 如果活跃请求过多，强制清理
+                if (this.activeRequests.size > 8) { // 降低阈值，更积极清理
+                    this.logger.error(`[TELEGRAM-CLEANUP] 活跃请求过多 (${this.activeRequests.size})，强制清理所有`);
+                    this.forceCleanupAllRequests();
+                }
+                
+            }, cleanupInterval);
+            
+        }, staggerOffset);
+    }
+    
+    /**
+     * 停止请求清理定时器
+     */
+    stopRequestCleanup() {
+        if (this.requestCleanupTimer) {
+            clearInterval(this.requestCleanupTimer);
+            this.requestCleanupTimer = null;
+        }
+        
+        // 强制清理所有活跃请求
+        this.activeRequests.forEach(req => {
+            if (!req.destroyed) {
+                req.destroy();
+            }
+        });
+        this.activeRequests.clear();
+    }
+    
+    /**
+     * 强制清理所有活跃请求 - 用于内存压力情况
+     */
+    forceCleanupAllRequests() {
+        const count = this.activeRequests.size;
+        this.logger.error(`[MEMORY] Force cleaning up ${count} active requests due to memory pressure`);
+        
+        this.activeRequests.forEach(req => {
+            if (!req.destroyed) {
+                try {
+                    req.destroy();
+                } catch (error) {
+                    // 忽略销毁错误
+                    this.logger.warn(`[MEMORY] Error destroying request: ${error.message}`);
+                }
+            }
+        });
+        this.activeRequests.clear();
+        
+        // 强制垃圾回收
+        if (global.gc) {
+            this.logger.info('[MEMORY] Triggering garbage collection after request cleanup');
+            global.gc();
+        }
+    }
 
 
     /**
@@ -1555,7 +2177,27 @@ class TelegramModule extends BaseCredentialModule {
             await this.stopWebSocketServer();
         }
         
+        // 停止请求清理
+        this.stopRequestCleanup();
+        
         this.logger.info('Telegram module disabled');
+    }
+
+    /**
+     * 掩码显示Token (保护敏感信息)
+     */
+    maskToken(token) {
+        if (!token || token.length < 10) return '[INVALID]';
+        const parts = token.split(':');
+        if (parts.length !== 2) return '[INVALID_FORMAT]';
+        
+        const botId = parts[0];
+        const secret = parts[1];
+        const maskedSecret = secret.length > 8 ? 
+            secret.substring(0, 4) + '*'.repeat(secret.length - 8) + secret.substring(secret.length - 4) :
+            '*'.repeat(secret.length);
+        
+        return `${botId}:${maskedSecret}`;
     }
 
     /**
