@@ -586,7 +586,7 @@ OpenAI-Organization: org-your-org-id-here</code></pre>
                     <span class="url">/api/openai/openai/transcribe</span>
                     <button class="btn btn-primary" onclick="testTranscribeAPI()">测试</button>
                 </div>
-                <div class="endpoint-description">使用Whisper模型将音频文件转换为文字</div>
+                <div class="endpoint-description">使用Whisper模型将音频文件转换为文字（直接调用OpenAI API的/v1/audio/transcriptions接口）</div>
                 <div class="endpoint-example">
                     <pre><code>curl -X POST http://localhost:3000/api/openai/openai/transcribe \
   -F "audio=@audio.mp3" \
@@ -650,7 +650,7 @@ OpenAI-Organization: org-your-org-id-here</code></pre>
                     <span class="url">/api/openai/openai/transcribe-url</span>
                     <button class="btn btn-primary" onclick="testTranscribeUrlAPI()">测试</button>
                 </div>
-                <div class="endpoint-description">从URL下载音频文件并转换为文字</div>
+                <div class="endpoint-description">从URL下载音频文件并转换为文字（直接调用OpenAI API的/v1/audio/transcriptions接口）</div>
                 <div class="endpoint-example">
                     <pre><code>curl -X POST http://localhost:3000/api/openai/openai/transcribe-url \
   -H "Content-Type: application/json" \

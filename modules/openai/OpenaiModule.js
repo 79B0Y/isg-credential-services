@@ -490,7 +490,7 @@ class OpenaiModule extends BaseCredentialModule {
             form.append('response_format', finalOptions.response_format);
             form.append('temperature', finalOptions.temperature.toString());
 
-            // 调用Whisper API
+            // 调用 OpenAI API 的 audio.transcriptions.create 接口
             const response = await this.callOpenAIAPIWithFormData(
                 api_key,
                 organization,
@@ -506,7 +506,8 @@ class OpenaiModule extends BaseCredentialModule {
                         text: response.text,
                         model: finalOptions.model,
                         language: finalOptions.language || 'auto-detected',
-                        transcribed_at: new Date().toISOString()
+                        transcribed_at: new Date().toISOString(),
+                        usage: response.usage || null
                     }
                 };
             } else {
