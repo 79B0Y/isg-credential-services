@@ -4,6 +4,7 @@ const http = require('http');
 const fs = require('fs').promises;
 const path = require('path');
 const WebSocket = require('ws');
+const TermuxHelper = require('../../lib/termux-helper');
 
 /**
  * TelegramModule - Telegram Bot凭据管理模块
@@ -52,16 +53,35 @@ class TelegramModule extends BaseCredentialModule {
      */
     async onInitialize() {
         this.logger.info('Telegram module initializing...');
-        
+
+        // Detect Termux environment and apply optimizations
+        const termuxConfig = TermuxHelper.getOptimizedConfig();
+        TermuxHelper.logEnvironmentInfo(this.logger);
+
+        if (termuxConfig.isTermux) {
+            this.logger.info('[TERMUX-OPT] Applying Termux optimizations...');
+
+            // Override config for Termux
+            this.config.timeout = termuxConfig.network.timeout;
+            this.config.pollingInterval = termuxConfig.network.pollingInterval;
+            this.config.maxMessageHistory = termuxConfig.memory.maxMessageHistory;
+
+            // Disable features that cause issues in Termux
+            if (termuxConfig.isProot) {
+                this.config.messaging.autoStartPolling = false;
+                this.logger.info('[TERMUX-OPT] Disabled auto-polling for proot environment');
+            }
+        }
+
         // 验证配置
         if (!this.config.apiBaseUrl) {
             this.config.apiBaseUrl = this.apiBaseUrl;
         }
-        
+
         if (!this.config.timeout) {
             this.config.timeout = this.defaultTimeout;
         }
-        
+
         // 初始化请求清理定时器
         this.startRequestCleanup();
         

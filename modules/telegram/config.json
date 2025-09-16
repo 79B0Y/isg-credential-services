@@ -3,8 +3,8 @@
   "timeout": 35000,
   "retries": 3,
   "cacheTimeout": 300000,
-  "pollingInterval": 300,
-  "maxMessageHistory": 1000,
+  "pollingInterval": 2000,
+  "maxMessageHistory": 100,
   "features": {
     "webhookInfo": true,
     "botCommands": true,

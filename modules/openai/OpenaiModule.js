@@ -1,5 +1,6 @@
 const BaseCredentialModule = require('../../core/BaseCredentialModule');
 const https = require('https');
+const TermuxHelper = require('../../lib/termux-helper');
 
 /**
  * OpenaiModule - OpenAI API凭据管理模块
@@ -221,6 +222,13 @@ class OpenaiModule extends BaseCredentialModule {
 
             // 发送FormData
             formData.pipe(req);
+
+            // Clean up FormData after request
+            req.on('finish', () => {
+                if (formData && typeof formData.destroy === 'function') {
+                    formData.destroy();
+                }
+            });
         });
     }
 
@@ -529,21 +537,47 @@ class OpenaiModule extends BaseCredentialModule {
             const audioBuffer = await new Promise((resolve, reject) => {
                 const parsedUrl = url.parse(audioUrl);
                 const httpModule = parsedUrl.protocol === 'https:' ? https : http;
-                
+
+                const chunks = [];
+                let totalSize = 0;
+                const termuxConfig = TermuxHelper.getOptimizedConfig();
+                const maxSize = termuxConfig.memory.maxFileSize;
+
                 const req = httpModule.get(audioUrl, (res) => {
                     if (res.statusCode !== 200) {
                         reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
                         return;
                     }
-                    
-                    const chunks = [];
-                    res.on('data', chunk => chunks.push(chunk));
-                    res.on('end', () => resolve(Buffer.concat(chunks)));
+
+                    res.on('data', chunk => {
+                        totalSize += chunk.length;
+                        if (totalSize > maxSize) {
+                            req.destroy();
+                            reject(new Error(`File too large (>${Math.round(maxSize/1024/1024)}MB)`));
+                            return;
+                        }
+                        chunks.push(chunk);
+                    });
+
+                    res.on('end', () => {
+                        try {
+                            const buffer = Buffer.concat(chunks);
+                            chunks.length = 0; // Clear chunks array
+                            resolve(buffer);
+                        } catch (error) {
+                            reject(new Error(`Buffer creation failed: ${error.message}`));
+                        }
+                    });
                 });
-                
-                req.on('error', reject);
+
+                req.on('error', (error) => {
+                    chunks.length = 0; // Clear chunks on error
+                    reject(error);
+                });
+
                 req.setTimeout(this.config.timeout || 30000, () => {
                     req.destroy();
+                    chunks.length = 0; // Clear chunks on timeout
                     reject(new Error('Download timeout'));
                 });
             });
