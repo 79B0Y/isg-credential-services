@@ -177,6 +177,41 @@ class DeviceControlModule {
             const successCount = results.filter(r => r.success).length;
             const failureCount = results.filter(r => !r.success).length;
 
+            // 获取控制后所有设备的状态
+            let deviceStates = [];
+            let statesMap = new Map();
+            try {
+                const entityIds = controlCommands.map(cmd => cmd.entity_id);
+                const statesResult = await this.baseModule.basicInfoModule.getEntityStates(entityIds, credentials);
+                
+                if (statesResult.success && statesResult.data && statesResult.data.states) {
+                    deviceStates = statesResult.data.states;
+                    // 创建状态映射以便快速查找
+                    deviceStates.forEach(state => {
+                        statesMap.set(state.entity_id, state);
+                    });
+                    this.logger.info(`[DEVICE-CONTROL] 成功获取 ${deviceStates.length} 个设备的状态`);
+                } else {
+                    this.logger.warn('[DEVICE-CONTROL] 获取设备状态失败:', statesResult.error);
+                }
+            } catch (error) {
+                this.logger.error('[DEVICE-CONTROL] 获取设备状态时出错:', error);
+            }
+
+            // 为每个控制结果添加对应的设备状态
+            const enhancedResults = results.map(result => {
+                const deviceState = statesMap.get(result.entity_id);
+                return {
+                    ...result,
+                    current_state: deviceState ? {
+                        state: deviceState.state,
+                        attributes: deviceState.attributes,
+                        last_changed: deviceState.last_changed,
+                        last_updated: deviceState.last_updated
+                    } : null
+                };
+            });
+
             return {
                 success: true,
                 message: `Batch control completed: ${successCount} succeeded, ${failureCount} failed`,
@@ -184,7 +219,8 @@ class DeviceControlModule {
                     total_commands: controlCommands.length,
                     success_count: successCount,
                     failure_count: failureCount,
-                    results: results,
+                    results: enhancedResults,
+                    device_states: deviceStates,
                     executed_at: new Date().toISOString()
                 }
             };
