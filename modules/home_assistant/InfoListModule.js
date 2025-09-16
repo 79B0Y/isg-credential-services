@@ -148,7 +148,7 @@ class InfoListModule {
 
                 // 设备信息
                 device_id: entity.device_id,
-                device_name: device ? device.name : null,
+                device_name: device ? (device.name_by_user || device.name) : null,
                 device_manufacturer: device ? device.manufacturer : null,
                 device_model: device ? device.model : null,
                 device_type: deviceType,
@@ -709,7 +709,26 @@ class InfoListModule {
                         match_error: `No entities found for room: ${room_name}, device_type: ${device_type}`
                     });
                 } else if (matchedEntities.length === 1) {
-                    // 找到唯一匹配
+                    // 找到唯一匹配，判断匹配类型
+                    let matchType = 'single_match';
+                    if (device_name) {
+                        const entity = matchedEntities[0];
+                        const deviceNameMatch = entity.device_name && 
+                            entity.device_name.toLowerCase() === device_name.toLowerCase();
+                        const entityNameMatch = entity.name && 
+                            entity.name.toLowerCase() === device_name.toLowerCase();
+                        
+                        if (deviceNameMatch && entityNameMatch) {
+                            matchType = 'exact_device_and_entity_name_match';
+                        } else if (deviceNameMatch) {
+                            matchType = 'exact_device_name_match';
+                        } else if (entityNameMatch) {
+                            matchType = 'exact_entity_name_match';
+                        } else {
+                            matchType = 'single_match_no_name_match';
+                        }
+                    }
+                    
                     matchedCommands.push({
                         ...command,
                         entity_id: matchedEntities[0].entity_id,
@@ -720,7 +739,7 @@ class InfoListModule {
                             room_name: matchedEntities[0].room_name,
                             device_type: matchedEntities[0].device_type
                         }],
-                        match_type: 'single_match',
+                        match_type: matchType,
                         total_matched: 1
                     });
                 } else {
@@ -729,17 +748,36 @@ class InfoListModule {
                     let matchType = '';
 
                     if (device_name) {
-                        // 如果指定了设备名称，优先匹配设备名称
-                        const nameMatch = matchedEntities.find(entity => 
-                            entity.device_name && 
-                            entity.device_name.toLowerCase() === device_name.toLowerCase()
-                        );
+                        // 如果指定了设备名称，优先匹配设备名称和entity名称
+                        const nameMatch = matchedEntities.find(entity => {
+                            // 匹配设备名称
+                            const deviceNameMatch = entity.device_name && 
+                                entity.device_name.toLowerCase() === device_name.toLowerCase();
+                            
+                            // 匹配entity名称
+                            const entityNameMatch = entity.name && 
+                                entity.name.toLowerCase() === device_name.toLowerCase();
+                            
+                            return deviceNameMatch || entityNameMatch;
+                        });
                         
                         if (nameMatch) {
                             selectedEntities = [nameMatch];
-                            matchType = 'exact_name_match';
+                            // 判断匹配类型
+                            const deviceNameMatch = nameMatch.device_name && 
+                                nameMatch.device_name.toLowerCase() === device_name.toLowerCase();
+                            const entityNameMatch = nameMatch.name && 
+                                nameMatch.name.toLowerCase() === device_name.toLowerCase();
+                            
+                            if (deviceNameMatch && entityNameMatch) {
+                                matchType = 'exact_device_and_entity_name_match';
+                            } else if (deviceNameMatch) {
+                                matchType = 'exact_device_name_match';
+                            } else {
+                                matchType = 'exact_entity_name_match';
+                            }
                         } else {
-                            // 没有找到设备名称匹配，返回该房间下该类型的所有entities
+                            // 没有找到设备名称或entity名称匹配，返回该房间下该类型的所有entities
                             selectedEntities = matchedEntities;
                             matchType = 'all_entities_no_name_match';
                         }
