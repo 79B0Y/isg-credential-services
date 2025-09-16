@@ -186,7 +186,9 @@ class CredentialService {
         this.app.post('/api/telegram/:module/send/video', this.handleSendVideo.bind(this));
         this.app.post('/api/telegram/:module/send/voice', this.handleSendVoice.bind(this));
         this.app.post('/api/telegram/:module/send/document', this.handleSendDocument.bind(this));
-        
+        this.app.post('/api/telegram/:module/reply/last', this.handleReplyToLastChat.bind(this));
+        this.app.get('/api/telegram/:module/last-chat-info', this.handleGetLastChatInfo.bind(this));
+
         // Telegram WebSocket API
         this.app.post('/api/telegram/:module/websocket/start', this.handleStartTelegramWebSocket.bind(this));
         this.app.post('/api/telegram/:module/websocket/stop', this.handleStopTelegramWebSocket.bind(this));
@@ -216,11 +218,21 @@ class CredentialService {
         this.app.post('/api/home_assistant/:module/entity/:entityId/turn_on', this.handleHATurnOn.bind(this));
         this.app.post('/api/home_assistant/:module/entity/:entityId/turn_off', this.handleHATurnOff.bind(this));
         this.app.post('/api/home_assistant/:module/entity/:entityId/set_state', this.handleHASetState.bind(this));
-        this.app.post('/api/home_assistant/:module/match-devices', this.handleHAMatchDevices.bind(this));
         this.app.post('/api/home_assistant/:module/batch-control', this.handleHABatchControl.bind(this));
         this.app.post('/api/home_assistant/:module/match-entities', this.handleHAMatchEntities.bind(this));
         this.app.post('/api/home_assistant/:module/match-control-devices', this.handleHAMatchControlDevices.bind(this));
         this.app.get('/api/home_assistant/:module/cache-status', this.handleHACacheStatus.bind(this));
+
+        // 新增重构后的API端点
+        this.app.get('/api/home_assistant/:module/enhanced-list', this.handleHAEnhancedList.bind(this));
+        this.app.post('/api/home_assistant/:module/match-devices', this.handleHAMatchDevices.bind(this));
+        this.app.get('/api/home_assistant/:module/enhanced-states-list', this.handleHAEnhancedStatesList.bind(this));
+        this.app.get('/api/home_assistant/:module/system-overview', this.handleHASystemOverview.bind(this));
+        this.app.post('/api/home_assistant/:module/entity-states', this.handleHAEntityStates.bind(this));
+        this.app.get('/api/home_assistant/:module/token-info', this.handleHATokenInfo.bind(this));
+        this.app.get('/api/home_assistant/:module/control-examples', this.handleHAControlExamples.bind(this));
+        this.app.get('/api/home_assistant/:module/supported-services', this.handleHASupportedServices.bind(this));
+        this.app.get('/api/home_assistant/:module/module-info', this.handleHAModuleInfo.bind(this));
 
         // OpenAI API路由
         this.app.get('/api/openai/:module/models', this.handleGetOpenAIModels.bind(this));
@@ -559,6 +571,57 @@ class CredentialService {
     }
 
     /**
+     * 回复最近聊天
+     */
+    async handleReplyToLastChat(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const { text, options = {} } = req.body;
+
+            if (!text) {
+                return res.status(400).json({ success: false, error: 'text is required' });
+            }
+
+            const module = this.moduleManager.getModule(moduleName);
+            if (!module || moduleName !== 'telegram') {
+                return res.status(404).json({ success: false, error: 'Telegram module not found' });
+            }
+
+            if (typeof module.replyToLastChat !== 'function') {
+                return res.status(400).json({ success: false, error: 'Reply to last chat not supported by this module' });
+            }
+
+            const result = await module.replyToLastChat(text, options);
+            res.json(result);
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 获取最近聊天信息
+     */
+    async handleGetLastChatInfo(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+
+            const module = this.moduleManager.getModule(moduleName);
+            if (!module || moduleName !== 'telegram') {
+                return res.status(404).json({ success: false, error: 'Telegram module not found' });
+            }
+
+            if (typeof module.getLastChatInfo !== 'function') {
+                return res.status(400).json({ success: false, error: 'Last chat info not supported by this module' });
+            }
+
+            const result = module.getLastChatInfo();
+            res.json(result);
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
      * 设置Webhook
      */
     async handleSetWebhook(req, res) {
@@ -874,14 +937,60 @@ class CredentialService {
                 return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
             }
             
-            if (typeof module.getAccessToken !== 'function') {
+            if (!module.basicInfoModule || typeof module.basicInfoModule.getTokenInfo !== 'function') {
                 return res.status(400).json({ success: false, error: 'Access token operations not supported by this module' });
             }
             
-            const result = await module.getAccessToken();
+            const result = await module.basicInfoModule.getTokenInfo();
             res.json(result);
         } catch (error) {
             this.logger.error('Get HA access token error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 设备匹配 - 根据房间、设备类型、设备名称查找对应的entity_id
+     */
+    async handleHAMatchDevices(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const module = this.moduleManager.getModule(moduleName);
+            
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+            
+            if (typeof module.matchDevices !== 'function') {
+                return res.status(400).json({ success: false, error: 'Device matching not supported by this module' });
+            }
+            
+            const deviceCommands = req.body;
+            
+            if (!Array.isArray(deviceCommands)) {
+                return res.status(400).json({ 
+                    success: false, 
+                    error: 'Request body must be an array of device commands' 
+                });
+            }
+            
+            try {
+                const result = module.matchDevices(deviceCommands);
+                res.json(result);
+            } catch (methodError) {
+                console.log('Module object keys:', Object.keys(module));
+                console.log('matchDevices method type:', typeof module.matchDevices);
+                console.log('Method error:', methodError.message);
+                res.status(500).json({ 
+                    success: false, 
+                    error: 'Method call failed',
+                    details: methodError.message,
+                    moduleKeys: Object.keys(module)
+                });
+            }
+            
+        } catch (error) {
+            this.logger.error('Device matching error:', error);
             res.status(500).json({ success: false, error: error.message });
         }
     }
@@ -915,7 +1024,10 @@ class CredentialService {
     async handleHACallService(req, res) {
         try {
             const { module: moduleName } = req.params;
-            const { domain, device_type, service, entity_id, data = {} } = req.body;
+            const { domain, device_type, service, entity_id, data = {}, service_data = {} } = req.body;
+            
+            // 合并data和service_data（向后兼容）
+            const mergedData = { ...data, ...service_data };
             
             // 支持 device_type 和 domain (向后兼容)
             const deviceDomain = device_type || domain;
@@ -929,7 +1041,7 @@ class CredentialService {
                 return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
             }
             
-            if (typeof module.callHomeAssistantAPI !== 'function') {
+            if (typeof module.controlSingleDevice !== 'function') {
                 return res.status(400).json({ success: false, error: 'Service calls not supported by this module' });
             }
             
@@ -938,24 +1050,22 @@ class CredentialService {
                 return res.status(400).json({ success: false, error: 'No credentials found' });
             }
             
-            const serviceData = { ...data };
-            if (entity_id) {
-                serviceData.entity_id = entity_id;
+            if (!entity_id) {
+                return res.status(400).json({ success: false, error: 'entity_id is required' });
             }
             
-            const result = await module.callHomeAssistantAPI(
-                credentials.data.access_token,
-                credentials.data.base_url,
-                `/api/services/${deviceDomain}/${service}`,
-                'POST',
-                serviceData
+            const result = await module.controlSingleDevice(
+                entity_id,
+                service,
+                mergedData,
+                credentials.data
             );
             
-            if (result.error) {
+            if (!result.success) {
                 return res.status(500).json({ success: false, error: result.error });
             }
             
-            res.json({ success: true, data: result });
+            res.json({ success: true, data: result.data });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
         }
@@ -1609,39 +1719,6 @@ class CredentialService {
         }
     }
 
-    /**
-     * 处理Home Assistant智能设备匹配请求
-     */
-    async handleHAMatchDevices(req, res) {
-        try {
-            const { module: moduleName } = req.params;
-            const module = this.moduleManager.getModule(moduleName);
-            
-            if (!module || moduleName !== 'home_assistant') {
-                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
-            }
-            
-            if (typeof module.matchDevicesByIntent !== 'function') {
-                return res.status(400).json({ success: false, error: 'Device matching not supported by this module' });
-            }
-            
-            let intentData = req.body.intent_data || req.body;
-            
-            // 如果没有intent_data字段，尝试使用整个body作为intent数据
-            if (!intentData || (!intentData.devices && !intentData.intent)) {
-                return res.status(400).json({ 
-                    success: false, 
-                    error: 'intent_data is required. Expected format: {"intent_data": {...}} or direct intent object' 
-                });
-            }
-            
-            const result = await module.matchDevicesByIntent(intentData);
-            res.json(result);
-        } catch (error) {
-            this.logger.error('Home Assistant match devices error:', error);
-            res.status(500).json({ success: false, error: error.message });
-        }
-    }
 
     /**
      * 处理Home Assistant实体匹配请求
@@ -1737,37 +1814,19 @@ class CredentialService {
                 });
             }
 
-            if (!module.enhancedStatesCache) {
+            // 使用模块的getCacheStatus方法
+            const cacheStatusResult = module.getCacheStatus();
+            
+            if (!cacheStatusResult.success) {
                 return res.status(400).json({ 
                     success: false, 
-                    error: 'Cache system not available' 
+                    error: cacheStatusResult.error || 'Cache system not available' 
                 });
             }
 
-            const cache = module.enhancedStatesCache;
-            const now = Date.now();
-            
-            const cacheStatus = {
-                cache_enabled: true,
-                cache_data_exists: !!cache.data,
-                last_updated: cache.lastUpdated,
-                last_updated_iso: cache.lastUpdated ? new Date(cache.lastUpdated).toISOString() : null,
-                cache_age: cache.lastUpdated ? (now - cache.lastUpdated) : null,
-                cache_age_minutes: cache.lastUpdated ? Math.round((now - cache.lastUpdated) / 60000) : null,
-                is_updating: cache.isUpdating,
-                update_interval: cache.updateInterval,
-                update_interval_minutes: cache.updateInterval / 60000,
-                max_age: cache.maxAge,
-                max_age_minutes: cache.maxAge / 60000,
-                is_valid: cache.data && cache.lastUpdated && (now - cache.lastUpdated) <= cache.maxAge,
-                timer_active: !!module.cacheUpdateTimer,
-                entities_count: cache.data ? (cache.data.states ? cache.data.states.length : 0) : 0,
-                next_update_in: cache.lastUpdated ? Math.max(0, cache.updateInterval - (now - cache.lastUpdated)) : 0
-            };
-
             res.json({
                 success: true,
-                data: cacheStatus,
+                data: cacheStatusResult.data,
                 retrieved_at: new Date().toISOString()
             });
 
@@ -1788,35 +1847,251 @@ class CredentialService {
         try {
             const { module: moduleName } = req.params;
             const module = this.moduleManager.getModule(moduleName);
-            
+
             if (!module || moduleName !== 'home_assistant') {
                 return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
             }
-            
+
             if (typeof module.batchControlDevices !== 'function') {
                 return res.status(400).json({ success: false, error: 'Batch control not supported by this module' });
             }
-            
-            const { control_commands } = req.body;
-            
-            if (!control_commands || !Array.isArray(control_commands)) {
-                return res.status(400).json({ success: false, error: 'control_commands array is required' });
+
+            // 支持多种数据格式：直接数组或包装在对象中
+            let controlCommands;
+            if (Array.isArray(req.body)) {
+                // 新格式：直接发送JSON数组
+                controlCommands = req.body;
+            } else if (req.body.control_commands) {
+                // 旧格式：包装在control_commands字段中
+                controlCommands = req.body.control_commands;
+            } else if (req.body.commands) {
+                // 前端格式：包装在commands字段中
+                controlCommands = req.body.commands;
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Invalid request format. Expected JSON array, {control_commands: [...]}, or {commands: [...]}'
+                });
             }
-            
-            // 验证控制命令格式
-            for (const command of control_commands) {
-                if (!command.entity_id || !command.entity_functions) {
-                    return res.status(400).json({ 
-                        success: false, 
-                        error: 'Each command must have entity_id and entity_functions' 
+
+            if (!Array.isArray(controlCommands)) {
+                return res.status(400).json({ success: false, error: 'control commands must be an array' });
+            }
+
+            // 验证新的控制命令格式
+            for (const command of controlCommands) {
+                if (!command.entity_id) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Each command must have entity_id'
+                    });
+                }
+                if (!command.service) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Each command must have service'
                     });
                 }
             }
-            
-            const result = await module.batchControlDevices(control_commands);
+
+            const result = await module.batchControlDevices(controlCommands);
             res.json(result);
         } catch (error) {
             this.logger.error('Home Assistant batch control error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 处理获取综合列表请求
+     */
+    async handleHAEnhancedList(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const { room_names, device_types } = req.query;
+
+            const module = this.moduleManager.getModule(moduleName);
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            // 解析查询参数
+            let roomNames = null;
+            let deviceTypes = null;
+
+            if (room_names) {
+                try {
+                    // 尝试解析JSON数组
+                    roomNames = JSON.parse(room_names);
+                } catch (e) {
+                    // 如果不是JSON，当作单个值或数组处理
+                    roomNames = Array.isArray(room_names) ? room_names : [room_names];
+                }
+            }
+
+            if (device_types) {
+                try {
+                    // 尝试解析JSON数组
+                    deviceTypes = JSON.parse(device_types);
+                } catch (e) {
+                    // 如果不是JSON，当作单个值或数组处理
+                    deviceTypes = Array.isArray(device_types) ? device_types : [device_types];
+                }
+            }
+
+            const result = await module.getEnhancedList(roomNames, deviceTypes);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Home Assistant enhanced list error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 处理获取增强状态列表请求
+     */
+    async handleHAEnhancedStatesList(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+
+            const module = this.moduleManager.getModule(moduleName);
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            if (typeof module.getEnhancedStatesList !== 'function') {
+                return res.status(400).json({ success: false, error: 'Enhanced states list not supported by this module' });
+            }
+
+            const result = await module.getEnhancedStatesList();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Home Assistant enhanced states list error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 处理获取系统概览请求
+     */
+    async handleHASystemOverview(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+
+            const module = this.moduleManager.getModule(moduleName);
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            const result = await module.getSystemOverview();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Home Assistant system overview error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 处理获取实体状态请求
+     */
+    async handleHAEntityStates(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const { entity_ids } = req.body;
+
+            const module = this.moduleManager.getModule(moduleName);
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            if (!entity_ids || !Array.isArray(entity_ids)) {
+                return res.status(400).json({ success: false, error: 'entity_ids array is required' });
+            }
+
+            const result = await module.getEntityStates(entity_ids);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Home Assistant entity states error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 处理获取Token信息请求
+     */
+    async handleHATokenInfo(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+
+            const module = this.moduleManager.getModule(moduleName);
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            const result = await module.getTokenInfo();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Home Assistant token info error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 处理获取控制示例请求
+     */
+    async handleHAControlExamples(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+
+            const module = this.moduleManager.getModule(moduleName);
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            const result = module.getControlExamples();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Home Assistant control examples error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 处理获取支持的服务请求
+     */
+    async handleHASupportedServices(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+
+            const module = this.moduleManager.getModule(moduleName);
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            const result = await module.getSupportedServices();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Home Assistant supported services error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 处理获取模块信息请求
+     */
+    async handleHAModuleInfo(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+
+            const module = this.moduleManager.getModule(moduleName);
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            const result = module.getModuleInfo();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Home Assistant module info error:', error);
             res.status(500).json({ success: false, error: error.message });
         }
     }

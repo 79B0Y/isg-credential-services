@@ -694,7 +694,7 @@
             text-align: center;
         }
 
-        /* 媒体模态框样式 */
+        /* Media modal styles */
         .media-modal {
             position: fixed;
             top: 0;
@@ -782,7 +782,7 @@
             z-index: 1002;
         }
 
-        /* API文档样式 */
+        /* API documentation styles */
         .api-documentation {
             padding: 1rem;
         }
@@ -1006,7 +1006,7 @@
             border: 2px solid;
             transition: all 0.3s ease;
         }
-        
+
         .polling-active {
             background-color: rgba(16, 185, 129, 0.1);
             border-color: var(--success-color);
@@ -1094,7 +1094,7 @@
 </head>
 <body>
     <div class="container">
-        <!-- 头部 -->
+        <!-- Header -->
         <div class="header">
             <h1>🔐 Credential Service Manager</h1>
             <p>Unified management and validation of your API credentials</p>
@@ -1180,7 +1180,7 @@
                             <span style="background: var(--success-color); color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: bold;">GET</span>
                             <span style="font-family: 'Courier New', monospace; font-size: 0.9rem;">/api/health</span>
                         </div>
-                        <div style="font-size: 0.9rem; color: var(--gray-600);">检查服务健康状态</div>
+                        <div style="font-size: 0.9rem; color: var(--gray-600);">Check service health status</div>
                     </div>
                     
                     <div style="background: var(--gray-50); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--gray-200);">
@@ -1188,7 +1188,7 @@
                             <span style="background: var(--success-color); color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: bold;">GET</span>
                             <span style="font-family: 'Courier New', monospace; font-size: 0.9rem;">/api/modules</span>
                         </div>
-                        <div style="font-size: 0.9rem; color: var(--gray-600);">获取所有模块列表</div>
+                        <div style="font-size: 0.9rem; color: var(--gray-600);">Get all module list</div>
                     </div>
                     
                     <div style="background: var(--gray-50); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--gray-200);">
@@ -1196,7 +1196,7 @@
                             <span style="background: var(--success-color); color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: bold;">GET</span>
                             <span style="font-family: 'Courier New', monospace; font-size: 0.9rem;">/api/statistics</span>
                         </div>
-                        <div style="font-size: 0.9rem; color: var(--gray-600);">获取系统统计信息</div>
+                        <div style="font-size: 0.9rem; color: var(--gray-600);">Get system statistics information</div>
                     </div>
                 </div>
             </div>
@@ -1217,11 +1217,11 @@
             
             <div class="messaging-stats" id="messagingStats">
                 <div class="stat-item">
-                    <span class="stat-label">消息总数:</span>
+                    <span class="stat-label">Total Messages:</span>
                     <span class="stat-value" id="totalMessages">0</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">最后更新:</span>
+                    <span class="stat-label">Last Updated:</span>
                     <span class="stat-value" id="lastUpdate">-</span>
                 </div>
             </div>
@@ -1286,24 +1286,24 @@
                         <input type="url" id="webhookUrl" placeholder="https://your-domain.com/webhook">
                     </div>
                     <div class="form-group">
-                        <label for="webhookSecret">密钥令牌（可选）</label>
-                        <input type="text" id="webhookSecret" placeholder="输入密钥令牌">
+                        <label for="webhookSecret">Secret Token (Optional)</label>
+                        <input type="text" id="webhookSecret" placeholder="Enter secret token">
                     </div>
                     <div class="webhook-actions">
-                        <button class="btn btn-success" onclick="setWebhook()">设置Webhook</button>
-                        <button class="btn btn-warning" onclick="removeWebhook()">移除Webhook</button>
-                        <button class="btn btn-primary" onclick="getWebhookInfo()">获取信息</button>
+                        <button class="btn btn-success" onclick="setWebhook()">Set Webhook</button>
+                        <button class="btn btn-warning" onclick="removeWebhook()">Remove Webhook</button>
+                        <button class="btn btn-primary" onclick="getWebhookInfo()">Get Info</button>
                     </div>
                     <div id="webhookStatus"></div>
                 </div>
             </div>
             
-            <!-- API文档标签页 -->
+            <!-- API Documentation Tab -->
             <div class="tab-content" id="tab-api">
                 <div class="api-documentation">
                     <div class="api-section">
-                        <h3>📚 API 文档</h3>
-                        <p>以下是所有可用的API端点，您可以直接复制使用或在前端应用中调用。</p>
+                        <h3>📚 API Documentation</h3>
+                        <p>Below are all available API endpoints that you can copy and use directly or call in frontend applications.</p>
                     </div>
                     
                     <div class="api-section">
@@ -1326,7 +1326,7 @@
                                 <span class="url">/api/modules</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/modules')">Test</button>
                             </div>
-                            <div class="endpoint-description">获取所有模块列表</div>
+                            <div class="endpoint-description">Get all module list</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/modules</code></pre>
                             </div>
@@ -1334,7 +1334,7 @@
                     </div>
                     
                     <div class="api-section">
-                        <h4>📱 Telegram 消息管理</h4>
+                        <h4>📱 Telegram Message Management</h4>
                         
                         <div class="api-endpoint">
                             <div class="endpoint-header">
@@ -1342,7 +1342,7 @@
                                 <span class="url">/api/telegram/telegram/messages</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/telegram/telegram/messages')">Test</button>
                             </div>
-                            <div class="endpoint-description">获取消息历史</div>
+                            <div class="endpoint-description">Get message history</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/telegram/telegram/messages</code></pre>
                             </div>
@@ -1354,7 +1354,7 @@
                                 <span class="url">/api/telegram/telegram/polling/start</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/telegram/telegram/polling/start')">Test</button>
                             </div>
-                            <div class="endpoint-description">开始消息轮询</div>
+                            <div class="endpoint-description">Start message polling</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/telegram/telegram/polling/start</code></pre>
                             </div>
@@ -1366,7 +1366,7 @@
                                 <span class="url">/api/telegram/telegram/polling/stop</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/telegram/telegram/polling/stop')">Test</button>
                             </div>
-                            <div class="endpoint-description">停止消息轮询</div>
+                            <div class="endpoint-description">Stop message polling</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/telegram/telegram/polling/stop</code></pre>
                             </div>
@@ -1378,7 +1378,7 @@
                                 <span class="url">/api/telegram/telegram/send/message</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/telegram/telegram/send/message', {chat_id: '123456789', text: 'Hello World'})">Test</button>
                             </div>
-                            <div class="endpoint-description">发送文本消息</div>
+                            <div class="endpoint-description">Send text message</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/telegram/telegram/send/message \\
   -H "Content-Type: application/json" \\
@@ -1392,7 +1392,7 @@
                                 <span class="url">/api/telegram/telegram/send/photo</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/telegram/telegram/send/photo', {chat_id: '123456789', photo: 'https://example.com/image.jpg', caption: 'Photo caption'})">Test</button>
                             </div>
-                            <div class="endpoint-description">发送图片消息</div>
+                            <div class="endpoint-description">Send photo message</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/telegram/telegram/send/photo \\
   -H "Content-Type: application/json" \\
@@ -1402,7 +1402,7 @@
                     </div>
                     
                     <div class="api-section">
-                        <h4>📁 文件操作</h4>
+                        <h4>📁 File Operations</h4>
                         
                         <div class="api-endpoint">
                             <div class="endpoint-header">
@@ -1410,7 +1410,7 @@
                                 <span class="url">/api/telegram/telegram/file-url/:fileId</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/telegram/telegram/file-url/BAADBAADrwADBREAAYag8mS4AAH0Ag')">Test</button>
                             </div>
-                            <div class="endpoint-description">获取文件直接URL</div>
+                            <div class="endpoint-description">Get file direct URL</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/telegram/telegram/file-url/BAADBAADrwADBREAAYag8mS4AAH0Ag</code></pre>
                             </div>
@@ -1422,7 +1422,7 @@
                                 <span class="url">/api/telegram/telegram/file/:fileId</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/telegram/telegram/file/BAADBAADrwADBREAAYag8mS4AAH0Ag')">Test</button>
                             </div>
-                            <div class="endpoint-description">获取文件信息</div>
+                            <div class="endpoint-description">Get file information</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/telegram/telegram/file/BAADBAADrwADBREAAYag8mS4AAH0Ag</code></pre>
                             </div>
@@ -1430,7 +1430,7 @@
                     </div>
                     
                     <div class="api-section">
-                        <h4>🔗 Webhook 管理</h4>
+                        <h4>🔗 Webhook Management</h4>
                         
                         <div class="api-endpoint">
                             <div class="endpoint-header">
@@ -1438,7 +1438,7 @@
                                 <span class="url">/api/telegram/telegram/webhook/set</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/telegram/telegram/webhook/set', {url: 'https://your-domain.com/webhook'})">Test</button>
                             </div>
-                            <div class="endpoint-description">设置Webhook URL</div>
+                            <div class="endpoint-description">Set Webhook URL</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/telegram/telegram/webhook/set \\
   -H "Content-Type: application/json" \\
@@ -1452,7 +1452,7 @@
                                 <span class="url">/api/telegram/telegram/webhook</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('DELETE', '/api/telegram/telegram/webhook')">Test</button>
                             </div>
-                            <div class="endpoint-description">删除Webhook</div>
+                            <div class="endpoint-description">Delete Webhook</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X DELETE http://localhost:3000/api/telegram/telegram/webhook</code></pre>
                             </div>
@@ -1464,7 +1464,7 @@
                                 <span class="url">/api/telegram/telegram/webhook</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/telegram/telegram/webhook')">Test</button>
                             </div>
-                            <div class="endpoint-description">获取Webhook信息</div>
+                            <div class="endpoint-description">Get Webhook information</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/telegram/telegram/webhook</code></pre>
                             </div>
@@ -1480,7 +1480,7 @@
                                 <span class="url">/api/home_assistant/home_assistant/states</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/states')">Test</button>
                             </div>
-                            <div class="endpoint-description">获取所有实体状态</div>
+                            <div class="endpoint-description">Get all entity states</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/home_assistant/home_assistant/states</code></pre>
                             </div>
@@ -1492,7 +1492,7 @@
                                 <span class="url">/api/home_assistant/home_assistant/config</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/config')">Test</button>
                             </div>
-                            <div class="endpoint-description">获取Home Assistant配置信息</div>
+                            <div class="endpoint-description">Get Home Assistant configuration information</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/home_assistant/home_assistant/config</code></pre>
                             </div>
@@ -1516,7 +1516,7 @@
                                 <span class="url">/api/home_assistant/home_assistant/entities</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/entities')">Test</button>
                             </div>
-                            <div class="endpoint-description">获取所有实体列表</div>
+                            <div class="endpoint-description">Get all entity list</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/home_assistant/home_assistant/entities</code></pre>
                             </div>
@@ -1528,7 +1528,7 @@
                                 <span class="url">/api/home_assistant/home_assistant/entity/:entityId</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/entity/light.living_room')">Test</button>
                             </div>
-                            <div class="endpoint-description">获取特定实体信息</div>
+                            <div class="endpoint-description">Get specific entity information</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/home_assistant/home_assistant/entity/light.living_room</code></pre>
                             </div>
@@ -1540,7 +1540,7 @@
                                 <span class="url">/api/home_assistant/home_assistant/call-service</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/home_assistant/home_assistant/call-service', {domain: 'light', service: 'turn_on', entity_id: 'light.living_room'})">Test</button>
                             </div>
-                            <div class="endpoint-description">调用Home Assistant服务</div>
+                            <div class="endpoint-description">Call Home Assistant service</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-service \\
   -H "Content-Type: application/json" \\
@@ -1554,7 +1554,7 @@
                                 <span class="url">/api/home_assistant/home_assistant/entity/:entityId/turn_on</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/home_assistant/home_assistant/entity/light.living_room/turn_on')">Test</button>
                             </div>
-                            <div class="endpoint-description">打开实体</div>
+                            <div class="endpoint-description">Turn on entity</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/home_assistant/home_assistant/entity/light.living_room/turn_on</code></pre>
                             </div>
@@ -1566,7 +1566,7 @@
                                 <span class="url">/api/home_assistant/home_assistant/entity/:entityId/turn_off</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/home_assistant/home_assistant/entity/light.living_room/turn_off')">Test</button>
                             </div>
-                            <div class="endpoint-description">关闭实体</div>
+                            <div class="endpoint-description">Turn off entity</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/home_assistant/home_assistant/entity/light.living_room/turn_off</code></pre>
                             </div>
@@ -1578,7 +1578,7 @@
                                 <span class="url">/api/home_assistant/home_assistant/entity/:entityId/set_state</span>
                                 <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/home_assistant/home_assistant/entity/light.living_room/set_state', {state: 'on', attributes: {brightness: 255}})"">Test</button>
                             </div>
-                            <div class="endpoint-description">设置实体状态</div>
+                            <div class="endpoint-description">Set entity state</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/home_assistant/home_assistant/entity/light.living_room/set_state \\
   -H "Content-Type: application/json" \\
@@ -1597,9 +1597,9 @@
             </div>
         </div>
 
-        <!-- 模块管理 -->
+        <!-- Module Management -->
         <div class="modules-grid" id="modulesGrid">
-            <!-- 动态生成模块卡片 -->
+            <!-- Dynamically generated module cards -->
         </div>
     </div>
 
@@ -1627,33 +1627,33 @@
         </div>
     </div>
 
-    <!-- Toast通知 -->
+    <!-- Toast Notifications -->
     <div class="toast" id="toast">
         <span id="toastMessage"></span>
     </div>
 
     <!-- QR Code Library - Using QR.js -->
     <script src="https://cdn.jsdelivr.net/npm/qrjs@0.1.2/qr.min.js"></script>
-    
+
     <script>
-        // 全局状态
+        // Global state
         let apiKey = '';
         let modules = {};
         let isConnected = false;
         let telegramPollingStatus = false;
 
-        // 初始化
+        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             checkConnection();
             loadModules();
-            setInterval(refreshData, 30000); // 每30秒刷新数据
+            setInterval(refreshData, 30000); // Refresh data every 30 seconds
             
-            // 如果Telegram模块可用，设置消息自动刷新
+            // If Telegram module is available, set up automatic message refresh
             setInterval(() => {
                 if (modules.telegram && modules.telegram.data && modules.telegram.data.messaging && modules.telegram.data.messaging.isPolling) {
                     refreshMessages();
                 }
-            }, 5000); // 每5秒刷新消息
+            }, 5000); // Refresh messages every 5 seconds
         });
 
         // Set API Key
@@ -1716,7 +1716,7 @@
             }
         }
 
-        // 加载模块列表
+        // Load module list
         async function loadModules() {
             if (!isConnected) return;
             
@@ -1738,7 +1738,7 @@
             }
         }
 
-        // 加载统计信息
+        // Load statistics
         async function loadStatistics() {
             if (!isConnected) return;
             
@@ -1756,7 +1756,7 @@
             }
         }
 
-        // 渲染统计信息
+        // Render statistics
         function renderStatistics(stats) {
             const grid = document.getElementById('statsGrid');
             grid.innerHTML = `
@@ -1779,7 +1779,7 @@
             `;
         }
 
-        // 渲染模块卡片
+        // Render module cards
         function renderModules() {
             const grid = document.getElementById('modulesGrid');
             grid.innerHTML = '';
@@ -1790,13 +1790,13 @@
                 grid.appendChild(card);
             });
             
-            // 渲染完成后检查Telegram模块
+            // Check Telegram module after rendering
             setTimeout(() => {
                 checkTelegramModule();
             }, 100);
         }
 
-        // 创建模块卡片
+        // Create module card
         function createModuleCard(name, data) {
             const card = document.createElement('div');
             card.className = 'module-card fade-in';
@@ -1824,7 +1824,7 @@
                 </div>
                 <div class="module-content">
                     <div id="credentials-${name}">
-                        <!-- 凭据表单将在这里动态生成 -->
+                        <!-- Credential form will be dynamically generated here -->
                     </div>
                     <div class="module-actions">
                         <button class="btn ${isEnabled ? 'btn-warning' : 'btn-success'}" 
@@ -1841,16 +1841,16 @@
                 </div>
             `;
             
-            // 加载凭据表单
+            // Load credential form
             loadCredentialForm(name);
             
             return card;
         }
 
-        // 加载凭据表单
+        // Load credential form
         async function loadCredentialForm(moduleName) {
             try {
-                // 获取schema
+                // Get schema
                 const schemaResponse = await fetch(`/api/schema/${moduleName}`, {
                     headers: { 'X-API-Key': apiKey }
                 });
@@ -1860,14 +1860,14 @@
                 const schemaData = await schemaResponse.json();
                 const schema = schemaData.data;
                 
-                // 获取现有凭据
+                // Get existing credentials
                 const credsResponse = await fetch(`/api/credentials/${moduleName}`, {
                     headers: { 'X-API-Key': apiKey }
                 });
                 
                 const existingCreds = credsResponse.ok ? (await credsResponse.json()).data : {};
                 
-                // 生成表单
+                // Generate form
                 const formContainer = document.getElementById(`credentials-${moduleName}`);
                 formContainer.innerHTML = generateCredentialForm(moduleName, schema, existingCreds);
                 
@@ -1876,9 +1876,9 @@
             }
         }
 
-        // 生成凭据表单
+        // Generate credential form
         function generateCredentialForm(moduleName, schema, existingCreds) {
-            if (!schema.properties) return '<p>无凭据配置</p>';
+            if (!schema.properties) return '<p>No credential configuration</p>';
             
             let formHTML = '';
             
@@ -1916,7 +1916,7 @@
             return formHTML;
         }
 
-        // 保存凭据
+        // Save credentials
         async function saveCredentials(moduleName) {
             const formContainer = document.getElementById(`credentials-${moduleName}`);
             const inputs = formContainer.querySelectorAll('input[name]');
@@ -1949,7 +1949,7 @@
             }
         }
 
-        // 切换模块状态
+        // Toggle module status
         async function toggleModule(moduleName, enabled) {
             try {
                 const response = await fetch(`/api/modules/${moduleName}/enabled`, {
@@ -1965,7 +1965,7 @@
                 
                 if (data.success) {
                     showToast(`${capitalizeFirst(moduleName)} ${enabled ? 'enabled' : 'disabled'}`, 'success');
-                    loadModules(); // 刷新模块状态
+                    loadModules(); // Refresh module status
                 } else {
                     showToast(`Operation failed: ${data.error}`, 'error');
                 }
@@ -2017,11 +2017,11 @@
                 
             } catch (error) {
                 console.error('Connection test failed:', error);
-                displayValidationResult(moduleName, { success: false, error: '连接测试失败' });
+                displayValidationResult(moduleName, { success: false, error: 'Connection test failed' });
             }
         }
 
-        // 重载模块
+        // Reload module
         async function reloadModule(moduleName) {
             try {
                 const response = await fetch(`/api/modules/${moduleName}/reload`, {
@@ -2032,18 +2032,18 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast(`${capitalizeFirst(moduleName)} 模块已重载`, 'success');
+                    showToast(`${capitalizeFirst(moduleName)} module reloaded`, 'success');
                     loadModules();
                 } else {
-                    showToast(`重载失败: ${data.error}`, 'error');
+                    showToast(`Reload failed: ${data.error}`, 'error');
                 }
             } catch (error) {
                 console.error('Failed to reload module:', error);
-                showToast('重载失败', 'error');
+                showToast('Reload failed', 'error');
             }
         }
 
-        // 清除缓存
+        // Clear cache
         async function clearCache(moduleName) {
             try {
                 const response = await fetch(`/api/cache/${moduleName}`, {
@@ -2054,17 +2054,17 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast(`${capitalizeFirst(moduleName)} 缓存已清除`, 'success');
+                    showToast(`${capitalizeFirst(moduleName)} cache cleared`, 'success');
                 } else {
                     showToast(`Clear failed: ${data.error}`, 'error');
                 }
             } catch (error) {
                 console.error('Failed to clear cache:', error);
-                showToast('清除失败', 'error');
+                showToast('Clear failed', 'error');
             }
         }
 
-        // 显示验证结果
+        // Display validation result
         function displayValidationResult(moduleName, result) {
             const resultContainer = document.getElementById(`result-${moduleName}`);
             const isSuccess = result.success;
@@ -2072,16 +2072,16 @@
             
             let content = `
                 <div class="validation-result ${className}">
-                    <strong>${isSuccess ? '✓ 验证成功' : '✗ 验证失败'}</strong>
+                    <strong>${isSuccess ? '✓ Validation successful' : '✗ Validation failed'}</strong>
                     <div>${result.message || result.error || ''}</div>
             `;
             
-            // 显示详细信息
+            // Display detailed information
             if (result.data && Object.keys(result.data).length > 0) {
                 content += `
                     <div class="collapsible-details">
                         <button class="collapsible-toggle" onclick="toggleDetails('${moduleName}')">
-                            显示详情
+                            Show Details
                         </button>
                         <div class="collapsible-content hidden" id="details-${moduleName}">
                             <pre>${JSON.stringify(result.data, null, 2)}</pre>
@@ -2094,21 +2094,21 @@
             resultContainer.innerHTML = content;
         }
 
-        // 切换详情显示
+        // Toggle details display
         function toggleDetails(moduleName) {
             const details = document.getElementById(`details-${moduleName}`);
             const toggle = details.previousElementSibling;
             
             if (details.classList.contains('hidden')) {
                 details.classList.remove('hidden');
-                toggle.textContent = '隐藏详情';
+                toggle.textContent = 'Hide Details';
             } else {
                 details.classList.add('hidden');
-                toggle.textContent = '显示详情';
+                toggle.textContent = 'Show Details';
             }
         }
 
-        // 显示Toast通知
+        // Show Toast notification
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             const messageEl = document.getElementById('toastMessage');
@@ -2123,7 +2123,7 @@
             }, 3000);
         }
 
-        // 刷新数据
+        // Refresh data
         function refreshData() {
             if (isConnected) {
                 loadModules();
@@ -2131,12 +2131,12 @@
             }
         }
 
-        // 首字母大写
+        // Capitalize first letter
         function capitalizeFirst(str) {
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
         
-        // 格式化文件大小
+        // Format file size
         function formatFileSize(bytes) {
             if (!bytes) return '';
             const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -2144,7 +2144,7 @@
             return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
         }
         
-        // 打开媒体模态框
+        // Open media modal
         function openMediaModal(src, type, photos = null) {
             const modal = document.createElement('div');
             modal.className = 'media-modal';
@@ -2160,7 +2160,7 @@
             } else if (type === 'video') {
                 content = `<video controls style="max-width: 90vw; max-height: 90vh; border-radius: 0.5rem;">
                     <source src="${src}" type="video/mp4">
-                    您的浏览器不支持视频播放
+                    Your browser does not support video playback
                 </video>`;
             }
             
@@ -2187,7 +2187,7 @@
             document.body.style.overflow = 'hidden';
         }
         
-        // 关闭媒体模态框
+        // Close media modal
         function closeMediaModal() {
             const modal = document.querySelector('.media-modal');
             if (modal) {
@@ -2196,7 +2196,7 @@
             }
         }
         
-        // ESC键关闭模态框
+        // ESC key closes modal
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeMediaModal();
@@ -2207,44 +2207,44 @@
         // Telegram Messaging Functions
         // =================
 
-        // 手动显示Telegram消息管理界面
+        // Manually show Telegram message management interface
         function showTelegramMessaging() {
             console.log('Manually showing Telegram messaging interface');
             
-            // 强制显示消息管理界面
+            // Force show message management interface
             document.getElementById('telegramMessaging').classList.remove('hidden');
             
-            // 滚动到消息管理界面
+            // Scroll to message management interface
             document.getElementById('telegramMessaging').scrollIntoView({ 
                 behavior: 'smooth', 
                 block: 'start' 
             });
             
-            // 更新状态和消息
+            // Update status and messages
             setTimeout(() => {
                 updatePollingStatus();
                 refreshMessages();
             }, 300);
             
-            showToast('Telegram消息管理界面已显示', 'success');
+            showToast('Telegram message management interface displayed', 'success');
         }
 
-        // 检查Telegram模块是否可用
+        // Check if Telegram module is available
         function checkTelegramModule() {
             console.log('Checking Telegram module...', modules.telegram);
             
-            // 只要Telegram模块存在且已初始化就显示界面
+            // Show interface as long as Telegram module exists and is initialized
             if (modules.telegram && modules.telegram.data && modules.telegram.data.initialized) {
                 console.log('Telegram module found and initialized, showing messaging interface');
                 document.getElementById('telegramMessaging').classList.remove('hidden');
                 
-                // 延迟执行以确保DOM已更新
+                // Delay execution to ensure DOM is updated
                 setTimeout(() => {
                     updatePollingStatus();
                     refreshMessages();
                 }, 200);
                 
-                // 检查是否有凭据
+                // Check if credentials exist
                 const hasCredentials = modules.telegram.data.hasCredentials && 
                                       Object.keys(modules.telegram.data.hasCredentials).length > 0;
                 
@@ -2263,7 +2263,7 @@
             }
         }
 
-        // 更新轮询状态显示
+        // Update polling status display
         function updatePollingStatus() {
             const header = document.querySelector('.messaging-header h2');
             if (!header) {
@@ -2277,7 +2277,7 @@
                 existingStatus.remove();
             }
             
-            // 从模块数据获取实际轮询状态
+            // Get actual polling status from module data
             const actualPollingStatus = modules.telegram && 
                                        modules.telegram.data && 
                                        modules.telegram.data.messaging && 
@@ -2288,8 +2288,8 @@
             const statusEl = document.createElement('div');
             statusEl.className = `polling-status ${actualPollingStatus ? 'polling-active' : 'polling-inactive'}`;
             
-            // 更详细的状态显示
-            const statusText = actualPollingStatus ? '已连接' : '未连接';
+            // More detailed status display
+            const statusText = actualPollingStatus ? 'Connected' : 'Disconnected';
             const statusIcon = actualPollingStatus ? '🟢' : '🔴';
             
             statusEl.innerHTML = `
@@ -2300,14 +2300,14 @@
             
             header.appendChild(statusEl);
             
-            // 更新全局状态
+            // Update global state
             telegramPollingStatus = actualPollingStatus;
             
-            // 更新按钮状态
+            // Update button status
             updatePollingButtons(actualPollingStatus);
         }
         
-        // 更新轮询按钮状态
+        // Update polling button status
         function updatePollingButtons(isPolling) {
             const startBtn = document.querySelector('button[onclick="startTelegramPolling()"]');
             const stopBtn = document.querySelector('button[onclick="stopTelegramPolling()"]');
@@ -2327,10 +2327,10 @@
             }
         }
 
-        // 开始Telegram轮询
+        // Start Telegram polling
         async function startTelegramPolling() {
             try {
-                // 显示开始状态
+                // Show start status
                 showToast('Starting Telegram polling...', 'info');
                 
                 const response = await fetch('/api/telegram/telegram/polling/start', {
@@ -2344,19 +2344,19 @@
                     telegramPollingStatus = true;
                     showToast('🟢 Telegram polling started, system connected', 'success');
                     
-                    // 立即更新状态显示
+                    // Immediately update status display
                     updatePollingButtons(true);
                     
-                    // 刷新模块状态以获取最新轮询状态
+                    // Refresh module status to get latest polling status
                     loadModules();
                     
-                    // 延迟更新状态并刷新消息
+                    // Delay update status and refresh messages
                     setTimeout(() => {
                         updatePollingStatus();
                         refreshMessages();
                     }, 1000);
                     
-                    // 定期检查连接状态
+                    // Regularly check connection status
                     startConnectionMonitoring();
                 } else {
                     showToast(`❌ Failed to start polling: ${data.error}`, 'error');
@@ -2381,7 +2381,7 @@
             }
         }
 
-        // 停止Telegram轮询
+        // Stop Telegram polling
         async function stopTelegramPolling() {
             try {
                 showToast('Stopping Telegram polling...', 'info');
@@ -2397,13 +2397,13 @@
                     telegramPollingStatus = false;
                     showToast('🔴 Telegram polling stopped, connection disconnected', 'success');
                     
-                    // 立即更新状态显示
+                    // Immediately update status display
                     updatePollingButtons(false);
                     
-                    // 停止连接监控
+                    // Stop connection monitoring
                     stopConnectionMonitoring();
                     
-                    // 刷新模块状态以获取最新轮询状态
+                    // Refresh module status to get latest polling status
                     loadModules();
                     setTimeout(() => {
                         updatePollingStatus();
@@ -2417,7 +2417,7 @@
             }
         }
 
-        // 刷新消息列表
+        // Refresh message list
         async function refreshMessages() {
             try {
                 const response = await fetch('/api/telegram/telegram/messages?limit=50', {
@@ -2430,22 +2430,22 @@
                     renderMessages(data.data.messages || []);
                 } else {
                     console.error('Failed to load messages, status:', response.status);
-                    // 如果没有API密钥，显示提示信息
+                    // If no API key, show prompt information
                     if (response.status === 401) {
-                        renderMessages([], '请先配置API密钥');
+                        renderMessages([], 'Please configure API key first');
                     }
                 }
             } catch (error) {
                 console.error('Failed to refresh messages:', error);
-                renderMessages([], '加载消息失败');
+                renderMessages([], 'Failed to load messages');
             }
         }
 
-        // 渲染消息列表
+        // Render message list
         function renderMessages(messages, errorMsg = null) {
             const messagesList = document.getElementById('messagesList');
             
-            // 更新统计信息
+            // Update statistics
             updateMessageStats(messages, errorMsg);
             
             if (errorMsg) {
@@ -2458,7 +2458,7 @@
                 return;
             }
             
-            // 按时间倒序排列消息
+            // Sort messages by time in descending order
             const sortedMessages = messages.sort((a, b) => new Date(b.date) - new Date(a.date));
             
             messagesList.innerHTML = sortedMessages.map(message => `
@@ -2470,7 +2470,7 @@
                         </div>
                         <div class="message-actions">
                             <button class="btn btn-sm btn-primary" onclick="replyToMessage('${message.chat_id}', '${message.from?.username ? `@${message.from.username}` : message.from?.first_name || 'Unknown'}')">
-                                回复
+                                Reply
                             </button>
                             <div class="message-time">
                                 ${new Date(message.date).toLocaleString()}
@@ -2490,7 +2490,7 @@
                                     
                                     switch(type) {
                                         case 'photo':
-                                            // 获取最高质量的图片
+                                            // Get highest quality image
                                             const photos = Array.isArray(mediaData) ? mediaData : [mediaData];
                                             const bestPhoto = photos.reduce((best, current) => {
                                                 const bestSize = (best.width || 0) * (best.height || 0);
@@ -2500,14 +2500,14 @@
                                             
                                             return `<div class="media-item">
                                                 <img src="/api/telegram/telegram/file-url/${bestPhoto.file_id}" 
-                                                     alt="图片" 
+                                                     alt="Image" 
                                                      class="media-image"
                                                      onclick="openMediaModal('/api/telegram/telegram/file-url/${bestPhoto.file_id}', 'image', ${JSON.stringify(photos).replace(/"/g, '&quot;')})"
                                                      loading="lazy"
                                                      data-photos='${JSON.stringify(photos).replace(/"/g, '&quot;')}'>
                                                 <div class="media-info">
-                                                    📷 图片 ${bestPhoto.width ? `${bestPhoto.width}×${bestPhoto.height}` : ''}
-                                                    ${photos.length > 1 ? ` (${photos.length}个尺寸)` : ''}
+                                                    📷 Image ${bestPhoto.width ? `${bestPhoto.width}×${bestPhoto.height}` : ''}
+                                                    ${photos.length > 1 ? ` (${photos.length} sizes)` : ''}
                                                 </div>
                                             </div>`;
                                         case 'video':
@@ -2521,10 +2521,10 @@
                                                        width="${Math.min(videoWidth, 400)}" 
                                                        onclick="openMediaModal('/api/telegram/telegram/file-url/${fileId}', 'video')">
                                                     <source src="/api/telegram/telegram/file-url/${fileId}" type="video/mp4">
-                                                    您的浏览器不支持视频播放
+                                                    Your browser does not support video playback
                                                 </video>
                                                 <div class="media-info">
-                                                    🎥 视频 ${videoWidth}×${videoHeight} ${videoDuration} ${videoSize}
+                                                    🎥 Video ${videoWidth}×${videoHeight} ${videoDuration} ${videoSize}
                                                 </div>
                                             </div>`;
                                         case 'video_note':
@@ -2536,10 +2536,10 @@
                                                        style="border-radius: 50%; width: 240px; height: 240px; object-fit: cover;"
                                                        onclick="openMediaModal('/api/telegram/telegram/file-url/${fileId}', 'video')">
                                                     <source src="/api/telegram/telegram/file-url/${fileId}" type="video/mp4">
-                                                    您的浏览器不支持视频播放
+                                                    Your browser does not support video playback
                                                 </video>
                                                 <div class="media-info">
-                                                    🎬 视频消息 ${noteDuration} ${noteSize}
+                                                    🎬 Video message ${noteDuration} ${noteSize}
                                                 </div>
                                             </div>`;
                                         case 'voice':
@@ -2550,13 +2550,13 @@
                                                 <audio controls class="media-audio" preload="metadata">
                                                     <source src="/api/telegram/telegram/file-url/${fileId}" type="audio/ogg">
                                                     <source src="/api/telegram/telegram/file-url/${fileId}" type="audio/mpeg">
-                                                    您的浏览器不支持音频播放
+                                                    Your browser does not support audio playback
                                                 </audio>
-                                                <div class="media-info">🎵 语音消息 ${voiceDuration} ${voiceSize}</div>
+                                                <div class="media-info">🎵 Voice message ${voiceDuration} ${voiceSize}</div>
                                             </div>`;
                                         case 'audio':
                                             const audioDuration = mediaData.duration ? `${Math.floor(mediaData.duration / 60)}:${String(mediaData.duration % 60).padStart(2, '0')}` : '';
-                                            const audioTitle = mediaData.title || mediaData.file_name || '音频文件';
+                                            const audioTitle = mediaData.title || mediaData.file_name || 'Audio file';
                                             const audioPerformer = mediaData.performer ? ` - ${mediaData.performer}` : '';
                                             const audioSize = mediaData.file_size ? formatFileSize(mediaData.file_size) : '';
                                             
@@ -2564,16 +2564,16 @@
                                                 <audio controls class="media-audio" preload="metadata">
                                                     <source src="/api/telegram/telegram/file-url/${fileId}" type="audio/mpeg">
                                                     <source src="/api/telegram/telegram/file-url/${fileId}" type="audio/ogg">
-                                                    您的浏览器不支持音频播放
+                                                    Your browser does not support audio playback
                                                 </audio>
                                                 <div class="media-info">🎵 ${audioTitle}${audioPerformer} ${audioDuration} ${audioSize}</div>
                                             </div>`;
                                         case 'document':
-                                            const docName = mediaData.file_name || '文档文件';
+                                            const docName = mediaData.file_name || 'Document file';
                                             const docSize = mediaData.file_size ? formatFileSize(mediaData.file_size) : '';
                                             const mimeType = mediaData.mime_type || '';
                                             
-                                            // 判断是否为图片或视频文档
+                                            // Determine if it's an image or video document
                                             if (mimeType.startsWith('image/')) {
                                                 return `<div class="media-item">
                                                     <img src="/api/telegram/telegram/file-url/${fileId}" 
@@ -2588,7 +2588,7 @@
                                                     <video controls class="media-video" preload="metadata"
                                                            onclick="openMediaModal('/api/telegram/telegram/file-url/${fileId}', 'video')">
                                                         <source src="/api/telegram/telegram/file-url/${fileId}" type="${mimeType}">
-                                                        您的浏览器不支持视频播放
+                                                        Your browser does not support video playback
                                                     </video>
                                                     <div class="media-info">🎥 ${docName} ${docSize}</div>
                                                 </div>`;
@@ -2596,16 +2596,16 @@
                                                 return `<div class="media-item">
                                                     <audio controls class="media-audio" preload="metadata">
                                                         <source src="/api/telegram/telegram/file-url/${fileId}" type="${mimeType}">
-                                                        您的浏览器不支持音频播放
+                                                        Your browser does not support audio playback
                                                     </audio>
                                                     <div class="media-info">🎵 ${docName} ${docSize}</div>
                                                 </div>`;
                                             } else {
-                                                return `<div class="media-item">
-                                                    <div class="media-document" onclick="downloadFile('${fileId}')">
+                                            return `<div class="media-item">
+                                                <div class="media-document" onclick="downloadFile('${fileId}')">
                                                         📄 ${docName}
-                                                    </div>
-                                                    <div class="media-info">${docSize} - 点击下载</div>
+                                                </div>
+                                                    <div class="media-info">${docSize} - Click to download</div>
                                                 </div>`;
                                             }
                                         case 'sticker':
@@ -2614,15 +2614,15 @@
                                             
                                             return `<div class="media-item">
                                                 <img src="/api/telegram/telegram/file-url/${fileId}" 
-                                                     alt="贴纸 ${stickerEmoji}" 
+                                                     alt="Sticker ${stickerEmoji}" 
                                                      class="media-image media-sticker"
                                                      style="max-width: 200px; max-height: 200px;"
                                                      onclick="openMediaModal('/api/telegram/telegram/file-url/${fileId}', 'image')"
                                                      loading="lazy">
-                                                <div class="media-info">${stickerEmoji} 贴纸 ${stickerSize}</div>
+                                                <div class="media-info">${stickerEmoji} Sticker ${stickerSize}</div>
                                             </div>`;
                                         case 'animation':
-                                            const animationName = mediaData.file_name || 'GIF动画';
+                                            const animationName = mediaData.file_name || 'GIF animation';
                                             const animationSize = mediaData.file_size ? formatFileSize(mediaData.file_size) : '';
                                             const animationDuration = mediaData.duration ? `${mediaData.duration}s` : '';
                                             
@@ -2630,7 +2630,7 @@
                                                 <video controls class="media-video" preload="metadata" autoplay loop muted
                                                        onclick="openMediaModal('/api/telegram/telegram/file-url/${fileId}', 'video')">
                                                     <source src="/api/telegram/telegram/file-url/${fileId}" type="${mediaData.mime_type || 'video/mp4'}">
-                                                    您的浏览器不支持动画播放
+                                                    Your browser does not support animation playback
                                                 </video>
                                                 <div class="media-info">🎬 ${animationName} ${animationDuration} ${animationSize}</div>
                                             </div>`;
@@ -2647,28 +2647,28 @@
             `).join('');
         }
 
-        // 回复消息
+        // Reply to message
         function replyToMessage(chatId, fromName) {
-            // 自动填充聊天ID
+            // Auto-fill chat ID
             document.getElementById('sendChatId').value = chatId;
             
-            // 切换到发送消息标签页
+            // Switch to send message tab
             switchTab('send');
             
-            // 显示提示信息
-            showToast(`已选择回复给: ${fromName} (${chatId})`, 'success');
+            // Show prompt information
+            showToast(`Selected reply to: ${fromName} (${chatId})`, 'success');
             
-            // 滚动到发送表单
+            // Scroll to send form
             document.getElementById('tab-send').scrollIntoView({ 
                 behavior: 'smooth', 
                 block: 'start' 
             });
         }
 
-        // 打开媒体模态框
+        // Open media modal
         function openMediaModal(src, type, photos = null) {
             if (type === 'image') {
-                // 创建图片模态框
+                // Create image modal
                 const modal = document.createElement('div');
                 modal.className = 'media-modal';
                 
@@ -2676,7 +2676,7 @@
                 if (photos && photos.length > 1) {
                     photoSelector = `
                         <div class="photo-selector">
-                            <label>选择尺寸:</label>
+                            <label>Select size:</label>
                             <select id="photoSizeSelect" onchange="changePhotoSize(this.value)">
                                 ${photos.map((photo, index) => `
                                     <option value="${photo.file_id}" ${photo.file_id === src.split('/').pop() ? 'selected' : ''}>
@@ -2692,16 +2692,16 @@
                     <div class="modal-content">
                         <span class="modal-close" onclick="closeMediaModal()">&times;</span>
                         ${photoSelector}
-                        <img src="${src}" alt="图片" class="modal-image" id="modalImage">
+                        <img src="${src}" alt="Image" class="modal-image" id="modalImage">
                         <div class="image-info" id="imageInfo"></div>
                     </div>
                 `;
                 document.body.appendChild(modal);
                 
-                // 更新图片信息
+                // Update image information
                 updateImageInfo(src, photos);
                 
-                // 点击背景关闭
+                // Click background to close
                 modal.onclick = function(e) {
                     if (e.target === modal) {
                         closeMediaModal();
@@ -2710,35 +2710,35 @@
             }
         }
 
-        // 切换图片尺寸
+        // Switch image size
         function changePhotoSize(fileId) {
             const modalImage = document.getElementById('modalImage');
             const newSrc = `/api/telegram/telegram/file-url/${fileId}`;
             modalImage.src = newSrc;
             
-            // 更新图片信息
+            // Update image information
             const select = document.getElementById('photoSizeSelect');
             const selectedOption = select.options[select.selectedIndex];
             const dimensions = selectedOption.text.split(' ')[0];
-            document.getElementById('imageInfo').textContent = `尺寸: ${dimensions}`;
+            document.getElementById('imageInfo').textContent = `Size: ${dimensions}`;
         }
 
-        // 更新图片信息
+        // Update image information
         function updateImageInfo(src, photos) {
             if (photos && photos.length > 0) {
                 const currentFileId = src.split('/').pop();
                 const currentPhoto = photos.find(p => p.file_id === currentFileId);
                 if (currentPhoto) {
-                    const info = `尺寸: ${currentPhoto.width}×${currentPhoto.height}`;
+                    const info = `Size: ${currentPhoto.width}×${currentPhoto.height}`;
                     if (currentPhoto.file_size) {
-                        info += ` | 大小: ${Math.round(currentPhoto.file_size/1024)}KB`;
+                        info += ` | Size: ${Math.round(currentPhoto.file_size/1024)}KB`;
                     }
                     document.getElementById('imageInfo').textContent = info;
                 }
             }
         }
 
-        // 关闭媒体模态框
+        // Close media modal
         function closeMediaModal() {
             const modal = document.querySelector('.media-modal');
             if (modal) {
@@ -2746,7 +2746,7 @@
             }
         }
 
-        // 下载文件
+        // Download file
         async function downloadFile(fileId) {
             try {
                 showToast('Getting file...', 'info');
@@ -2762,7 +2762,7 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    // 创建下载链接
+                    // Create download link
                     const link = document.createElement('a');
                     link.href = result.data.file_url;
                     link.download = `telegram_file_${fileId}`;
@@ -2771,27 +2771,27 @@
                     link.click();
                     document.body.removeChild(link);
                     
-                    showToast('文件下载已开始', 'success');
+                    showToast('File download started', 'success');
                 } else {
-                    showToast(`下载失败: ${result.error}`, 'error');
+                    showToast(`Download failed: ${result.error}`, 'error');
                 }
             } catch (error) {
                 console.error('Download error:', error);
-                showToast('下载失败: 网络错误', 'error');
+                showToast('Download failed: Network error', 'error');
             }
         }
 
-        // 测试API端点
+        // Test API endpoint
         async function testApi(method, url, data = null) {
             const resultsContainer = document.getElementById('apiTestResults');
             const timestamp = new Date().toLocaleTimeString();
             
-            // 显示测试开始信息
+            // Show test start information
             const testId = `test-${Date.now()}`;
             resultsContainer.innerHTML = `
                 <div class="test-result info" id="${testId}">
                     <strong>🧪 Test ${method} ${url}</strong>
-                    <div>时间: ${timestamp}</div>
+                    <div>Time: ${timestamp}</div>
                     <div>Status: Testing...</div>
                 </div>
             `;
@@ -2804,12 +2804,12 @@
                     }
                 };
                 
-                // 添加API密钥（如果有）
+                // Add API key (if available)
                 if (apiKey) {
                     options.headers['X-API-Key'] = apiKey;
                 }
                 
-                // 添加请求体（如果是POST/PUT请求）
+                // Add request body (if POST/PUT request)
                 if (data && (method === 'POST' || method === 'PUT')) {
                     options.body = JSON.stringify(data);
                 }
@@ -2825,13 +2825,13 @@
                 }
                 
                 const resultClass = response.ok ? 'success' : 'error';
-                const statusText = response.ok ? '✅ 成功' : '❌ 失败';
+                const statusText = response.ok ? '✅ Success' : '❌ Failed';
                 
                 document.getElementById(testId).innerHTML = `
                     <strong>🧪 Test ${method} ${url}</strong>
-                    <div>时间: ${timestamp}</div>
-                    <div>状态: ${statusText} (HTTP ${response.status})</div>
-                    <div>响应时间: ${Date.now() - parseInt(testId.split('-')[1])}ms</div>
+                    <div>Time: ${timestamp}</div>
+                    <div>Status: ${statusText} (HTTP ${response.status})</div>
+                    <div>Response time: ${Date.now() - parseInt(testId.split('-')[1])}ms</div>
                     <pre>${JSON.stringify(parsedData, null, 2)}</pre>
                 `;
                 document.getElementById(testId).className = `test-result ${resultClass}`;
@@ -2839,22 +2839,22 @@
             } catch (error) {
                 document.getElementById(testId).innerHTML = `
                     <strong>🧪 Test ${method} ${url}</strong>
-                    <div>时间: ${timestamp}</div>
-                    <div>状态: ❌ 网络错误</div>
-                    <div>错误: ${error.message}</div>
+                    <div>Time: ${timestamp}</div>
+                    <div>Status: ❌ Network error</div>
+                    <div>Error: ${error.message}</div>
                 `;
                 document.getElementById(testId).className = 'test-result error';
             }
         }
 
-        // 更新消息统计信息
+        // Update message statistics
         function updateMessageStats(messages, errorMsg = null) {
             const totalMessagesEl = document.getElementById('totalMessages');
             const lastUpdateEl = document.getElementById('lastUpdate');
             
             if (errorMsg) {
                 totalMessagesEl.textContent = '-';
-                lastUpdateEl.textContent = '错误';
+                lastUpdateEl.textContent = 'Error';
                 return;
             }
             
@@ -2870,9 +2870,9 @@
             }
         }
 
-        // 清除消息历史
+        // Clear message history
         async function clearMessages() {
-            if (!confirm('确定要清除所有消息历史吗？')) {
+            if (!confirm('Are you sure you want to clear all message history?')) {
                 return;
             }
             
@@ -2892,11 +2892,11 @@
                 }
             } catch (error) {
                 console.error('Failed to clear messages:', error);
-                showToast('清除失败', 'error');
+                showToast('Clear failed', 'error');
             }
         }
         
-        // 重新处理消息的媒体数据
+        // Reprocess message media data
         async function reprocessMessages() {
             try {
                 showToast('Reprocessing message media data...', 'info');
@@ -2912,7 +2912,7 @@
                     const { reprocessed, total } = data.data;
                     showToast(`✅ Reprocessing completed: ${reprocessed}/${total} messages updated with media data`, 'success');
                     
-                    // 刷新消息显示
+                    // Refresh message display
                     setTimeout(() => {
                         refreshMessages();
                     }, 1000);
@@ -2925,26 +2925,26 @@
             }
         }
 
-        // 切换标签页
+        // Switch tab
         function switchTab(tabName) {
-            // 隐藏所有标签内容
+            // Hide all tab content
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
             
-            // 移除所有标签按钮的活跃状态
+            // Remove active state from all tab buttons
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             
-            // 显示选中的标签内容
+            // Show selected tab content
             document.getElementById(`tab-${tabName}`).classList.add('active');
             
-            // 激活选中的标签按钮
+            // Activate selected tab button
             event.target.classList.add('active');
         }
 
-        // 更新发送表单
+        // Update send form
         function updateSendForm() {
             const messageType = document.getElementById('sendMessageType').value;
             const textGroup = document.getElementById('textMessageGroup');
@@ -2959,7 +2959,7 @@
             }
         }
 
-        // 发送Telegram消息
+        // Send Telegram message
         async function sendTelegramMessage() {
             const chatId = document.getElementById('sendChatId').value.trim();
             const messageType = document.getElementById('sendMessageType').value;
@@ -2968,24 +2968,24 @@
             const caption = document.getElementById('sendCaption').value.trim();
             
             if (!chatId) {
-                showToast('请输入聊天ID', 'error');
+                showToast('Please enter chat ID', 'error');
                 return;
             }
             
             if (messageType === 'text' && !text) {
-                showToast('请输入消息内容', 'error');
+                showToast('Please enter message content', 'error');
                 return;
             }
             
             if (messageType !== 'text' && !media) {
-                showToast('请输入媒体文件ID或URL', 'error');
+                showToast('Please enter media file ID or URL', 'error');
                 return;
             }
             
-            // 显示发送状态
+            // Show send status
             const sendButton = event.target;
             const originalText = sendButton.textContent;
-            sendButton.textContent = '发送中...';
+            sendButton.textContent = 'Sending...';
             sendButton.disabled = true;
             
             try {
@@ -3034,47 +3034,47 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast('消息发送成功', 'success');
-                    // 清空表单
+                    showToast('Message sent successfully', 'success');
+                    // Clear form
                     document.getElementById('sendChatId').value = '';
                     document.getElementById('sendText').value = '';
                     document.getElementById('sendMedia').value = '';
                     document.getElementById('sendCaption').value = '';
                 } else {
-                    showToast(`发送失败: ${data.error}`, 'error');
+                    showToast(`Send failed: ${data.error}`, 'error');
                     console.error('Send message error:', data);
                 }
             } catch (error) {
                 console.error('Failed to send message:', error);
-                showToast('发送失败: 网络错误', 'error');
+                showToast('Send failed: Network error', 'error');
             } finally {
-                // 恢复按钮状态
+                // Restore button status
                 sendButton.textContent = originalText;
                 sendButton.disabled = false;
             }
         }
 
-        // 设置Webhook
+        // Set Webhook
         async function setWebhook() {
             const webhookUrl = document.getElementById('webhookUrl').value.trim();
             const webhookSecret = document.getElementById('webhookSecret').value.trim();
             
             if (!webhookUrl) {
-                showToast('请输入Webhook URL', 'error');
+                showToast('Please enter Webhook URL', 'error');
                 return;
             }
             
-            // 验证URL格式
+            // Validate URL format
             try {
                 new URL(webhookUrl);
             } catch (e) {
-                showToast('请输入有效的URL', 'error');
+                showToast('Please enter a valid URL', 'error');
                 return;
             }
             
             const setButton = event.target;
             const originalText = setButton.textContent;
-            setButton.textContent = '设置中...';
+            setButton.textContent = 'Setting...';
             setButton.disabled = true;
             
             try {
@@ -3104,22 +3104,22 @@
                 }
             } catch (error) {
                 console.error('Failed to set webhook:', error);
-                displayWebhookStatus({ success: false, error: '设置失败: 网络错误' }, 'error');
+                displayWebhookStatus({ success: false, error: 'Setting failed: Network error' }, 'error');
             } finally {
                 setButton.textContent = originalText;
                 setButton.disabled = false;
             }
         }
 
-        // 移除Webhook
+        // Remove Webhook
         async function removeWebhook() {
-            if (!confirm('确定要移除当前的Webhook设置吗？')) {
+            if (!confirm('Are you sure you want to remove the current Webhook settings?')) {
                 return;
             }
             
             const removeButton = event.target;
             const originalText = removeButton.textContent;
-            removeButton.textContent = '移除中...';
+            removeButton.textContent = 'Removing...';
             removeButton.disabled = true;
             
             try {
@@ -3132,25 +3132,25 @@
                 displayWebhookStatus(data, data.success ? 'success' : 'error');
                 
                 if (data.success) {
-                    showToast('Webhook已移除', 'success');
-                    // 清空表单
+                    showToast('Webhook removed', 'success');
+                    // Clear form
                     document.getElementById('webhookUrl').value = '';
                     document.getElementById('webhookSecret').value = '';
                 }
             } catch (error) {
                 console.error('Failed to remove webhook:', error);
-                displayWebhookStatus({ success: false, error: '移除失败: 网络错误' }, 'error');
+                displayWebhookStatus({ success: false, error: 'Removal failed: Network error' }, 'error');
             } finally {
                 removeButton.textContent = originalText;
                 removeButton.disabled = false;
             }
         }
 
-        // 获取Webhook信息
+        // Get Webhook information
         async function getWebhookInfo() {
             const infoButton = event.target;
             const originalText = infoButton.textContent;
-            infoButton.textContent = '获取中...';
+            infoButton.textContent = 'Getting...';
             infoButton.disabled = true;
             
             try {
@@ -3162,43 +3162,43 @@
                 displayWebhookStatus(data, 'info');
                 
                 if (data.success && data.data) {
-                    // 如果webhook已设置，填充表单
+                    // If webhook is set, fill the form
                     if (data.data.url) {
                         document.getElementById('webhookUrl').value = data.data.url;
                     }
                 }
             } catch (error) {
                 console.error('Failed to get webhook info:', error);
-                displayWebhookStatus({ success: false, error: '获取信息失败: 网络错误' }, 'error');
+                displayWebhookStatus({ success: false, error: 'Failed to get information: Network error' }, 'error');
             } finally {
                 infoButton.textContent = originalText;
                 infoButton.disabled = false;
             }
         }
 
-        // 显示Webhook状态
+        // Display Webhook status
         function displayWebhookStatus(data, type) {
             const statusEl = document.getElementById('webhookStatus');
             const className = `webhook-status ${type}`;
             
             let content = '';
             if (data.success) {
-                content = `<strong>✓ ${data.message || '操作成功'}</strong>`;
+                content = `<strong>✓ ${data.message || 'Operation successful'}</strong>`;
                 if (data.data) {
                     content += `<pre style="margin-top: 0.5rem; font-size: 0.8rem;">${JSON.stringify(data.data, null, 2)}</pre>`;
                 }
             } else {
-                content = `<strong>✗ ${data.error || '操作失败'}</strong>`;
+                content = `<strong>✗ ${data.error || 'Operation failed'}</strong>`;
             }
             
             statusEl.innerHTML = `<div class="${className}">${content}</div>`;
         }
 
         // =================
-        // API文档管理函数
+        // API documentation management functions
         // =================
 
-        // 显示API文档
+        // Show API documentation
         function showApiDocumentation() {
             document.getElementById('apiDocumentation').classList.remove('hidden');
             document.getElementById('apiDocumentation').scrollIntoView({ 
@@ -3208,7 +3208,7 @@
             showToast('API documentation displayed', 'success');
         }
         
-        // 显示二维码
+        // Show QR code
         async function showQRCode() {
             console.log('showQRCode function called');
             
@@ -3222,26 +3222,26 @@
                 return;
             }
             
-            // 显示加载状态
+            // Show loading status
             qrCodeContainer.innerHTML = '<div style="text-align: center; padding: 2rem;"><div class="spinner"></div><p>Loading...</p></div>';
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
             
             try {
-                // 获取服务器信息（包含局域网IP）
+                // Get server information (including LAN IP)
                 const response = await fetch('/api/server-info');
                 const serverInfo = await response.json();
                 
                 const lanUrl = serverInfo.url;
                 qrUrlElement.textContent = lanUrl;
                 
-                // 清空加载状态
+                // Clear loading status
                 qrCodeContainer.innerHTML = '';
                 
-                // 检查QR库是否加载，如果没有则使用在线QR码生成服务
+                // Check if QR library is loaded, if not use online QR code generation service
                 if (typeof QR === 'undefined') {
                     console.log('QR library not loaded, using online QR service');
-                    // 使用在线QR码生成服务
+                    // Use online QR code generation service
                     const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(lanUrl)}`;
                     qrCodeContainer.innerHTML = `
                         <img src="${qrImageUrl}" 
@@ -3258,7 +3258,7 @@
                 }
                 
                 try {
-                    // 生成二维码
+                    // Generate QR code
                     const qr = new QR({
                         text: lanUrl,
                         width: 200,
@@ -3267,17 +3267,17 @@
                         colorLight: '#FFFFFF'
                     });
                     
-                    // 创建canvas元素
+                    // Create canvas element
                     const canvas = document.createElement('canvas');
                     canvas.width = 200;
                     canvas.height = 200;
                     canvas.style.border = '1px solid #ddd';
                     canvas.style.borderRadius = '0.5rem';
                     
-                    // 绘制QR码
+                    // Draw QR code
                     qr.draw(canvas);
                     
-                    // 添加到容器
+                    // Add to container
                     qrCodeContainer.appendChild(canvas);
                     
                     console.log('QR Code generated successfully');
@@ -3294,7 +3294,7 @@
                 
             } catch (error) {
                 console.error('Failed to get server info:', error);
-                // 使用当前URL作为备用
+                // Use current URL as fallback
                 const currentUrl = window.location.href;
                 qrUrlElement.textContent = currentUrl;
                 
@@ -3308,14 +3308,14 @@
             }
         }
         
-        // 关闭二维码
+        // Close QR code
         function closeQRCode() {
             const modal = document.getElementById('qrModal');
             modal.classList.add('hidden');
             document.body.style.overflow = '';
         }
         
-        // ESC键关闭二维码
+        // ESC key closes QR code
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeQRCode();
@@ -3323,57 +3323,57 @@
         });
         
 
-        // 显示所有API文档
+        // Show all API documentation
         function showAllApiDocs() {
             showApiDocumentation();
             switchApiTab('overview');
         }
 
-        // 显示Telegram API文档
+        // Show Telegram API documentation
         function showTelegramApiDocs() {
             showApiDocumentation();
             switchApiTab('telegram');
         }
 
-        // 显示Home Assistant API文档
+        // Show Home Assistant API documentation
         function showHomeAssistantApiDocs() {
             showApiDocumentation();
             switchApiTab('home_assistant');
         }
 
-        // 切换API标签页
+        // Switch API tab
         function switchApiTab(tabName) {
-            // 隐藏所有API标签内容
+            // Hide all API tab content
             document.querySelectorAll('#apiDocumentation .tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
             
-            // 移除所有API标签按钮的活跃状态
+            // Remove active state from all API tab buttons
             document.querySelectorAll('#apiDocumentation .tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             
-            // 显示选中的标签内容
+            // Show selected tab content
             document.getElementById(`api-tab-${tabName}`).classList.add('active');
             
-            // 激活选中的标签按钮
+            // Activate selected tab button
             event.target.classList.add('active');
         }
 
-        // 键盘快捷键
+        // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
-            // Ctrl/Cmd + R 刷新数据
+            // Ctrl/Cmd + R refresh data
             if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
                 e.preventDefault();
                 refreshData();
-                showToast('数据已刷新', 'success');
+                showToast('Data refreshed', 'success');
             }
             
-            // Escape 键关闭详情
+            // Escape key closes details
             if (e.key === 'Escape') {
                 document.querySelectorAll('.collapsible-content:not(.hidden)').forEach(el => {
                     el.classList.add('hidden');
-                    el.previousElementSibling.textContent = '显示详情';
+                    el.previousElementSibling.textContent = 'Show Details';
                 });
             }
         });

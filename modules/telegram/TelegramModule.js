@@ -41,6 +41,10 @@ class TelegramModule extends BaseCredentialModule {
         this.wss = null;
         this.websocketClients = new Set();
         this.websocketPort = 8080;
+
+        // 最近聊天ID记录
+        this.lastChatId = null;
+        this.lastChatInfo = null;
     }
 
     /**
@@ -949,6 +953,18 @@ class TelegramModule extends BaseCredentialModule {
                 this.messages.set(message.message_id, processedMessage);
                 this.messageHistory.push(processedMessage);
 
+                // 更新最近聊天ID
+                this.lastChatId = message.chat.id;
+                this.lastChatInfo = {
+                    chat_id: message.chat.id,
+                    chat_type: message.chat.type,
+                    chat_title: message.chat.title,
+                    chat_username: message.chat.username,
+                    chat_first_name: message.chat.first_name,
+                    chat_last_name: message.chat.last_name,
+                    updated_at: new Date()
+                };
+
                 // 保持历史记录在合理范围内
                 if (this.messageHistory.length > 1000) {
                     this.messageHistory = this.messageHistory.slice(-500);
@@ -1155,6 +1171,40 @@ class TelegramModule extends BaseCredentialModule {
             this.logger.error('Failed to send message:', error);
             return { success: false, error: error.message };
         }
+    }
+
+    /**
+     * 快速回复消息（使用最近的聊天ID）
+     */
+    async replyToLastChat(text, options = {}, credentials = null) {
+        try {
+            if (!this.lastChatId) {
+                return {
+                    success: false,
+                    error: 'No recent chat found. Please receive a message first or use sendMessage with specific chat_id.'
+                };
+            }
+
+            // 使用最近的聊天ID发送消息
+            return await this.sendMessage(this.lastChatId, text, options, credentials);
+        } catch (error) {
+            this.logger.error('Failed to reply to last chat:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * 获取最近聊天信息
+     */
+    getLastChatInfo() {
+        return {
+            success: true,
+            data: {
+                last_chat_id: this.lastChatId,
+                last_chat_info: this.lastChatInfo,
+                has_recent_chat: this.lastChatId !== null
+            }
+        };
     }
 
     /**
