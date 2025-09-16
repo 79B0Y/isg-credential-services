@@ -224,12 +224,34 @@ if (global.gc) {
     console.warn('⚠️  垃圾回收不可用，建议使用 --expose-gc 标志启动');
 }
 
-// 加载主服务
+// 启动主服务
 try {
-    require('./server.js');
-    console.log('✅ 服务启动成功');
+    const CredentialService = require('./server.js');
+    const service = new CredentialService();
+
+    // 优雅关闭处理
+    process.on('SIGINT', async () => {
+        console.log('\n⏹️ 正在优雅关闭...');
+        await service.stop();
+        process.exit(0);
+    });
+
+    process.on('SIGTERM', async () => {
+        console.log('\n⏹️ 正在优雅关闭...');
+        await service.stop();
+        process.exit(0);
+    });
+
+    // 启动服务
+    service.start().then(() => {
+        console.log('✅ 服务启动成功');
+    }).catch(error => {
+        console.error('❌ 服务启动失败:', error.message);
+        console.error('📍 错误详情:', error.stack);
+        process.exit(1);
+    });
 } catch (error) {
-    console.error('❌ 服务启动失败:', error.message);
+    console.error('❌ 服务初始化失败:', error.message);
     console.error('📍 错误详情:', error.stack);
     process.exit(1);
 }
