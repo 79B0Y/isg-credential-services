@@ -565,6 +565,34 @@ class OpenaiModule extends BaseCredentialModule {
      * 从URL下载音频文件
      */
     async downloadAudioFromUrl(audioUrl) {
+        // 尝试多种下载策略
+        const strategies = [
+            () => this.downloadWithIPv4(audioUrl),
+            () => this.downloadWithFallback(audioUrl),
+            () => this.downloadWithSimpleRequest(audioUrl)
+        ];
+
+        let lastError;
+        for (let i = 0; i < strategies.length; i++) {
+            try {
+                this.logger.info(`Trying download strategy ${i + 1}/${strategies.length}`);
+                return await strategies[i]();
+            } catch (error) {
+                lastError = error;
+                this.logger.warn(`Download strategy ${i + 1} failed:`, error.message);
+                if (i < strategies.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+        }
+        
+        throw lastError;
+    }
+
+    /**
+     * 使用 IPv4 下载
+     */
+    async downloadWithIPv4(audioUrl) {
         const https = require('https');
         const http = require('http');
         const url = require('url');
@@ -582,8 +610,12 @@ class OpenaiModule extends BaseCredentialModule {
 
             const req = httpModule.get(audioUrl, {
                 timeout: connectTimeout,
+                family: 4, // 强制使用 IPv4
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36'
+                    'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36',
+                    'Accept': '*/*',
+                    'Accept-Encoding': 'identity', // 禁用压缩以避免问题
+                    'Connection': 'close' // 强制关闭连接
                 }
             }, (res) => {
                 if (res.statusCode !== 200) {
@@ -621,6 +653,122 @@ class OpenaiModule extends BaseCredentialModule {
                 req.destroy();
                 chunks.length = 0; // Clear chunks on timeout
                 reject(new Error(`Download timeout after ${downloadTimeout/1000}s`));
+            });
+        });
+    }
+
+    /**
+     * 备用下载方法 - 使用更简单的配置
+     */
+    async downloadWithFallback(audioUrl) {
+        const https = require('https');
+        const http = require('http');
+        
+        return new Promise((resolve, reject) => {
+            const parsedUrl = require('url').parse(audioUrl);
+            const httpModule = parsedUrl.protocol === 'https:' ? https : http;
+
+            const chunks = [];
+            let totalSize = 0;
+            const maxSize = 10 * 1024 * 1024; // 10MB limit
+
+            const req = httpModule.get(audioUrl, {
+                timeout: 45000, // 45秒超时
+                family: 4,
+                headers: {
+                    'User-Agent': 'curl/7.68.0'
+                }
+            }, (res) => {
+                if (res.statusCode !== 200) {
+                    reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
+                    return;
+                }
+
+                res.on('data', chunk => {
+                    totalSize += chunk.length;
+                    if (totalSize > maxSize) {
+                        req.destroy();
+                        reject(new Error(`File too large (>${Math.round(maxSize/1024/1024)}MB)`));
+                        return;
+                    }
+                    chunks.push(chunk);
+                });
+
+                res.on('end', () => {
+                    try {
+                        const buffer = Buffer.concat(chunks);
+                        chunks.length = 0;
+                        resolve(buffer);
+                    } catch (error) {
+                        reject(new Error(`Buffer creation failed: ${error.message}`));
+                    }
+                });
+            });
+
+            req.on('error', (error) => {
+                chunks.length = 0;
+                reject(error);
+            });
+
+            req.setTimeout(60000, () => {
+                req.destroy();
+                chunks.length = 0;
+                reject(new Error('Download timeout after 60s'));
+            });
+        });
+    }
+
+    /**
+     * 最简单的下载方法
+     */
+    async downloadWithSimpleRequest(audioUrl) {
+        const https = require('https');
+        const http = require('http');
+        
+        return new Promise((resolve, reject) => {
+            const parsedUrl = require('url').parse(audioUrl);
+            const httpModule = parsedUrl.protocol === 'https:' ? https : http;
+
+            const chunks = [];
+            let totalSize = 0;
+            const maxSize = 5 * 1024 * 1024; // 5MB limit
+
+            const req = httpModule.get(audioUrl, (res) => {
+                if (res.statusCode !== 200) {
+                    reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
+                    return;
+                }
+
+                res.on('data', chunk => {
+                    totalSize += chunk.length;
+                    if (totalSize > maxSize) {
+                        req.destroy();
+                        reject(new Error(`File too large (>${Math.round(maxSize/1024/1024)}MB)`));
+                        return;
+                    }
+                    chunks.push(chunk);
+                });
+
+                res.on('end', () => {
+                    try {
+                        const buffer = Buffer.concat(chunks);
+                        chunks.length = 0;
+                        resolve(buffer);
+                    } catch (error) {
+                        reject(new Error(`Buffer creation failed: ${error.message}`));
+                    }
+                });
+            });
+
+            req.on('error', (error) => {
+                chunks.length = 0;
+                reject(error);
+            });
+
+            req.setTimeout(30000, () => {
+                req.destroy();
+                chunks.length = 0;
+                reject(new Error('Download timeout after 30s'));
             });
         });
     }
