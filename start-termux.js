@@ -200,7 +200,18 @@ process.on('SIGINT', () => {
 // 启动服务
 console.log('🚀 启动 Credential Service...');
 
-// 启动内存监控
+// 使用 TermuxHelper 进行环境检测和内存保护
+const TermuxHelper = require('./lib/termux-helper.js');
+
+// 检测环境并设置内存保护
+console.log('🤖 检测到 Termux 环境，启用内存优化...');
+TermuxHelper.setupMemoryProtection({
+    info: (msg) => console.log(`[INFO] ${msg}`),
+    warn: (msg) => console.warn(`[WARN] ${msg}`),
+    error: (msg) => console.error(`[ERROR] ${msg}`)
+});
+
+// 启动内存监控（作为备用）
 startMemoryMonitoring();
 
 // 强制垃圾回收（如果可用）
