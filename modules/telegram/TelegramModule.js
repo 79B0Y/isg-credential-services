@@ -46,6 +46,10 @@ class TelegramModule extends BaseCredentialModule {
         // 最近聊天ID记录
         this.lastChatId = null;
         this.lastChatInfo = null;
+
+        // 防止重复初始化的标志
+        this.isInitializing = false;
+        this.hasAutoStarted = false;
     }
 
     /**
@@ -91,49 +95,67 @@ class TelegramModule extends BaseCredentialModule {
             retries: this.config.retries || 3
         });
 
-        // 检查是否已有有效凭据，如果有则自动启动功能
-        try {
-            const credentialsResult = await this.getCredentials();
-            if (credentialsResult.success && credentialsResult.data.bot_token) {
-                this.logger.info('[AUTO-START] 发现已保存的凭据，验证并自动启动功能...');
-                
-                // 验证现有凭据
-                const validationResult = await this.performValidation(credentialsResult.data);
-                if (validationResult.success) {
-                    this.logger.info('[AUTO-START] 凭据验证成功，启动自动功能');
-                    
-                    // 延迟启动，避免初始化冲突
-                    setTimeout(async () => {
-                        try {
-                            // 启动WebSocket服务器
-                            if (!this.wss) {
-                                this.logger.info('[AUTO-START] 初始化时启动WebSocket服务器...');
-                                await this.startWebSocketServer();
-                                this.logger.info('[AUTO-START] ✅ WebSocket服务器启动成功');
-                            }
+        // 检查是否已有有效凭据，如果有则自动启动功能（但避免重复启动）
+        if (!this.hasAutoStarted && !this.isInitializing) {
+            this.isInitializing = true;
+            try {
+                const credentialsResult = await this.getCredentials();
+                if (credentialsResult.success && credentialsResult.data.bot_token) {
+                    this.logger.info('[AUTO-START] 发现已保存的凭据，验证并自动启动功能...');
 
-                            // 启动消息轮询
-                            if (!this.isPolling) {
-                                this.logger.info('[AUTO-START] 初始化时启动消息轮询...');
-                                const pollingResult = await this.startPolling(credentialsResult.data);
-                                if (pollingResult.success) {
-                                    this.logger.info('[AUTO-START] ✅ 消息轮询启动成功');
-                                } else {
-                                    this.logger.warn('[AUTO-START] 消息轮询启动失败:', pollingResult.message);
+                    // 验证现有凭据
+                    const validationResult = await this.performValidation(credentialsResult.data);
+                    if (validationResult.success) {
+                        this.logger.info('[AUTO-START] 凭据验证成功，启动自动功能');
+
+                        // 延迟启动，避免初始化冲突
+                        setTimeout(async () => {
+                            try {
+                                // 启动WebSocket服务器（仅在Termux非proot环境下）
+                                if (!this.wss && (!termuxConfig.isProot || !termuxConfig.isTermux)) {
+                                    this.logger.info('[AUTO-START] 初始化时启动WebSocket服务器...');
+                                    await this.startWebSocketServer();
+                                    this.logger.info('[AUTO-START] ✅ WebSocket服务器启动成功');
+                                } else if (termuxConfig.isProot) {
+                                    this.logger.info('[AUTO-START] Termux proot环境，跳过WebSocket启动');
                                 }
+
+                                // 启动消息轮询
+                                if (!this.isPolling) {
+                                    this.logger.info('[AUTO-START] 初始化时启动消息轮询...');
+                                    const pollingResult = await this.startPolling(credentialsResult.data);
+                                    if (pollingResult.success) {
+                                        this.logger.info('[AUTO-START] ✅ 消息轮询启动成功');
+                                        this.hasAutoStarted = true; // 标记已成功自动启动
+                                    } else {
+                                        this.logger.warn('[AUTO-START] 消息轮询启动失败:', pollingResult.message);
+                                    }
+                                } else {
+                                    this.logger.info('[AUTO-START] 消息轮询已在运行，跳过启动');
+                                    this.hasAutoStarted = true;
+                                }
+                            } catch (autoStartError) {
+                                this.logger.warn('[AUTO-START] 自动启动过程中出错:', autoStartError.message);
+                            } finally {
+                                this.isInitializing = false;
                             }
-                        } catch (autoStartError) {
-                            this.logger.warn('[AUTO-START] 自动启动过程中出错:', autoStartError.message);
-                        }
-                    }, 2000); // 2秒延迟
+                        }, 2000); // 2秒延迟
+                    } else {
+                        this.logger.info('[AUTO-START] 凭据验证失败，跳过自动启动:', validationResult.error);
+                        this.isInitializing = false;
+                    }
                 } else {
-                    this.logger.info('[AUTO-START] 凭据验证失败，跳过自动启动:', validationResult.error);
+                    this.logger.info('[AUTO-START] 未找到有效凭据，等待用户配置');
+                    this.isInitializing = false;
                 }
-            } else {
-                this.logger.info('[AUTO-START] 未找到有效凭据，等待用户配置');
+            } catch (autoStartError) {
+                this.logger.warn('[AUTO-START] 检查自动启动失败:', autoStartError.message);
+                this.isInitializing = false;
             }
-        } catch (autoStartError) {
-            this.logger.warn('[AUTO-START] 检查自动启动失败:', autoStartError.message);
+        } else if (this.hasAutoStarted) {
+            this.logger.info('[AUTO-START] 已经自动启动过，跳过重复启动');
+        } else if (this.isInitializing) {
+            this.logger.info('[AUTO-START] 正在初始化中，跳过重复启动');
         }
     }
 
@@ -906,9 +928,13 @@ class TelegramModule extends BaseCredentialModule {
      */
     async pollUpdates(botToken) {
         try {
+            // 根据环境调整轮询超时
+            const termuxConfig = TermuxHelper.getOptimizedConfig();
+            const pollingTimeout = termuxConfig.isTermux ? 10 : 25; // Termux环境使用更短的超时
+
             const params = {
                 offset: this.lastUpdateId + 1,
-                timeout: 25,
+                timeout: pollingTimeout,
                 allowed_updates: ['message', 'edited_message', 'channel_post', 'edited_channel_post']
             };
 
@@ -985,9 +1011,24 @@ class TelegramModule extends BaseCredentialModule {
                     updated_at: new Date()
                 };
 
-                // 保持历史记录在合理范围内
-                if (this.messageHistory.length > 1000) {
-                    this.messageHistory = this.messageHistory.slice(-500);
+                // 保持历史记录在合理范围内（根据环境调整）
+                const termuxConfig = TermuxHelper.getOptimizedConfig();
+                const maxHistory = termuxConfig.memory.maxMessageHistory;
+
+                if (this.messageHistory.length > maxHistory) {
+                    const keepCount = Math.floor(maxHistory / 2);
+                    this.messageHistory = this.messageHistory.slice(-keepCount);
+
+                    // 同时清理messages Map以释放内存
+                    if (termuxConfig.isTermux && this.messages.size > maxHistory) {
+                        const messagesToDelete = this.messageHistory.slice(0, this.messageHistory.length - keepCount);
+                        messagesToDelete.forEach(msg => this.messages.delete(msg.id));
+
+                        // 强制垃圾回收
+                        if (termuxConfig.features.formDataCleanup) {
+                            TermuxHelper.forceGarbageCollection();
+                        }
+                    }
                 }
 
                 // 广播到WebSocket客户端

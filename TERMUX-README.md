@@ -134,7 +134,47 @@ done
 2. **并发限制**: 线程池大小限制为 2
 3. **缓存限制**: Home Assistant 缓存间隔增加到 120 秒
 
+## 已应用的修复
+
+### Telegram模块优化
+- **防重复启动**: 添加 `hasAutoStarted` 和 `isInitializing` 标志防止重复自动启动
+- **轮询超时优化**: Termux环境下轮询超时从25秒降到10秒
+- **内存清理**: 消息历史在Termux环境下限制为100条（原1000条）
+- **WebSocket禁用**: 在proot环境下自动禁用WebSocket以避免内存问题
+
+### OpenAI模块优化
+- **文件大小限制**: Termux环境下音频文件限制为10MB（原25MB）
+- **内存安全**: 添加buffer创建错误处理和FormData清理
+- **下载保护**: 添加文件大小检查和内存溢出保护
+
+### 系统级优化
+- **环境检测**: 自动检测Termux和proot环境
+- **内存管理**: 定期强制垃圾回收
+- **启动优化**: 提供专用的 `start-termux.js` 启动器
+
+## 使用建议
+
+### 启动Telegram轮询
+```bash
+# 使用优化启动器（推荐）
+node --expose-gc start-termux.js
+
+# 手动控制轮询
+curl -X POST http://localhost:3000/api/telegram/telegram/start-polling
+curl -X POST http://localhost:3000/api/telegram/telegram/stop-polling
+```
+
+### 监控内存使用
+```bash
+# 查看实时内存使用（每分钟输出）
+grep "Memory usage" <(tail -f logfile.log)
+
+# 查看Telegram轮询状态
+curl http://localhost:3000/api/telegram/telegram/polling-status
+```
+
 ## 更新日志
 
+- **v1.0.2**: 修复内存泄漏和重复启动问题，优化Termux环境支持
 - **v1.0.1**: 添加 Termux 环境检测和内存优化
 - **v1.0.0**: 初始版本，基本功能
