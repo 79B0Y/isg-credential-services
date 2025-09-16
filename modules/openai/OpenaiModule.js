@@ -529,65 +529,100 @@ class OpenaiModule extends BaseCredentialModule {
         try {
             this.logger.info('Downloading audio from URL...');
             
-            // 下载音频文件
-            const https = require('https');
-            const http = require('http');
-            const url = require('url');
+            // 下载音频文件（带重试机制）
+            const termuxConfig = TermuxHelper.getOptimizedConfig();
+            const maxRetries = termuxConfig.network.retries;
+            let lastError;
             
-            const audioBuffer = await new Promise((resolve, reject) => {
-                const parsedUrl = url.parse(audioUrl);
-                const httpModule = parsedUrl.protocol === 'https:' ? https : http;
-
-                const chunks = [];
-                let totalSize = 0;
-                const termuxConfig = TermuxHelper.getOptimizedConfig();
-                const maxSize = termuxConfig.memory.maxFileSize;
-
-                const req = httpModule.get(audioUrl, (res) => {
-                    if (res.statusCode !== 200) {
-                        reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
-                        return;
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    this.logger.info(`Download attempt ${attempt}/${maxRetries}`);
+                    const audioBuffer = await this.downloadAudioFromUrl(audioUrl);
+                    this.logger.info('Audio downloaded successfully');
+                    
+                    // 转文字
+                    return await this.transcribeAudio(audioBuffer, options, credentials);
+                } catch (error) {
+                    lastError = error;
+                    this.logger.warn(`Download attempt ${attempt} failed:`, error.message);
+                    
+                    if (attempt < maxRetries) {
+                        const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000); // 指数退避，最大5秒
+                        this.logger.info(`Retrying in ${delay}ms...`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
                     }
-
-                    res.on('data', chunk => {
-                        totalSize += chunk.length;
-                        if (totalSize > maxSize) {
-                            req.destroy();
-                            reject(new Error(`File too large (>${Math.round(maxSize/1024/1024)}MB)`));
-                            return;
-                        }
-                        chunks.push(chunk);
-                    });
-
-                    res.on('end', () => {
-                        try {
-                            const buffer = Buffer.concat(chunks);
-                            chunks.length = 0; // Clear chunks array
-                            resolve(buffer);
-                        } catch (error) {
-                            reject(new Error(`Buffer creation failed: ${error.message}`));
-                        }
-                    });
-                });
-
-                req.on('error', (error) => {
-                    chunks.length = 0; // Clear chunks on error
-                    reject(error);
-                });
-
-                req.setTimeout(this.config.timeout || 30000, () => {
-                    req.destroy();
-                    chunks.length = 0; // Clear chunks on timeout
-                    reject(new Error('Download timeout'));
-                });
-            });
-
-            // 转文字
-            return await this.transcribeAudio(audioBuffer, options, credentials);
+                }
+            }
+            
+            throw lastError;
         } catch (error) {
             this.logger.error('Failed to download and transcribe audio:', error);
             return { success: false, error: error.message };
         }
+    }
+
+    /**
+     * 从URL下载音频文件
+     */
+    async downloadAudioFromUrl(audioUrl) {
+        const https = require('https');
+        const http = require('http');
+        const url = require('url');
+        
+        return new Promise((resolve, reject) => {
+            const parsedUrl = url.parse(audioUrl);
+            const httpModule = parsedUrl.protocol === 'https:' ? https : http;
+
+            const chunks = [];
+            let totalSize = 0;
+            const termuxConfig = TermuxHelper.getOptimizedConfig();
+            const maxSize = termuxConfig.memory.maxFileSize;
+            const downloadTimeout = termuxConfig.network.downloadTimeout;
+            const connectTimeout = termuxConfig.network.connectTimeout;
+
+            const req = httpModule.get(audioUrl, {
+                timeout: connectTimeout,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36'
+                }
+            }, (res) => {
+                if (res.statusCode !== 200) {
+                    reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
+                    return;
+                }
+
+                res.on('data', chunk => {
+                    totalSize += chunk.length;
+                    if (totalSize > maxSize) {
+                        req.destroy();
+                        reject(new Error(`File too large (>${Math.round(maxSize/1024/1024)}MB)`));
+                        return;
+                    }
+                    chunks.push(chunk);
+                });
+
+                res.on('end', () => {
+                    try {
+                        const buffer = Buffer.concat(chunks);
+                        chunks.length = 0; // Clear chunks array
+                        resolve(buffer);
+                    } catch (error) {
+                        reject(new Error(`Buffer creation failed: ${error.message}`));
+                    }
+                });
+            });
+
+            req.on('error', (error) => {
+                chunks.length = 0; // Clear chunks on error
+                reject(error);
+            });
+
+            req.setTimeout(downloadTimeout, () => {
+                req.destroy();
+                chunks.length = 0; // Clear chunks on timeout
+                reject(new Error(`Download timeout after ${downloadTimeout/1000}s`));
+            });
+        });
     }
 
     /**
