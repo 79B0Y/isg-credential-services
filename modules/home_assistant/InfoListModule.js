@@ -695,8 +695,11 @@ class InfoListModule {
                         entity.room_name.toLowerCase() === room_name.toLowerCase();
                     
                     // 设备类型匹配（不区分大小写）
-                    const typeMatch = entity.device_type && 
-                        entity.device_type.toLowerCase() === device_type.toLowerCase();
+                    // 支持匹配domain（如sensor, binary_sensor）或device_type（如humidity, motion）
+                    const typeMatch = (entity.device_type && 
+                        entity.device_type.toLowerCase() === device_type.toLowerCase()) ||
+                        (entity.domain && 
+                        entity.domain.toLowerCase() === device_type.toLowerCase());
 
                     return roomMatch && typeMatch;
                 });
