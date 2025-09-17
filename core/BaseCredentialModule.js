@@ -98,7 +98,7 @@ class BaseCredentialModule {
             return { success: true, data: credentials };
         } catch (error) {
             if (error.code === 'ENOENT') {
-                return { success: true, data: {} };
+                return { success: false, error: 'No credentials found' };
             }
             this.logger.error(`Failed to get credentials for ${this.name}:`, error);
             return { success: false, error: error.message };
