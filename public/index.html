@@ -1103,9 +1103,10 @@
                     <span class="status-dot"></span>
                     <span>Checking connection...</span>
                 </div>
-                <button class="btn btn-primary" onclick="showApiDocumentation()" style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3);">
+                <!-- API Documentation button hidden for clean release -->
+                <!-- <button class="btn btn-primary" onclick="showApiDocumentation()" style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3);">
                     📚 API Documentation
-                </button>
+                </button> -->
                 <button class="btn btn-primary" onclick="showQRCode()" style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3);">
                     📱 QR Code
                 </button>
@@ -1132,8 +1133,8 @@
             </div>
         </div>
 
-        <!-- API Documentation Links -->
-        <div class="api-documentation hidden" id="apiDocumentation">
+        <!-- API Documentation Links - Hidden for clean release -->
+        <div class="api-documentation hidden" id="apiDocumentation" style="display: none;">
             <div class="messaging-header">
                 <h2>📚 API Documentation</h2>
                 <p>Access detailed API documentation and testing tools for each service</p>
@@ -1230,7 +1231,8 @@
                 <button class="tab-btn active" onclick="switchTab('messages')">Message History</button>
                 <button class="tab-btn" onclick="switchTab('send')">Send Message</button>
                 <button class="tab-btn" onclick="switchTab('webhook')">Webhook Settings</button>
-                <button class="tab-btn" onclick="switchTab('api')">API Documentation</button>
+                <!-- API Documentation tab hidden for clean release -->
+                <!-- <button class="tab-btn" onclick="switchTab('api')">API Documentation</button> -->
             </div>
             
             <!-- Message History Tab -->
@@ -1298,8 +1300,8 @@
                 </div>
             </div>
             
-            <!-- API Documentation Tab -->
-            <div class="tab-content" id="tab-api">
+            <!-- API Documentation Tab - Hidden for clean release -->
+            <div class="tab-content hidden" id="tab-api" style="display: none;">
                 <div class="api-documentation">
                     <div class="api-section">
                         <h3>📚 API Documentation</h3>
@@ -3198,14 +3200,19 @@
         // API documentation management functions
         // =================
 
-        // Show API documentation
+        // Show API documentation - Hidden for clean release
         function showApiDocumentation() {
+            // Function disabled for clean release
+            console.log('API Documentation is hidden in clean release');
+            return;
+            /*
             document.getElementById('apiDocumentation').classList.remove('hidden');
             document.getElementById('apiDocumentation').scrollIntoView({ 
                 behavior: 'smooth', 
                 block: 'start' 
             });
             showToast('API documentation displayed', 'success');
+            */
         }
         
         // Show QR code
@@ -3323,22 +3330,37 @@
         });
         
 
-        // Show all API documentation
+        // Show all API documentation - Hidden for clean release
         function showAllApiDocs() {
+            // Function disabled for clean release
+            console.log('API Documentation is hidden in clean release');
+            return;
+            /*
             showApiDocumentation();
             switchApiTab('overview');
+            */
         }
 
-        // Show Telegram API documentation
+        // Show Telegram API documentation - Hidden for clean release
         function showTelegramApiDocs() {
+            // Function disabled for clean release
+            console.log('API Documentation is hidden in clean release');
+            return;
+            /*
             showApiDocumentation();
             switchApiTab('telegram');
+            */
         }
 
-        // Show Home Assistant API documentation
+        // Show Home Assistant API documentation - Hidden for clean release
         function showHomeAssistantApiDocs() {
+            // Function disabled for clean release
+            console.log('API Documentation is hidden in clean release');
+            return;
+            /*
             showApiDocumentation();
             switchApiTab('home_assistant');
+            */
         }
 
         // Switch API tab
