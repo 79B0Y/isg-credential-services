@@ -3,25 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Assistant API 文档 - Credential Service</title>
+    <title>🏠 Home Assistant API 完整测试文档</title>
     <style>
         :root {
-            --primary-color: #6366f1;
-            --primary-dark: #4f46e5;
-            --success-color: #10b981;
-            --danger-color: #ef4444;
-            --warning-color: #f59e0b;
-            --info-color: #3b82f6;
-            --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-300: #d1d5db;
-            --gray-400: #9ca3af;
-            --gray-500: #6b7280;
-            --gray-600: #4b5563;
-            --gray-700: #374151;
-            --gray-800: #1f2937;
-            --gray-900: #111827;
+            --primary: #41b883;
+            --primary-dark: #369970;
+            --secondary: #3273dc;
+            --success: #48c78e;
+            --danger: #f14668;
+            --warning: #ffe08a;
+            --info: #3e8ed0;
+            --light: #f5f5f5;
+            --dark: #363636;
+            --white: #ffffff;
+            --gray-50: #fafafa;
+            --gray-100: #f5f5f5;
+            --gray-200: #eeeeee;
+            --gray-300: #e0e0e0;
+            --gray-400: #bdbdbd;
+            --gray-500: #9e9e9e;
+            --gray-600: #757575;
+            --gray-700: #616161;
+            --gray-800: #424242;
+            --gray-900: #212121;
         }
 
         * {
@@ -35,25 +39,29 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: var(--gray-800);
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 2rem 1rem;
+            padding: 1rem;
         }
 
         .header {
             text-align: center;
             color: white;
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .header h1 {
             font-size: 2.5rem;
-            font-weight: 700;
             margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
         .header p {
@@ -61,2820 +69,1513 @@
             opacity: 0.9;
         }
 
-        .api-documentation {
-            background: white;
-            border-radius: 1rem;
-            padding: 2rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .api-section {
-            margin-bottom: 2rem;
-        }
-
-        .api-section h2 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 0.5rem;
-        }
-
-        .api-section h3 {
-            color: var(--gray-700);
-            margin-bottom: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .api-endpoint {
-            background: var(--gray-50);
-            border: 1px solid var(--gray-200);
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            overflow: hidden;
-        }
-
-        .endpoint-header {
-            display: flex;
-            align-items: center;
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
-            padding: 1rem;
-            background: var(--gray-100);
-            border-bottom: 1px solid var(--gray-200);
+            margin-top: 1rem;
         }
 
-        .method {
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-weight: bold;
-            font-size: 0.8rem;
-            min-width: 60px;
+        .stat-card {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1rem;
+            border-radius: 0.5rem;
             text-align: center;
         }
 
-        .method.get {
-            background: var(--success-color);
-            color: white;
-        }
-
-        .method.post {
-            background: var(--warning-color);
-            color: white;
-        }
-
-        .method.delete {
-            background: var(--danger-color);
-            color: white;
-        }
-
-        .method.put {
-            background: var(--info-color);
-            color: white;
-        }
-
-        .url {
-            font-family: 'Courier New', monospace;
-            background: var(--gray-200);
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            flex: 1;
-        }
-
-        .endpoint-description {
-            padding: 1rem;
-            color: var(--gray-600);
-            font-style: italic;
-        }
-
-        .endpoint-example {
-            padding: 1rem;
-            background: var(--gray-900);
-            color: var(--gray-100);
-        }
-
-        .endpoint-example pre {
-            margin: 0;
-            overflow-x: auto;
-        }
-
-        .endpoint-example code {
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        .api-test-results {
-            background: var(--gray-50);
-            border: 1px solid var(--gray-200);
-            border-radius: 0.5rem;
-            padding: 1rem;
-            min-height: 100px;
-        }
-
-        .test-result {
-            margin-bottom: 1rem;
-            padding: 0.75rem;
-            border-radius: 0.25rem;
-            border-left: 4px solid;
-        }
-
-        .test-result.success {
-            background: #f0f9ff;
-            border-left-color: var(--success-color);
-            color: var(--success-color);
-        }
-
-        .test-result.error {
-            background: #fef2f2;
-            border-left-color: var(--danger-color);
-            color: var(--danger-color);
-        }
-
-        .test-result.info {
-            background: #f0f9ff;
-            border-left-color: var(--info-color);
-            color: var(--info-color);
-        }
-
-        .test-result pre {
-            background: var(--gray-100);
-            padding: 0.5rem;
-            border-radius: 0.25rem;
-            margin-top: 0.5rem;
-            overflow-x: auto;
-            font-size: 0.8rem;
-        }
-
-        .test-result-container {
-            margin-top: 1rem;
-            background: var(--gray-50);
-            border-radius: 0.5rem;
-            border: 1px solid var(--gray-200);
-            min-height: 50px;
-        }
-
-        .filter-section {
-            margin: 1rem 0;
-            padding: 1rem;
-            background: var(--gray-50);
-            border-radius: 0.5rem;
-            border: 1px solid var(--gray-200);
-        }
-
-        .filter-group {
-            margin-bottom: 1rem;
-        }
-
-        .filter-group label {
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
             display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--gray-700);
         }
 
-        .filter-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--gray-300);
-            border-radius: 0.375rem;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        .stat-label {
             font-size: 0.875rem;
-            resize: vertical;
-            min-height: 60px;
+            opacity: 0.8;
         }
 
-        .filter-group textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        /* Credentials Panel */
+        .credentials-panel {
+            background: var(--white);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .filter-actions {
+        .credentials-header {
             display: flex;
-            gap: 0.75rem;
-            margin-top: 1rem;
-        }
-
-        .test-result-header {
-            padding: 0.75rem 1rem;
-            background: var(--gray-100);
-            border-radius: 0.5rem 0.5rem 0 0;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            font-weight: 600;
-            color: var(--gray-700);
-            border-bottom: 1px solid var(--gray-200);
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
         }
 
-        .test-result-header:hover {
-            background: var(--gray-200);
-        }
-
-        .test-result-content {
-            padding: 1rem;
-            display: none;
-        }
-
-        .test-result-content.expanded {
-            display: block;
-        }
-
-        .test-result-toggle {
-            font-size: 1.2rem;
-            transition: transform 0.2s ease;
-        }
-
-        .test-result-toggle.expanded {
-            transform: rotate(90deg);
-        }
-
-        .endpoint-input {
-            margin: 1rem 0;
-            padding: 1rem;
-            background: #f8f9fa;
-            border-radius: 0.5rem;
-            border: 1px solid #e9ecef;
-        }
-
-        .endpoint-input label {
-            font-weight: 600;
-            color: var(--gray-700);
-            margin-right: 0.5rem;
-        }
-
-        .endpoint-input input, .endpoint-input select {
-            border: 1px solid #ced4da;
-            border-radius: 0.25rem;
-            padding: 0.375rem 0.75rem;
-            font-size: 0.875rem;
-            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        }
-
-        .endpoint-input input:focus, .endpoint-input select:focus {
-            outline: 0;
-            border-color: #80bdff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        }
-        
-        .endpoint-input button {
-            margin-right: 10px;
-            margin-top: 10px;
-        }
-        
-        .device-list {
-            margin-top: 10px;
-        }
-        
-        .device-item {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 4px;
-            padding: 10px;
-            margin: 5px 0;
-        }
-        
-        .device-item div {
-            margin: 2px 0;
-        }
-
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 0.25rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
+        .credentials-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-error {
+            background: var(--danger);
+            color: white;
+        }
+
+        .status-loading {
+            background: var(--warning);
+            color: var(--dark);
+        }
+
+        .credentials-info {
+            background: var(--gray-50);
+            border: 2px solid var(--success);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .credential-item {
+            margin: 0.5rem 0;
+            font-size: 0.875rem;
+        }
+
+        .credential-label {
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        .credential-value {
+            color: var(--gray-600);
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
         .btn-primary {
-            background-color: var(--primary-color);
+            background: var(--primary);
             color: white;
         }
 
         .btn-primary:hover {
-            background-color: var(--primary-dark);
+            background: var(--primary-dark);
         }
 
-        .btn-sm {
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-300);
+        }
+
+        .btn-info {
+            background: var(--info);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            background: var(--white);
+            border-radius: 1rem 1rem 0 0;
+            overflow-x: auto;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tab:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: var(--gray-50);
+        }
+
+        /* Content Area */
+        .content-area {
+            background: var(--white);
+            border-radius: 0 0 1rem 1rem;
+            min-height: 60vh;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* API Section */
+        .api-section {
+            margin-bottom: 3rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--gray-800);
+        }
+
+        .section-count {
+            background: var(--primary);
+            color: white;
             padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
             font-size: 0.75rem;
+            font-weight: 600;
         }
 
-        .toc {
+        /* API Endpoint Card */
+        .endpoint-card {
             background: var(--gray-50);
             border: 1px solid var(--gray-200);
-            border-radius: 0.5rem;
-            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .endpoint-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary);
+        }
+
+        .endpoint-header {
+            background: var(--white);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .endpoint-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .method-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .method-get {
+            background: var(--success);
+            color: white;
+        }
+
+        .method-post {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .method-put {
+            background: var(--warning);
+            color: var(--dark);
+        }
+
+        .method-delete {
+            background: var(--danger);
+            color: white;
+        }
+
+        .endpoint-path {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            background: var(--gray-100);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+
+        .endpoint-description {
+            color: var(--gray-600);
+            flex: 1;
+        }
+
+        .expand-icon {
+            transition: transform 0.2s;
+        }
+
+        .endpoint-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .endpoint-content {
+            display: none;
+            padding: 1.5rem;
+        }
+
+        .endpoint-card.expanded .endpoint-content {
+            display: block;
+        }
+
+        .endpoint-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
             margin-bottom: 2rem;
         }
 
-        .toc h3 {
-            margin-bottom: 1rem;
-            color: var(--primary-color);
+        @media (max-width: 768px) {
+            .endpoint-details {
+                grid-template-columns: 1fr;
+            }
         }
 
-        .toc ul {
+        .detail-section h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+        }
+
+        .param-list {
             list-style: none;
         }
 
-        .toc li {
+        .param-item {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
             margin-bottom: 0.5rem;
         }
 
-        .toc a {
+        .param-name {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        .param-required {
+            background: var(--danger);
+            color: white;
+            padding: 0.125rem 0.375rem;
+            border-radius: 0.25rem;
+            font-size: 0.625rem;
+            margin-left: 0.5rem;
+        }
+
+        .param-optional {
+            background: var(--gray-400);
+            color: white;
+            padding: 0.125rem 0.375rem;
+            border-radius: 0.25rem;
+            font-size: 0.625rem;
+            margin-left: 0.5rem;
+        }
+
+        .param-type {
+            font-style: italic;
             color: var(--gray-600);
-            text-decoration: none;
-            transition: color 0.3s;
         }
 
-        .toc a:hover {
-            color: var(--primary-color);
+        .param-description {
+            color: var(--gray-700);
+            margin-top: 0.25rem;
         }
 
-        .back-link {
-            display: inline-flex;
+        /* Test Panel */
+        .test-panel {
+            background: var(--white);
+            border: 2px solid var(--primary);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .test-header {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            margin-bottom: 1rem;
+        }
+
+        .test-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: white;
-            text-decoration: none;
+        }
+
+        .form-group {
             margin-bottom: 1rem;
-            padding: 0.5rem 1rem;
-            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--gray-700);
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-300);
             border-radius: 0.5rem;
-            transition: background 0.3s;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
         }
 
-        .back-link:hover {
-            background: rgba(255, 255, 255, 0.2);
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(65, 184, 131, 0.1);
         }
 
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .endpoint-header {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 0.5rem;
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .input-group .form-input {
+            flex: 1;
+        }
+
+        /* Response Panel */
+        .response-panel {
+            background: var(--gray-900);
+            color: var(--white);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.875rem;
+        }
+
+        .response-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--gray-600);
+        }
+
+        .response-title {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .response-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .response-body {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
             }
         }
 
-        .matched-device {
+        /* Quick Actions */
+        .quick-actions {
             background: var(--gray-50);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .quick-actions h3 {
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-card {
+            background: var(--white);
             border: 1px solid var(--gray-200);
             border-radius: 0.5rem;
             padding: 1rem;
-            margin: 0.5rem 0;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .matched-device div {
-            margin: 0.25rem 0;
+        .action-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .matched-device strong {
-            color: var(--primary-color);
+        .action-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
         }
 
-        /* JSON输入框样式 */
-        .endpoint-input textarea {
-            width: 100%;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.4;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            resize: vertical;
-            background-color: #f8f9fa;
-            transition: border-color 0.3s ease;
+        .action-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
         }
 
-        .endpoint-input textarea:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-        }
-
-        .endpoint-input textarea:hover {
-            border-color: #999;
-        }
-
-        /* 按钮样式 */
-        .btn-info {
-            background-color: #17a2b8;
-            border-color: #17a2b8;
-            color: white;
-        }
-
-        .btn-info:hover {
-            background-color: #138496;
-            border-color: #117a8b;
-        }
-
-        .btn-warning {
-            background-color: #ffc107;
-            border-color: #ffc107;
-            color: #212529;
-        }
-
-        .btn-warning:hover {
-            background-color: #e0a800;
-            border-color: #d39e00;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: var(--gray-50);
-            padding: 6px 10px;
-            border-radius: 4px;
-            border: 1px solid var(--gray-200);
-        }
-
-        .stat-label {
-            font-size: 0.9em;
+        .action-description {
+            font-size: 0.875rem;
             color: var(--gray-600);
         }
 
-        .stat-value {
-            font-weight: 600;
-            color: var(--primary-color);
+        /* Log Panel */
+        .log-panel {
+            background: var(--gray-900);
+            color: var(--gray-300);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.75rem;
+            max-height: 300px;
+            overflow-y: auto;
         }
 
-        .badge {
-            display: inline-block;
-            padding: 2px 6px;
-            font-size: 0.8em;
-            border-radius: 3px;
-            background-color: var(--gray-200);
-            color: var(--gray-700);
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.25rem 0;
         }
 
-        .badge-success {
-            background-color: var(--success-color);
-            color: white;
+        .log-timestamp {
+            color: var(--gray-500);
+            margin-right: 0.5rem;
         }
 
-        .badge-warning {
-            background-color: var(--warning-color);
-            color: white;
+        .log-level-info {
+            color: var(--info);
         }
 
-        .filter-controls {
-            background-color: var(--gray-50);
-            padding: 15px;
-            border-radius: 6px;
-            border: 1px solid var(--gray-200);
-            margin-bottom: 10px;
+        .log-level-success {
+            color: var(--success);
         }
 
-        .parameter-section h4 {
-            color: var(--gray-700);
-            margin-bottom: 10px;
-            font-size: 1.1em;
+        .log-level-error {
+            color: var(--danger);
+        }
+
+        .log-level-warn {
+            color: var(--warning);
+        }
+
+        /* Utilities */
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-2 {
+            margin-top: 1rem;
+        }
+
+        .mb-2 {
+            margin-bottom: 1rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- 头部 -->
+        <!-- Header -->
         <div class="header">
-            <a href="/" class="back-link">
-                ← 返回主界面
-            </a>
-            <h1>🏠 Home Assistant API 文档</h1>
-            <p>完整的Home Assistant API接口说明和测试工具</p>
+            <h1>🏠 Home Assistant API 完整测试文档</h1>
+            <p>模块化架构 · 实时缓存 · 完整测试覆盖</p>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number">7</span>
+                    <span class="stat-label">API端点</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">1</span>
+                    <span class="stat-label">功能模块</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">测试覆盖</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">1分钟</span>
+                    <span class="stat-label">缓存刷新</span>
+                </div>
+            </div>
         </div>
 
-        <!-- API文档 -->
-        <div class="api-documentation">
-            <!-- 目录 -->
-            <div class="toc">
-                <h3>📋 目录</h3>
-                <ul>
-                    <li><a href="#overview">概述</a></li>
-                    <li><a href="#authentication">认证</a></li>
-                    <li><a href="#basic-info">基础信息</a></li>
-                    <li><a href="#enhanced-states">增强状态数据</a></li>
-                    <li><a href="#entity-registry">实体注册表</a></li>
-                    <li><a href="#devices">设备列表</a></li>
-                    <li><a href="#rooms">房间列表</a></li>
-                    <li><a href="#floors">楼层列表</a></li>
-                    <li><a href="#services">服务调用</a></li>
-                    <li><a href="#device-matching">智能设备匹配</a></li>
-                    <li><a href="#control-device-matching">控制设备匹配</a></li>
-                    <li><a href="#batch-control">批量设备控制</a></li>
-                </ul>
-            </div>
-
-            <!-- 概述 -->
-            <div class="api-section" id="overview">
-                <h2>📖 概述</h2>
-                <p>Home Assistant API允许您通过RESTful接口与Home Assistant实例进行交互。本服务提供了完整的API封装，支持获取实体状态、调用服务、管理配置等功能。</p>
-                
-                <h3>🔧 前置条件</h3>
-                <ul>
-                    <li>Home Assistant实例正在运行</li>
-                    <li>已创建长期访问令牌（Long-lived Access Token）</li>
-                    <li>在Credential Service中配置了Home Assistant凭据</li>
-                </ul>
-            </div>
-
-            <!-- 认证 -->
-            <div class="api-section" id="authentication">
-                <h2>🔐 认证</h2>
-                <p>所有API请求都需要在Credential Service中配置Home Assistant凭据：</p>
-                <ul>
-                    <li><strong>access_token</strong>: Home Assistant长期访问令牌</li>
-                    <li><strong>base_url</strong>: Home Assistant实例的URL（包含协议和端口）</li>
-                </ul>
-                
-                <div class="api-endpoint">
-                    <div class="endpoint-header">
-                        <span class="method post">POST</span>
-                        <span class="url">/api/home_assistant/home_assistant/test-connection</span>
-                        <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/home_assistant/home_assistant/test-connection', null, 'test-connection-test')">测试</button>
-                    </div>
-                    <div class="endpoint-description">测试Home Assistant连接和认证</div>
-                    <div class="endpoint-example">
-                        <pre><code>curl -X POST http://localhost:3000/api/home_assistant/home_assistant/test-connection</code></pre>
-                    </div>
-                    <div id="test-connection-test" class="test-result-container"></div>
+        <!-- Credentials Panel -->
+        <div class="credentials-panel">
+            <div class="credentials-header">
+                <div class="credentials-title">
+                    🔐 凭据管理
+                    <span id="credentials-status" class="status-badge status-loading">检查中...</span>
                 </div>
             </div>
 
-            <!-- 基础信息 -->
-            <div class="api-section" id="basic-info">
-                <h2>📊 基础信息</h2>
-                
-                <div class="api-endpoint">
-                    <div class="endpoint-header">
-                        <span class="method get">GET</span>
-                        <span class="url">/api/home_assistant/home_assistant/config</span>
-                        <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/config', null, 'config-test')">测试</button>
-                    </div>
-                    <div class="endpoint-description">获取Home Assistant配置信息</div>
-                    <div class="endpoint-example">
-                        <pre><code>curl -X GET http://localhost:3000/api/home_assistant/home_assistant/config</code></pre>
-                    </div>
-                    <div id="config-test" class="test-result-container"></div>
+            <div id="credentials-info" class="credentials-info hidden">
+                <div class="credential-item">
+                    <span class="credential-label">Base URL:</span>
+                    <span class="credential-value" id="stored-base-url">-</span>
                 </div>
-
-                <div class="api-endpoint">
-                    <div class="endpoint-header">
-                        <span class="method get">GET</span>
-                        <span class="url">/api/home_assistant/home_assistant/access-token</span>
-                        <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/access-token', null, 'access-token-test')">测试</button>
-                    </div>
-                    <div class="endpoint-description">获取当前配置的Access Token信息</div>
-                    <div class="endpoint-example">
-                        <pre><code>curl -X GET http://localhost:3000/api/home_assistant/home_assistant/access-token</code></pre>
-                    </div>
-                    <div id="access-token-test" class="test-result-container"></div>
+                <div class="credential-item">
+                    <span class="credential-label">Access Token:</span>
+                    <span class="credential-value" id="stored-token-preview">-</span>
                 </div>
-
-                <div class="api-endpoint">
-                    <div class="endpoint-header">
-                        <span class="method get">GET</span>
-                        <span class="url">/api/home_assistant/home_assistant/states</span>
-                        <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/states', null, 'states-test')">测试</button>
-                    </div>
-                    <div class="endpoint-description">获取所有实体状态</div>
-                    <div class="endpoint-example">
-                        <pre><code>curl -X GET http://localhost:3000/api/home_assistant/home_assistant/states</code></pre>
-                    </div>
-                    <div id="states-test" class="test-result-container"></div>
+                <div class="credential-item">
+                    <span class="credential-label">最后更新:</span>
+                    <span class="credential-value" id="stored-config-time">-</span>
                 </div>
-
             </div>
 
-            <!-- 增强状态数据 -->
-            <div class="api-section" id="enhanced-states">
-                <h2>🚀 增强状态数据</h2>
-                <p>获取集成了设备信息、房间信息和楼层信息的完整实体状态数据。该API将states、entity registry、devices和rooms四个数据源的信息合并，提供最全面的实体状态视图。</p>
-                
-                <div class="api-endpoint">
-                    <div class="endpoint-header">
-                        <span class="method get">GET</span>
-                        <span class="url">/api/home_assistant/home_assistant/enhanced-states</span>
-                        <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/enhanced-states', null, 'enhanced-states-test')">测试</button>
-                    </div>
-                    <div class="endpoint-description">
-                        获取增强的实体状态信息
-                        <br>
-                        <small class="text-muted">📡 集成实体注册表、设备信息和房间信息的完整状态数据</small>
-                    </div>
-                    <div class="endpoint-example">
-                        <pre><code>curl -X GET http://localhost:3000/api/home_assistant/home_assistant/enhanced-states</code></pre>
-                    </div>
-                    
-                    <h3>🔍 筛选参数</h3>
-                    <div class="filter-section">
-                        <div class="filter-group">
-                            <label for="area-names-filter">区域名称筛选 (area_names):</label>
-                            <textarea id="area-names-filter" placeholder='["Living Room", "Kitchen", "Bedroom"]' rows="2"></textarea>
-                            <small class="text-muted">输入JSON数组格式的区域名称，支持模糊匹配</small>
+            <div class="controls">
+                <button id="refresh-credentials" class="btn btn-primary">🔄 刷新凭据</button>
+                <button id="test-connection" class="btn btn-info">🔗 测试连接</button>
+                <button id="view-logs" class="btn btn-secondary">📋 查看日志</button>
+                <button id="clear-logs" class="btn btn-secondary">🗑️ 清除日志</button>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('quick-test')">⚡ 快速测试</button>
+            <button class="nav-tab" onclick="showTab('information')">📋 API接口</button>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- Quick Test Tab -->
+            <div id="quick-test" class="tab-content active">
+                <div class="quick-actions">
+                    <h3>🚀 快速操作</h3>
+                    <div class="action-grid">
+                        <div class="action-card" onclick="quickTest('entity-registry')">
+                            <div class="action-icon">📋</div>
+                            <div class="action-title">实体注册表</div>
+                            <div class="action-description">获取完整的实体注册表信息</div>
                         </div>
-                        
-                        <div class="filter-group">
-                            <label for="device-types-filter">设备类型筛选 (device_types):</label>
-                            <textarea id="device-types-filter" placeholder='["light", "sensor", "switch"]' rows="2"></textarea>
-                            <small class="text-muted">输入JSON数组格式的设备类型，支持模糊匹配</small>
+                        <div class="action-card" onclick="quickTest('states')">
+                            <div class="action-icon">🏠</div>
+                            <div class="action-title">所有实体状态</div>
+                            <div class="action-description">获取所有实体的当前状态</div>
                         </div>
-                        
-                        <div class="filter-actions">
-                            <button class="btn btn-primary" onclick="testEnhancedStatesWithFilters()">应用筛选测试</button>
-                            <button class="btn btn-secondary" onclick="clearFilters()">清空筛选</button>
+                        <div class="action-card" onclick="quickTest('spaces')">
+                            <div class="action-icon">🏢</div>
+                            <div class="action-title">空间列表</div>
+                            <div class="action-description">查看楼层和房间列表</div>
+                        </div>
+                        <div class="action-card" onclick="quickTest('enhanced-entities')">
+                            <div class="action-icon">⭐</div>
+                            <div class="action-title">增强实体信息</div>
+                            <div class="action-description">实体信息+房间楼层信息</div>
+                        </div>
+                        <div class="action-card" onclick="quickTest('device-registry')">
+                            <div class="action-icon">📱</div>
+                            <div class="action-title">设备注册表</div>
+                            <div class="action-description">获取完整的设备注册表信息</div>
+                        </div>
+                        <div class="action-card" onclick="quickTest('batch-control')">
+                            <div class="action-icon">🎮</div>
+                            <div class="action-title">批量控制设备</div>
+                            <div class="action-description">批量执行设备控制命令</div>
                         </div>
                     </div>
-                    
-                    <div class="api-info">
-                        <h3>🔗 数据源集成</h3>
-                        <ul>
-                            <li><strong>States API</strong>: 基础实体状态和属性</li>
-                            <li><strong>Entity Registry</strong> (WebSocket: config/entity_registry/list): 设备ID和区域ID关联</li>
-                            <li><strong>Devices API</strong>: 设备名称、制造商、型号等信息</li>
-                            <li><strong>Rooms API</strong>: 房间名称、楼层ID和楼层名称</li>
-                        </ul>
-
-                        <h3>📋 增强信息字段</h3>
-                        <ul>
-                            <li><strong>device_id</strong>: 设备ID (来自entity registry)</li>
-                            <li><strong>device_name</strong>: 设备名称 (来自devices API)</li>
-                            <li><strong>device_manufacturer</strong>: 设备制造商</li>
-                            <li><strong>device_model</strong>: 设备型号</li>
-                            <li><strong>device_type</strong>: 设备类型 (优先device_class，其次entity_id前缀)</li>
-                            <li><strong>area_id</strong>: 区域ID (来自entity registry)</li>
-                            <li><strong>area_name</strong>: 区域名称 (来自rooms API)</li>
-                            <li><strong>floor_id</strong>: 楼层ID (来自rooms API)</li>
-                            <li><strong>floor_name</strong>: 楼层名称 (来自rooms API)</li>
-                        </ul>
-                        
-                        <h3>📊 响应格式示例</h3>
-                        <pre><code>{
-  "success": true,
-  "data": {
-    "states": [
-      {
-        "entity_id": "light.living_room_light",
-        "state": "on",
-        "attributes": {...},
-        "last_changed": "2025-09-11T10:30:00.000Z",
-        "last_updated": "2025-09-11T10:30:00.000Z",
-        "device_id": "abcd1234efgh5678",
-        "device_name": "Living Room Light",
-        "device_manufacturer": "Philips",
-        "device_model": "Hue White",
-        "area_id": "living_room",
-        "area_name": "Living Room",
-        "floor_id": "ground_floor",
-        "floor_name": "Ground Floor"
-      }
-    ],
-    "statistics": {
-      "total_states": 269,
-      "with_device_info": 256,
-      "with_room_info": 0,
-      "with_floor_info": 0,
-      "unique_devices": 96,
-      "unique_rooms": 0,
-      "unique_floors": 0
-    },
-    "data_sources": {
-      "states": "2025-09-11T02:20:27.404Z",
-      "entity_registry": "2025-09-11T02:20:27.778Z",
-      "devices": "2025-09-11T02:20:27.697Z",
-      "rooms": "2025-09-11T02:20:27.590Z"
-    },
-    "retrieved_at": "2025-09-11T02:20:27.779Z"
-  }
-}</code></pre>
-                    </div>
-                    
-                    <h3>💡 使用场景</h3>
-                    <div class="api-info">
-                        <ul>
-                            <li><strong>智能家居分析</strong>: 按房间、楼层或设备制造商分析设备状态</li>
-                            <li><strong>设备管理</strong>: 快速查找特定制造商或型号的设备</li>
-                            <li><strong>空间管理</strong>: 按楼层或房间组织设备状态</li>
-                            <li><strong>第三方集成</strong>: 为其他系统提供完整的上下文信息</li>
-                            <li><strong>数据分析</strong>: 进行设备使用模式和空间分布分析</li>
-                        </ul>
-                    </div>
-                    
-                    <div id="enhanced-states-test" class="test-result-container"></div>
                 </div>
-            </div>
 
-            <!-- 实体注册表 -->
-            <div class="api-section" id="entity-registry">
-                <h2>📋 实体注册表</h2>
-                <p>获取Home Assistant中的实体注册表信息，包含所有已注册实体的详细元数据。通过WebSocket API (<code>config/entity_registry/list</code>) 获取最完整的实体信息。</p>
-                
-                <div class="api-endpoint">
-                    <div class="endpoint-header">
-                        <span class="method get">GET</span>
-                        <span class="url">/api/home_assistant/home_assistant/entity-registry</span>
-                        <button class="btn btn-sm btn-primary" onclick="testEntityRegistryApi('entity-registry-test')">测试</button>
-                    </div>
-                    <div class="endpoint-description">
-                        获取实体注册表列表 (WebSocket: config/entity_registry/list)
-                        <br>
-                        <small class="text-muted">📡 优先使用WebSocket API，失败时自动fallback到REST API</small>
-                    </div>
-                    <div class="endpoint-example">
-                        <pre><code>curl -X GET http://localhost:3000/api/home_assistant/home_assistant/entity-registry</code></pre>
-                    </div>
-                    
-                    <div class="parameter-section">
-                        <h4>🔍 筛选参数</h4>
-                        <div class="filter-controls">
-                            <div style="margin-bottom: 10px;">
-                                <label for="entity-domain-filter">实体域 (Entity Domain):</label>
-                                <select id="entity-domain-filter" style="width: 150px; margin: 0 10px; padding: 5px; border: 1px solid #ccc; border-radius: 3px;">
-                                    <option value="">全部</option>
-                                    <option value="light">light (灯光)</option>
-                                    <option value="switch">switch (开关)</option>
-                                    <option value="sensor">sensor (传感器)</option>
-                                    <option value="binary_sensor">binary_sensor (二进制传感器)</option>
-                                    <option value="climate">climate (空调)</option>
-                                    <option value="cover">cover (窗帘)</option>
-                                    <option value="fan">fan (风扇)</option>
-                                    <option value="lock">lock (锁)</option>
-                                    <option value="camera">camera (摄像头)</option>
-                                    <option value="media_player">media_player (媒体播放器)</option>
-                                </select>
-                            </div>
-                            <div style="margin-bottom: 10px;">
-                                <label for="entity-platform-filter">平台 (Platform):</label>
-                                <input type="text" id="entity-platform-filter" placeholder="例如: mqtt, zigbee2mqtt, esphome" style="width: 200px; margin: 0 10px; padding: 5px; border: 1px solid #ccc; border-radius: 3px;">
-                            </div>
-                            <div style="margin-bottom: 10px;">
-                                <label for="entity-device-filter">设备ID过滤:</label>
-                                <input type="text" id="entity-device-filter" placeholder="输入设备ID" style="width: 250px; margin: 0 10px; padding: 5px; border: 1px solid #ccc; border-radius: 3px;">
-                            </div>
-                            <div style="margin-bottom: 10px;">
-                                <label for="entity-limit">显示数量限制:</label>
-                                <input type="number" id="entity-limit" value="20" min="1" max="500" style="width: 80px; margin: 0 10px; padding: 5px; border: 1px solid #ccc; border-radius: 3px;">
-                            </div>
+                <!-- Quick Response Panel -->
+                <div id="quick-response" class="response-panel hidden">
+                    <div class="response-header">
+                        <span class="response-title">⚡ 快速测试结果</span>
+                        <div class="response-actions">
+                            <button class="btn btn-secondary" onclick="copyQuickResponse()">📋 复制</button>
+                            <button class="btn btn-secondary" onclick="closeQuickResponse()">✖️ 关闭</button>
                         </div>
                     </div>
-                    
-                    <div id="entity-registry-test" class="test-result-container"></div>
+                    <div id="quick-response-body" class="response-body"></div>
                 </div>
             </div>
 
-            <!-- 设备列表 -->
-            <div class="api-section" id="devices">
-                <h2>📱 设备列表</h2>
-                <p>获取Home Assistant中注册的所有设备信息，包括设备ID、名称、制造商、型号等详细信息。</p>
-                
-                <div class="api-endpoint">
-                    <div class="endpoint-header">
-                        <span class="method get">GET</span>
-                        <span class="url">/api/home_assistant/home_assistant/devices</span>
-                        <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/devices', null, 'devices-test')">测试</button>
+            <!-- Information Tab -->
+            <div id="information" class="tab-content">
+                <div class="api-section">
+                    <div class="section-header">
+                        <h2 class="section-title">📋 Home Assistant API接口</h2>
+                        <span class="section-count">5个接口</span>
                     </div>
-                    <div class="endpoint-description">获取所有设备列表</div>
-                    <div class="endpoint-example">
-                        <pre><code>curl -X GET http://localhost:3000/api/home_assistant/home_assistant/devices</code></pre>
-                    </div>
-                    <div id="devices-test" class="test-result-container"></div>
-                </div>
-
-                <h3>📋 设备信息字段</h3>
-                <div class="endpoint-example">
-                    <pre><code>{
-  "success": true,
-  "data": {
-    "devices": [
-      {
-        "id": "device_id",
-        "name": "设备名称",
-        "manufacturer": "制造商",
-        "model": "型号",
-        "sw_version": "软件版本",
-        "area_id": "房间ID",
-        "name_by_user": "用户自定义名称",
-        "disabled_by": null,
-        "entry_type": "service",
-        "identifiers": [["domain", "unique_id"]],
-        "connections": [["mac", "00:11:22:33:44:55"]],
-        "suggested_area": "建议房间",
-        "config_entries": ["config_entry_id"]
-      }
-    ],
-    "count": 1,
-    "retrieved_at": "2025-01-08T10:30:00.000Z"
-  }
-}</code></pre>
-                </div>
-
-                <h3>🔧 直接调用Home Assistant API</h3>
-                <p>您也可以直接调用Home Assistant的原始API：</p>
-                <div class="endpoint-example">
-                    <pre><code># 获取设备注册表
-curl -X GET \
-  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  http://your-home-assistant-url:8123/api/config/device_registry/list
-
-# 获取所有实体状态
-curl -X GET \
-  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  http://your-home-assistant-url:8123/api/states</code></pre>
-                </div>
-
-                <h3>🐍 Python示例</h3>
-                <div class="endpoint-example">
-                    <pre><code>import requests
-import json
-
-# 配置信息
-HA_URL = "http://your-home-assistant-url:8123"
-TOKEN = "YOUR_ACCESS_TOKEN"
-
-headers = {
-    "Authorization": f"Bearer {TOKEN}",
-    "Content-Type": "application/json",
-}
-
-# 查询设备注册表
-def get_device_registry():
-    response = requests.get(f"{HA_URL}/api/config/device_registry/list", headers=headers)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"错误: {response.status_code}")
-        return None
-
-# 查询所有实体
-def get_all_entities():
-    response = requests.get(f"{HA_URL}/api/states", headers=headers)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"错误: {response.status_code}")
-        return None
-
-# 执行查询
-devices = get_device_registry()
-entities = get_all_entities()
-
-if devices:
-    print(f"找到 {len(devices)} 个设备")
-    for device in devices[:5]:
-        print(f"- {device['name']}: {device['manufacturer']}")
-
-if entities:
-    print(f"找到 {len(entities)} 个实体")
-    for entity in entities[:5]:
-        print(f"- {entity['entity_id']}: {entity['state']}")</code></pre>
+                    <!-- API endpoints will be generated here -->
                 </div>
             </div>
+        </div>
 
-            <!-- 房间列表 -->
-            <div class="api-section" id="rooms">
-                <h2>🏠 房间列表</h2>
-                <p>获取Home Assistant中配置的所有房间/区域信息，用于组织和管理设备。</p>
-                
-                <div class="api-endpoint">
-                    <div class="endpoint-header">
-                        <span class="method get">GET</span>
-                        <span class="url">/api/home_assistant/home_assistant/rooms</span>
-                        <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/rooms', null, 'rooms-test')">测试</button>
-                    </div>
-                    <div class="endpoint-description">获取所有房间列表</div>
-                    <div class="endpoint-example">
-                        <pre><code>curl -X GET http://localhost:3000/api/home_assistant/home_assistant/rooms</code></pre>
-                    </div>
-                    <div id="rooms-test" class="test-result-container"></div>
-                </div>
-
-                <h3>📋 房间信息字段</h3>
-                <div class="endpoint-example">
-                    <pre><code>{
-  "success": true,
-  "data": {
-    "rooms": [
-      {
-        "area_id": "room_id",
-        "name": "房间名称",
-        "normalized_name": "normalized_room_name",
-        "aliases": ["别名1", "别名2"],
-        "picture": "/api/area_picture/room_id"
-      }
-    ],
-    "count": 1,
-    "retrieved_at": "2025-01-08T10:30:00.000Z"
-  }
-}</code></pre>
+        <!-- Log Panel -->
+        <div id="log-panel" class="log-panel hidden">
+            <div class="response-header">
+                <span class="response-title">📋 操作日志</span>
+                <div class="response-actions">
+                    <button class="btn btn-secondary" onclick="clearLogs()">🗑️ 清除</button>
+                    <button class="btn btn-secondary" onclick="toggleLogPanel()">✖️ 关闭</button>
                 </div>
             </div>
-
-
-            <!-- 楼层列表 -->
-            <div class="api-section" id="floors">
-                <h2>🏢 楼层列表</h2>
-                <p>获取Home Assistant中配置的所有楼层信息，用于组织和管理房间。</p>
-                
-                <div class="api-endpoint">
-                    <div class="endpoint-header">
-                        <span class="method get">GET</span>
-                        <span class="url">/api/home_assistant/home_assistant/floors</span>
-                        <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/floors', null, 'floors-test')">测试</button>
-                    </div>
-                    <div class="endpoint-description">获取所有楼层列表</div>
-                    <div class="endpoint-example">
-                        <pre><code>curl -X GET http://localhost:3000/api/home_assistant/home_assistant/floors</code></pre>
-                    </div>
-                    <div id="floors-test" class="test-result-container"></div>
-                </div>
-
-                <h3>📋 楼层信息字段</h3>
-                <div class="endpoint-example">
-                    <pre><code>{
-  "success": true,
-  "data": {
-    "floors": [
-      {
-        "floor_id": "home",
-        "name": "Home",
-        "level": null,
-        "icon": null,
-        "aliases": [],
-        "created_at": 1751427259.679931,
-        "modified_at": 1751427259.679966
-      }
-    ],
-    "count": 1,
-    "retrieved_at": "2025-01-08T10:30:00.000Z"
-  }
-}</code></pre>
-                </div>
-
-                <h3>🔧 直接调用Home Assistant API</h3>
-                <p>您也可以直接调用Home Assistant的原始API：</p>
-                <div class="endpoint-example">
-                    <pre><code># 获取楼层注册表
-curl -X GET \
-  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  http://your-home-assistant-url:8123/api/config/floor_registry/list</code></pre>
-                </div>
-
-                <h3>🐍 Python示例</h3>
-                <div class="endpoint-example">
-                    <pre><code>import requests
-import json
-
-# 配置信息
-HA_URL = "http://your-home-assistant-url:8123"
-TOKEN = "YOUR_ACCESS_TOKEN"
-
-headers = {
-    "Authorization": f"Bearer {TOKEN}",
-    "Content-Type": "application/json",
-}
-
-# 查询楼层注册表
-def get_floor_registry():
-    response = requests.get(f"{HA_URL}/api/config/floor_registry/list", headers=headers)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"错误: {response.status_code}")
-        return None
-
-# 执行查询
-floors = get_floor_registry()
-
-if floors:
-    print(f"找到 {len(floors)} 个楼层")
-    for floor in floors:
-        print(f"- {floor['name']} (ID: {floor['floor_id']})")</code></pre>
-                </div>
-            </div>
-
-            <!-- 服务调用 -->
-            <div class="api-section" id="services">
-                <h2>⚙️ 服务调用</h2>
-                
-                <div class="api-endpoint">
-                    <div class="endpoint-header">
-                        <span class="method post">POST</span>
-                        <span class="url">/api/home_assistant/home_assistant/call-service</span>
-                        <button class="btn btn-sm btn-primary" onclick="testCallServiceApi('call-service-test')">测试</button>
-                    </div>
-                    <div class="endpoint-description">调用Home Assistant服务</div>
-                    <div class="endpoint-input">
-                        <div style="margin-bottom: 10px;">
-                            <label for="call-service-domain-input">Domain:</label>
-                            <input type="text" id="call-service-domain-input" value="light" placeholder="例如: light, switch, fan" style="width: 100px; margin: 0 10px; padding: 5px; border: 1px solid #ccc; border-radius: 3px;">
-                        </div>
-                        <div style="margin-bottom: 10px;">
-                            <label for="call-service-service-input">Service:</label>
-                            <input type="text" id="call-service-service-input" value="turn_on" placeholder="例如: turn_on, turn_off, toggle" style="width: 100px; margin: 0 10px; padding: 5px; border: 1px solid #ccc; border-radius: 3px;">
-                        </div>
-                        <div style="margin-bottom: 10px;">
-                            <label for="call-service-entity-input">Entity ID:</label>
-                            <input type="text" id="call-service-entity-input" value="light.living_room" placeholder="例如: light.living_room" style="width: 200px; margin: 0 10px; padding: 5px; border: 1px solid #ccc; border-radius: 3px;">
-                        </div>
-                        <div style="margin-bottom: 10px;">
-                            <label for="call-service-data-input">Service Data (JSON):</label>
-                            <input type="text" id="call-service-data-input" value='{}' placeholder='例如: {"brightness": 255}' style="width: 300px; margin: 0 10px; padding: 5px; border: 1px solid #ccc; border-radius: 3px;">
-                        </div>
-                    </div>
-                    <div class="endpoint-example">
-                        <pre><code id="call-service-curl-example">curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-service \\
-  -H "Content-Type: application/json" \\
-  -d '{"domain": "light", "service": "turn_on", "entity_id": "light.living_room"}'</code></pre>
-                    </div>
-                    <div id="call-service-test" class="test-result-container"></div>
-                </div>
-
-                <h3>🔧 常用服务示例</h3>
-                
-                <h4>灯光控制</h4>
-                <div class="endpoint-example">
-                    <pre><code># 打开灯光
-curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-service \
-  -H "Content-Type: application/json" \
-  -d '{"domain": "light", "service": "turn_on", "entity_id": "light.living_room"}'
-
-# 关闭灯光
-curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-service \
-  -H "Content-Type: application/json" \
-  -d '{"domain": "light", "service": "turn_off", "entity_id": "light.living_room"}'
-
-# 设置亮度
-curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-service \
-  -H "Content-Type: application/json" \
-  -d '{"domain": "light", "service": "turn_on", "entity_id": "light.living_room", "data": {"brightness": 128}}'</code></pre>
-                </div>
-
-                <h4>开关控制</h4>
-                <div class="endpoint-example">
-                    <pre><code># 打开开关
-curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-service \
-  -H "Content-Type: application/json" \
-  -d '{"domain": "switch", "service": "turn_on", "entity_id": "switch.coffee_maker"}'
-
-# 关闭开关
-curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-service \
-  -H "Content-Type: application/json" \
-  -d '{"domain": "switch", "service": "turn_off", "entity_id": "switch.coffee_maker"}'</code></pre>
-                </div>
-
-                <h4>场景控制</h4>
-                <div class="endpoint-example">
-                    <pre><code># 激活场景
-curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-service \
-  -H "Content-Type: application/json" \
-  -d '{"domain": "scene", "service": "turn_on", "entity_id": "scene.movie_night"}'</code></pre>
-                </div>
-            </div>
-
-            <!-- 智能设备匹配 -->
-            <div class="api-section" id="device-matching">
-                <h2>🤖 智能设备匹配</h2>
-                <p>根据OpenAI返回的结构化数据智能匹配Home Assistant设备，支持空间名称/类型匹配和设备名称/类型匹配。</p>
-                
-                <div class="api-endpoint">
-                    <div class="endpoint-header">
-                        <span class="method post">POST</span>
-                        <span class="url">/api/home_assistant/home_assistant/match-devices</span>
-                        <button class="btn btn-primary" onclick="testMatchDevicesAPI('quick-test')">测试</button>
-                    </div>
-                    <div class="endpoint-description">根据意图数据智能匹配Home Assistant设备</div>
-                    <div id="quick-test" class="test-result-container"></div>
-                    <div class="endpoint-example">
-                        <pre><code>curl -X POST http://localhost:3000/api/home_assistant/home_assistant/match-devices \
-  -H "Content-Type: application/json" \
-  -d '{
-    "intent_data": {
-      "intent": "Control Device",
-      "confidence": 0.95,
-      "user_input": "把卧室的灯和空调关了 把厨房的空调调到20度",
-      "devices": [
-        {
-          "space_name": "卧室",
-          "space_type": "Bedroom",
-          "device_name": "灯",
-          "device_type": "Light",
-          "action": "关"
-        },
-        {
-          "space_name": "卧室",
-          "space_type": "Bedroom", 
-          "device_name": "空调",
-          "device_type": "Air Conditioner",
-          "action": "关"
-        },
-        {
-          "space_name": "厨房",
-          "space_type": "Kitchen",
-          "device_name": "空调", 
-          "device_type": "Air Conditioner",
-          "action": "调到20度"
-        }
-      ]
-    }
-  }'</code></pre>
-                    </div>
-                    <div class="endpoint-params">
-                        <strong>参数:</strong>
-                        <ul>
-                            <li><code>intent_data</code> (必需): 意图数据对象</li>
-                            <li><code>intent_data.devices</code> (必需): 设备数组</li>
-                            <li><code>devices[].space_name</code> (必需): 空间名称</li>
-                            <li><code>devices[].space_type</code> (必需): 空间类型</li>
-                            <li><code>devices[].device_name</code> (必需): 设备名称</li>
-                            <li><code>devices[].device_type</code> (必需): 设备类型</li>
-                            <li><code>devices[].action</code> (必需): 操作动作</li>
-                        </ul>
-                    </div>
-
-                    <h3>🔧 智能设备匹配参数输入</h3>
-                    <div class="endpoint-input">
-                        <label for="intent-input">意图数据 (JSON):</label>
-                        <textarea id="intent-input" rows="15" style="width: 100%; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.4; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;">{
-  "intent": "Control Device",
-  "confidence": 0.95,
-  "user_input": "把卧室的灯和空调关了 把厨房的空调调到20度",
-  "devices": [
-    {
-      "space_name": "卧室",
-      "space_type": "Bedroom",
-      "device_name": "灯",
-      "device_type": "Light",
-      "action": "关"
-    },
-    {
-      "space_name": "卧室",
-      "space_type": "Bedroom",
-      "device_name": "空调",
-      "device_type": "Air Conditioner",
-      "action": "关"
-    },
-    {
-      "space_name": "厨房",
-      "space_type": "Kitchen",
-      "device_name": "空调",
-      "device_type": "Air Conditioner",
-      "action": "调到20度"
-    }
-  ]
-}</textarea>
-                    </div>
-                    <div class="endpoint-input">
-                        <button class="btn btn-primary" onclick="testMatchDevicesAPI()">🤖 开始匹配设备</button>
-                        <button class="btn btn-secondary" onclick="clearMatchDevicesInputs()">🗑️ 清空输入</button>
-                        <button class="btn btn-info" onclick="formatJSON('intent-input')">📝 格式化JSON</button>
-                        <button class="btn btn-warning" onclick="validateJSON('intent-input')">✅ 验证JSON</button>
-                    </div>
-                    <div id="match-devices-test" class="test-result-container"></div>
-                </div>
-
-                <div class="api-info">
-                    <h3>📋 匹配规则</h3>
-                    <ul>
-                        <li><strong>空间匹配</strong>: 优先精确匹配空间名称，失败则匹配空间类型</li>
-                        <li><strong>设备匹配</strong>: 优先精确匹配设备名称，失败则匹配设备类型</li>
-                        <li><strong>功能推断</strong>: 根据设备类型和操作动作推断可用功能</li>
-                        <li><strong>置信度计算</strong>: 基于匹配精度计算匹配置信度</li>
-                    </ul>
-
-                    <h3>📊 返回格式</h3>
-                    <pre><code>{
-  "success": true,
-  "data": {
-    "matched_devices": [
-      {
-        "entity_id": "light.bedroom_light",
-        "entity_name": "卧室灯",
-        "entity_functions": ["turn_on", "turn_off"],
-        "device_name": "卧室灯",
-        "device_type": "Light",
-        "space_name": "卧室",
-        "space_type": "卧室",
-        "action": "关",
-        "confidence": 0.9
-      }
-    ],
-    "total_matched": 3,
-    "intent_devices": 3,
-    "match_rate": "100%",
-    "matched_at": "2025-09-10T06:33:07.000Z"
-  }
-}</code></pre>
-                </div>
-            </div>
-
-            <!-- 控制设备匹配 -->
-            <div class="api-section" id="control-device-matching">
-                <h2>🎯 控制设备匹配</h2>
-                <p>基于意图数据智能匹配需要控制的设备实体，支持精确的房间、设备类型、设备名称匹配，并保留增强状态数据的所有字段。</p>
-                
-                <div class="api-endpoint">
-                    <div class="endpoint-header">
-                        <span class="method post">POST</span>
-                        <span class="url">/api/home_assistant/home_assistant/match-control-devices</span>
-                        <button class="btn btn-sm btn-primary" onclick="testControlDeviceMatchingAPI()">测试</button>
-                    </div>
-                    <div class="endpoint-description">
-                        基于意图数据匹配控制设备
-                        <br>
-                        <small class="text-muted">🎯 智能匹配房间、设备类型、设备名称，返回增强状态数据</small>
-                    </div>
-                    <div class="endpoint-example">
-                        <pre><code>curl -X POST http://localhost:3000/api/home_assistant/home_assistant/match-control-devices \
-  -H "Content-Type: application/json" \
-  -d '{
-    "intent": "Control Device",
-    "confidence": 0.95,
-    "user_input": "卧室的灯和空调关掉 书房的空调温度调到20度",
-    "matched_rooms": ["Master Bedroom", "Study Room"],
-    "device_types": ["light", "climate"],
-    "devices": [
-      {
-        "room_name": "Master Bedroom",
-        "device_type": "light",
-        "device_name": "灯",
-        "action": "关掉"
-      },
-      {
-        "room_name": "Master Bedroom",
-        "device_type": "climate",
-        "device_name": "空调",
-        "action": "关掉"
-      }
-    ]
-  }'</code></pre>
-                    </div>
-                    
-                    <h3>📋 请求参数</h3>
-                    <div class="api-info">
-                        <ul>
-                            <li><code>intent</code> (必需): 意图类型，如 "Control Device"</li>
-                            <li><code>confidence</code> (可选): 置信度，0-1之间的数值</li>
-                            <li><code>user_input</code> (可选): 用户原始输入</li>
-                            <li><code>matched_rooms</code> (可选): 匹配的房间列表</li>
-                            <li><code>device_types</code> (可选): 设备类型列表</li>
-                            <li><code>devices</code> (必需): 设备数组，每个设备包含：
-                                <ul>
-                                    <li><code>room_name</code> (必需): 房间名称</li>
-                                    <li><code>device_type</code> (必需): 设备类型</li>
-                                    <li><code>device_name</code> (可选): 设备名称</li>
-                                    <li><code>action</code> (必需): 操作动作</li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <h3>🔧 控制设备匹配参数输入</h3>
-                    <div class="endpoint-input">
-                        <label for="control-intent-input">意图数据 (JSON):</label>
-                        <textarea id="control-intent-input" rows="20" style="width: 100%; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.4; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;">{
-  "intent": "Control Device",
-  "confidence": 0.95,
-  "user_input": "卧室的灯和空调关掉 书房的空调温度调到20度",
-  "matched_rooms": ["Master Bedroom", "Study Room"],
-  "device_types": ["light", "climate"],
-  "devices": [
-    {
-      "room_name": "Master Bedroom",
-      "device_type": "light",
-      "device_name": "灯",
-      "action": "关掉"
-    },
-    {
-      "room_name": "Master Bedroom",
-      "device_type": "climate",
-      "device_name": "空调",
-      "action": "关掉"
-    },
-    {
-      "room_name": "Study Room",
-      "device_type": "climate",
-      "device_name": "空调",
-      "action": "调到20度"
-    }
-  ]
-}</textarea>
-                        <div style="margin-top: 10px;">
-                            <button class="btn btn-primary" onclick="testControlDeviceMatchingAPI()">测试控制设备匹配</button>
-                            <button class="btn btn-secondary" onclick="clearControlDeviceMatchingInputs()">清空输入</button>
-                        </div>
-                    </div>
-
-                    <h3>📊 响应格式</h3>
-                    <div class="api-info">
-                        <pre><code>{
-  "success": true,
-  "data": {
-    "matched_devices": [
-      {
-        "entity_id": "light.master_bedroom_light",
-        "state": "on",
-        "device_id": "abc123",
-        "device_name": "Master Bedroom Light",
-        "device_manufacturer": "Philips",
-        "device_model": "Hue White",
-        "device_type": "light",
-        "area_id": "master_bedroom",
-        "area_name": "Master Bedroom",
-        "floor_id": "second_floor",
-        "floor_name": "Second Floor",
-        "action": "关掉",
-        "intent_room": "Master Bedroom",
-        "intent_device_type": "light",
-        "intent_device_name": "灯",
-        "match_confidence": 0.95
-      }
-    ],
-    "statistics": {
-      "total_intent_devices": 3,
-      "matched_entities": 2,
-      "unique_rooms": 2,
-      "unique_device_types": 2,
-      "actions": ["关掉", "调到20度"],
-      "confidence_scores": {
-        "high": 2,
-        "medium": 0,
-        "low": 0
-      }
-    },
-    "intent_data": { ... },
-    "retrieved_at": "2025-09-11T10:30:00.000Z"
-  }
-}</code></pre>
-                    </div>
-
-                    <h3>🎯 匹配规则</h3>
-                    <div class="api-info">
-                        <ol>
-                            <li><strong>空间匹配</strong>: 首先根据房间名称匹配实体</li>
-                            <li><strong>设备名称匹配</strong>: 优先按设备名称精确匹配</li>
-                            <li><strong>设备类型匹配</strong>: 如果设备名称匹配失败，则按设备类型匹配</li>
-                            <li><strong>置信度计算</strong>: 基于房间匹配(40%)、设备类型匹配(30%)、设备名称匹配(30%)</li>
-                        </ol>
-                    </div>
-
-                    <h3>💡 使用场景</h3>
-                    <div class="api-info">
-                        <ul>
-                            <li><strong>智能语音控制</strong>: 将自然语言转换为具体的设备控制命令</li>
-                            <li><strong>批量设备操作</strong>: 同时控制多个房间的多个设备</li>
-                            <li><strong>设备状态查询</strong>: 获取需要控制的设备当前状态</li>
-                            <li><strong>自动化流程</strong>: 基于用户意图自动执行设备控制</li>
-                        </ul>
-                    </div>
-                    
-                    <div id="control-device-matching-test" class="test-result-container"></div>
-                </div>
-            </div>
-
-            <!-- 批量设备控制 -->
-            <div class="api-section" id="batch-control">
-                <h2>🎛️ 批量设备控制</h2>
-                <p>根据OpenAI返回的控制命令批量执行Home Assistant设备控制，支持多种设备类型和操作。</p>
-                
-                <div class="api-endpoint">
-                    <div class="endpoint-header">
-                        <span class="method post">POST</span>
-                        <span class="url">/api/home_assistant/home_assistant/batch-control</span>
-                        <button class="btn btn-primary" onclick="testBatchControlAPI('quick-batch-test')">测试</button>
-                    </div>
-                    <div class="endpoint-description">批量执行设备控制命令并返回执行状态</div>
-                    <div id="quick-batch-test" class="test-result-container"></div>
-                    <div class="endpoint-example">
-                        <pre><code>curl -X POST http://localhost:3000/api/home_assistant/home_assistant/batch-control \
-  -H "Content-Type: application/json" \
-  -d '{
-    "control_commands": [
-      {
-        "entity_id": "light.bedroom_light",
-        "entity_functions": ["turn_on", "turn_off"],
-        "action": "关",
-        "parameters": {}
-      },
-      {
-        "entity_id": "climate.bedroom_ac",
-        "entity_functions": ["turn_on", "turn_off", "set_temperature"],
-        "action": "关",
-        "parameters": {}
-      },
-      {
-        "entity_id": "climate.kitchen_ac",
-        "entity_functions": ["turn_on", "turn_off", "set_temperature"],
-        "action": "调到20度",
-        "parameters": {"temperature": 20}
-      }
-    ]
-  }'</code></pre>
-                    </div>
-                    <div class="endpoint-params">
-                        <strong>参数:</strong>
-                        <ul>
-                            <li><code>control_commands</code> (必需): 控制命令数组</li>
-                            <li><code>control_commands[].entity_id</code> (必需): 实体ID</li>
-                            <li><code>control_commands[].entity_functions</code> (必需): 实体功能数组</li>
-                            <li><code>control_commands[].action</code> (必需): 操作动作</li>
-                            <li><code>control_commands[].parameters</code> (可选): 额外参数</li>
-                        </ul>
-                    </div>
-
-                    <h3>🔧 批量控制参数输入</h3>
-                    <div class="endpoint-input">
-                        <label for="control-commands-input">控制命令 (JSON):</label>
-                        <textarea id="control-commands-input" rows="15" style="width: 100%; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.4; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;">[
-  {
-    "entity_id": "light.bedroom_light",
-    "entity_functions": ["turn_on", "turn_off"],
-    "action": "关",
-    "parameters": {}
-  },
-  {
-    "entity_id": "climate.bedroom_ac",
-    "entity_functions": ["turn_on", "turn_off", "set_temperature"],
-    "action": "关",
-    "parameters": {}
-  },
-  {
-    "entity_id": "climate.kitchen_ac",
-    "entity_functions": ["turn_on", "turn_off", "set_temperature"],
-    "action": "调到20度",
-    "parameters": {"temperature": 20}
-  }
-]</textarea>
-                    </div>
-                    <div class="endpoint-input">
-                        <button class="btn btn-primary" onclick="testBatchControlAPI()">🎛️ 执行批量控制</button>
-                        <button class="btn btn-secondary" onclick="clearBatchControlInputs()">🗑️ 清空输入</button>
-                        <button class="btn btn-info" onclick="formatJSON('control-commands-input')">📝 格式化JSON</button>
-                        <button class="btn btn-warning" onclick="validateJSON('control-commands-input')">✅ 验证JSON</button>
-                    </div>
-                    <div id="batch-control-test" class="test-result-container"></div>
-                </div>
-
-                <div class="api-info">
-                    <h3>📋 支持的操作类型</h3>
-                    <ul>
-                        <li><strong>开关控制</strong>: 开/关 (turn_on/turn_off)</li>
-                        <li><strong>温度控制</strong>: 调到X度 (set_temperature)</li>
-                        <li><strong>亮度控制</strong>: 亮度X% (set_brightness)</li>
-                        <li><strong>颜色控制</strong>: 设置颜色 (set_color)</li>
-                        <li><strong>速度控制</strong>: 低/中/高/最高 (set_speed)</li>
-                        <li><strong>窗帘控制</strong>: 开/关窗帘 (open_cover/close_cover)</li>
-                        <li><strong>锁控制</strong>: 开锁/锁门 (unlock/lock)</li>
-                    </ul>
-
-                    <h3>📊 返回格式</h3>
-                    <pre><code>{
-  "success": true,
-  "data": {
-    "total_commands": 3,
-    "successful_commands": 3,
-    "failed_commands": 0,
-    "success_rate": "100%",
-    "results": [
-      {
-        "index": 0,
-        "entity_id": "light.bedroom_light",
-        "success": true,
-        "result": {
-          "service_called": "light.turn_off",
-          "service_data": {"entity_id": "light.bedroom_light"},
-          "result": {...}
-        }
-      }
-    ],
-    "entity_states": [
-      {
-        "entity_id": "light.bedroom_light",
-        "state": "off",
-        "attributes": {...},
-        "last_changed": "2025-09-10T06:33:07.000Z",
-        "last_updated": "2025-09-10T06:33:07.000Z"
-      }
-    ],
-    "executed_at": "2025-09-10T06:33:07.000Z"
-  }
-}</code></pre>
-                </div>
-            </div>
-
-
+            <div id="log-content"></div>
         </div>
     </div>
 
     <script>
-        // 全局状态
-        let apiKey = '';
+        // Global variables
+        let credentials = {};
+        let logs = [];
 
-        // 初始化
+        // API definitions organized by category
+        const API_DEFINITIONS = {
+            information: [
+                {
+                    method: 'GET',
+                    path: '/api/home_assistant/home_assistant/entity-registry',
+                    title: '实体注册表',
+                    description: '获取完整的实体注册表信息',
+                    parameters: [],
+                    testFunction: 'testEntityRegistry'
+                },
+                {
+                    method: 'GET',
+                    path: '/api/home_assistant/home_assistant/states',
+                    title: '所有实体状态',
+                    description: '获取所有实体的当前状态',
+                    parameters: [],
+                    testFunction: 'testStates'
+                },
+                {
+                    method: 'GET',
+                    path: '/api/home_assistant/home_assistant/spaces',
+                    title: '空间列表（楼层+房间）',
+                    description: '将楼层列表和房间列表组合成空间列表，支持通过op控制输出格式（当前支持：floors）',
+                    parameters: [
+                        { name: 'op', type: 'string', required: false, description: '输出格式，默认为floors（按楼层嵌套房间）' }
+                    ],
+                    testFunction: 'testSpaces'
+                },
+                {
+                    method: 'GET',
+                    path: '/api/home_assistant/home_assistant/device-registry',
+                    title: '设备注册表',
+                    description: '获取完整的设备注册表信息，包括设备ID、名称、区域分配等信息',
+                    parameters: [],
+                    testFunction: 'testDeviceRegistry'
+                },
+                {
+                    method: 'GET',
+                    path: '/api/home_assistant/home_assistant/enhanced-entities',
+                    title: '增强实体信息',
+                    description: '获取包含房间ID、房间名称、楼层ID、楼层名称的完整实体信息。整合实体注册表、空间列表和实体状态三个API的数据',
+                    parameters: [],
+                    testFunction: 'testEnhancedEntities'
+                },
+                {
+                    method: 'POST',
+                    path: '/api/home_assistant/home_assistant/batch-control',
+                    title: '批量控制设备',
+                    description: '批量执行设备控制命令。接收包含entity_id、service和service_data的JSON数组，批量控制多个设备',
+                    parameters: [
+                        { name: 'commands', type: 'json-array', required: true, description: '批量控制命令JSON数组，每个命令包含entity_id、service和service_data。例如：[{"entity_id":"light.light_test_001","service":"light.turn_on","service_data":{"color_name":"blue"}}]' }
+                    ],
+                    testFunction: 'testBatchControl'
+                },
+                {
+                    method: 'POST',
+                    path: '/api/home_assistant/home_assistant/batch-states',
+                    title: '批量获取实体状态',
+                    description: '批量获取指定实体的当前状态。返回清洗后的数据，只包含有用信息（灯光：亮度/颜色，空调：温度/模式，传感器：状态值）',
+                    parameters: [
+                        { name: 'entities', type: 'json-array', required: true, description: '实体ID列表JSON数组。例如：[{"entity_id":"climate.text_ac_01"},{"entity_id":"light.light_test_001"}]' }
+                    ],
+                    testFunction: 'testBatchStates'
+                }
+            ]
+        };
+
+        // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
-            // 从localStorage获取API密钥
-            apiKey = localStorage.getItem('credentialServiceApiKey') || '';
+            initializePage();
+            loadCredentials();
+            generateAPIDocumentation();
         });
 
-        // 测试API端点
-        async function testApi(method, url, data = null, containerId = null) {
-            const resultsContainer = containerId ? document.getElementById(containerId) : document.getElementById('apiTestResults');
-            const timestamp = new Date().toLocaleTimeString();
-            
-            // 显示测试开始信息
-            const testId = `test-${Date.now()}`;
-            resultsContainer.innerHTML = `
-                <div class="test-result-container" id="${testId}">
-                    <div class="test-result-header" onclick="toggleTestResult('${testId}')">
-                        <span>🧪 测试 ${method} ${url}</span>
-                        <span class="test-result-toggle">▶</span>
-                    </div>
-                    <div class="test-result-content">
-                        <div class="test-result info">
-                            <div>时间: ${timestamp}</div>
-                            <div>状态: 正在测试...</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            try {
-                const options = {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                };
-                
-                // 添加API密钥（如果有）
-                if (apiKey) {
-                    options.headers['X-API-Key'] = apiKey;
-                }
-                
-                // 添加请求体（如果是POST/PUT请求）
-                if (data && (method === 'POST' || method === 'PUT')) {
-                    options.body = JSON.stringify(data);
-                }
-                
-                const response = await fetch(url, options);
-                const responseData = await response.text();
-                
-                let parsedData;
-                try {
-                    parsedData = JSON.parse(responseData);
-                } catch (e) {
-                    parsedData = responseData;
-                }
-                
-                const resultClass = response.ok ? 'success' : 'error';
-                const statusText = response.ok ? '✅ 成功' : '❌ 失败';
-                const responseTime = Date.now() - parseInt(testId.split('-')[1]);
-                
-                const testResultElement = document.getElementById(testId);
-                const headerElement = testResultElement.querySelector('.test-result-header span:first-child');
-                const contentElement = testResultElement.querySelector('.test-result-content');
-                
-                headerElement.innerHTML = `🧪 测试 ${method} ${url} - ${statusText}`;
-                contentElement.innerHTML = `
-                    <div class="test-result ${resultClass}">
-                        <div>时间: ${timestamp}</div>
-                        <div>状态: ${statusText} (HTTP ${response.status})</div>
-                        <div>响应时间: ${responseTime}ms</div>
-                        <pre>${JSON.stringify(parsedData, null, 2)}</pre>
-                    </div>
-                `;
-                
-            } catch (error) {
-                const testResultElement = document.getElementById(testId);
-                const headerElement = testResultElement.querySelector('.test-result-header span:first-child');
-                const contentElement = testResultElement.querySelector('.test-result-content');
-                
-                headerElement.innerHTML = `🧪 测试 ${method} ${url} - ❌ 网络错误`;
-                contentElement.innerHTML = `
-                    <div class="test-result error">
-                        <div>时间: ${timestamp}</div>
-                        <div>状态: ❌ 网络错误</div>
-                        <div>错误: ${error.message}</div>
-                    </div>
-                `;
-            }
+        // Initialize page components
+        function initializePage() {
+            // Setup event listeners
+            document.getElementById('refresh-credentials').addEventListener('click', loadCredentials);
+            document.getElementById('test-connection').addEventListener('click', testCredentials);
+            document.getElementById('view-logs').addEventListener('click', toggleLogPanel);
+            document.getElementById('clear-logs').addEventListener('click', clearLogs);
         }
 
-        // 测试智能设备匹配API
-        async function testMatchDevicesAPI(containerId = 'match-devices-test') {
-            const container = document.getElementById(containerId);
-            const timestamp = new Date().toLocaleTimeString();
-            
-            let intentInput = document.getElementById('intent-input').value.trim();
-            
-            // 如果是快速测试且没有输入数据，使用默认测试数据
-            if (!intentInput && containerId === 'quick-test') {
-                intentInput = JSON.stringify({
-                    intent: "Control Device",
-                    confidence: 0.95,
-                    user_input: "把卧室的灯和空调关了 把厨房的空调调到20度",
-                    devices: [
-                        {
-                            space_name: "卧室",
-                            space_type: "Bedroom",
-                            device_name: "灯",
-                            device_type: "Light",
-                            action: "关"
-                        },
-                        {
-                            space_name: "卧室",
-                            space_type: "Bedroom",
-                            device_name: "空调",
-                            device_type: "Air Conditioner",
-                            action: "关"
-                        },
-                        {
-                            space_name: "厨房",
-                            space_type: "Kitchen",
-                            device_name: "空调",
-                            device_type: "Air Conditioner",
-                            action: "调到20度"
-                        }
-                    ]
-                });
-            }
-            
-            if (!intentInput) {
-                container.innerHTML = `
-                    <div class="test-result error">
-                        <div><strong>❌ 错误</strong></div>
-                        <div>请输入意图数据</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            let intentData;
-            try {
-                intentData = JSON.parse(intentInput);
-            } catch (error) {
-                container.innerHTML = `
-                    <div class="test-result error">
-                        <div><strong>❌ 错误</strong></div>
-                        <div>JSON格式错误: ${error.message}</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            const testId = `match-devices-test-${Date.now()}`;
-            container.innerHTML = `
-                <div class="test-result-container" id="${testId}">
-                    <div class="test-result-header" onclick="toggleTestResult('${testId}')">
-                        <span>🤖 测试智能设备匹配API</span>
-                        <span class="test-result-toggle">▶</span>
-                    </div>
-                    <div class="test-result-content">
-                        <div class="test-result info">
-                            <div>时间: ${timestamp}</div>
-                            <div>状态: 正在匹配设备...</div>
-                            <div>意图: ${intentData.intent || 'Unknown'}</div>
-                            <div>设备数量: ${intentData.devices ? intentData.devices.length : 0}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            try {
-                const response = await fetch('/api/home_assistant/home_assistant/match-devices', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ intent_data: intentData })
-                });
-                
-                const data = await response.json();
-                const resultClass = response.ok ? 'success' : 'error';
-                const statusText = response.ok ? '✅ 成功' : '❌ 失败';
-                
-                let resultsHtml = `
-                    <div class="test-result ${resultClass}">
-                        <div><strong>智能设备匹配API测试结果</strong></div>
-                        <div>状态: ${statusText}</div>
-                `;
-                
-                if (data.success && data.data) {
-                    resultsHtml += `
-                        <div>匹配设备数量: ${data.data.total_matched || 0}</div>
-                        <div>匹配率: ${data.data.match_rate || '0%'}</div>
-                    `;
-                    
-                    if (data.data.matched_devices && data.data.matched_devices.length > 0) {
-                        resultsHtml += `
-                            <div><strong>匹配的设备:</strong></div>
-                        `;
-                        
-                        data.data.matched_devices.forEach((device, index) => {
-                            resultsHtml += `
-                                <div class="matched-device">
-                                    <div><strong>设备 ${index + 1}:</strong></div>
-                                    <div>实体ID: ${device.entity_id}</div>
-                                    <div>实体名称: ${device.entity_name}</div>
-                                    <div>设备名称: ${device.device_name}</div>
-                                    <div>设备类型: ${device.device_type}</div>
-                                    <div>空间名称: ${device.space_name}</div>
-                                    <div>操作动作: ${device.action}</div>
-                                    <div>可用功能: ${device.entity_functions ? device.entity_functions.join(', ') : 'N/A'}</div>
-                                    <div>置信度: ${(device.confidence * 100).toFixed(1)}%</div>
-                                </div>
-                            `;
-                        });
-                    }
-                } else if (data.error) {
-                    resultsHtml += `
-                        <div><strong>错误信息:</strong></div>
-                        <div class="error-message">${data.error}</div>
-                    `;
-                }
-                
-                resultsHtml += `
-                        <div><strong>完整响应:</strong></div>
-                        <pre class="json-response">${JSON.stringify(data, null, 2)}</pre>
-                    </div>
-                `;
-                
-                document.querySelector(`#${testId} .test-result-content`).innerHTML = resultsHtml;
-            } catch (error) {
-                document.querySelector(`#${testId} .test-result-content`).innerHTML = `
-                    <div class="test-result error">
-                        <div><strong>❌ 网络错误</strong></div>
-                        <div>${error.message}</div>
-                    </div>
-                `;
-            }
-        }
+        // Load credentials from service
+        async function loadCredentials() {
+            const statusEl = document.getElementById('credentials-status');
+            const infoEl = document.getElementById('credentials-info');
 
-        // 清空智能设备匹配输入
-        function clearMatchDevicesInputs() {
-            document.getElementById('intent-input').value = '';
-        }
-
-        // 格式化JSON
-        function formatJSON(textareaId) {
-            const textarea = document.getElementById(textareaId);
-            try {
-                const jsonData = JSON.parse(textarea.value);
-                textarea.value = JSON.stringify(jsonData, null, 2);
-                showMessage('JSON格式化成功！', 'success');
-            } catch (error) {
-                showMessage('JSON格式错误：' + error.message, 'error');
-            }
-        }
-
-        // 验证JSON
-        function validateJSON(textareaId) {
-            const textarea = document.getElementById(textareaId);
-            try {
-                JSON.parse(textarea.value);
-                showMessage('JSON格式正确！', 'success');
-            } catch (error) {
-                showMessage('JSON格式错误：' + error.message, 'error');
-            }
-        }
-
-        // 显示消息
-        function showMessage(message, type) {
-            // 创建消息元素
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message message-${type}`;
-            messageDiv.textContent = message;
-            messageDiv.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 10px 20px;
-                border-radius: 4px;
-                color: white;
-                font-weight: bold;
-                z-index: 1000;
-                max-width: 300px;
-                word-wrap: break-word;
-                ${type === 'success' ? 'background-color: #28a745;' : 'background-color: #dc3545;'}
-            `;
-            
-            document.body.appendChild(messageDiv);
-            
-            // 3秒后自动移除
-            setTimeout(() => {
-                if (messageDiv.parentNode) {
-                    messageDiv.parentNode.removeChild(messageDiv);
-                }
-            }, 3000);
-        }
-
-        // 测试批量控制API
-        async function testBatchControlAPI(containerId = 'batch-control-test') {
-            const container = document.getElementById(containerId);
-            const timestamp = new Date().toLocaleTimeString();
-            
-            let commandsInput = document.getElementById('control-commands-input').value.trim();
-            
-            // 如果是快速测试且没有输入数据，使用默认测试数据
-            if (!commandsInput && containerId === 'quick-batch-test') {
-                commandsInput = JSON.stringify([
-                    {
-                        entity_id: "light.bedroom_light",
-                        entity_functions: ["turn_on", "turn_off"],
-                        action: "关",
-                        parameters: {}
-                    },
-                    {
-                        entity_id: "climate.bedroom_ac",
-                        entity_functions: ["turn_on", "turn_off", "set_temperature"],
-                        action: "关",
-                        parameters: {}
-                    },
-                    {
-                        entity_id: "climate.kitchen_ac",
-                        entity_functions: ["turn_on", "turn_off", "set_temperature"],
-                        action: "调到20度",
-                        parameters: { temperature: 20 }
-                    }
-                ]);
-            }
-            
-            if (!commandsInput) {
-                container.innerHTML = `
-                    <div class="test-result error">
-                        <div><strong>❌ 错误</strong></div>
-                        <div>请输入控制命令</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            let controlCommands;
-            try {
-                controlCommands = JSON.parse(commandsInput);
-            } catch (error) {
-                container.innerHTML = `
-                    <div class="test-result error">
-                        <div><strong>❌ 错误</strong></div>
-                        <div>JSON格式错误: ${error.message}</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            const testId = `batch-control-test-${Date.now()}`;
-            container.innerHTML = `
-                <div class="test-result-container" id="${testId}">
-                    <div class="test-result-header" onclick="toggleTestResult('${testId}')">
-                        <span>🎛️ 测试批量控制API</span>
-                        <span class="test-result-toggle">▶</span>
-                    </div>
-                    <div class="test-result-content">
-                        <div class="test-result info">
-                            <div>时间: ${timestamp}</div>
-                            <div>状态: 正在执行批量控制...</div>
-                            <div>命令数量: ${controlCommands.length}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            try {
-                const response = await fetch('/api/home_assistant/home_assistant/batch-control', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ control_commands: controlCommands })
-                });
-                
-                const data = await response.json();
-                const resultClass = response.ok ? 'success' : 'error';
-                const statusText = response.ok ? '✅ 成功' : '❌ 失败';
-                
-                let resultsHtml = `
-                    <div class="test-result ${resultClass}">
-                        <div><strong>批量控制API测试结果</strong></div>
-                        <div>状态: ${statusText}</div>
-                `;
-                
-                if (data.success && data.data) {
-                    resultsHtml += `
-                        <div>总命令数: ${data.data.total_commands || 0}</div>
-                        <div>成功命令数: ${data.data.successful_commands || 0}</div>
-                        <div>失败命令数: ${data.data.failed_commands || 0}</div>
-                        <div>成功率: ${data.data.success_rate || '0%'}</div>
-                    `;
-                    
-                    if (data.data.results && data.data.results.length > 0) {
-                        resultsHtml += `
-                            <div><strong>执行结果:</strong></div>
-                        `;
-                        
-                        data.data.results.forEach((result, index) => {
-                            const statusIcon = result.success ? '✅' : '❌';
-                            resultsHtml += `
-                                <div class="matched-device">
-                                    <div><strong>命令 ${index + 1}: ${statusIcon}</strong></div>
-                                    <div>实体ID: ${result.entity_id}</div>
-                                    <div>状态: ${result.success ? '成功' : '失败'}</div>
-                            `;
-                            
-                            if (result.success && result.result) {
-                                resultsHtml += `
-                                    <div>调用服务: ${result.result.service_called}</div>
-                                    <div>服务数据: ${JSON.stringify(result.result.service_data)}</div>
-                                `;
-                            } else if (result.error) {
-                                resultsHtml += `
-                                    <div>错误信息: ${result.error}</div>
-                                `;
-                            }
-                            
-                            resultsHtml += `</div>`;
-                        });
-                    }
-                    
-                    if (data.data.entity_states && data.data.entity_states.length > 0) {
-                        resultsHtml += `
-                            <div><strong>实体状态:</strong></div>
-                        `;
-                        
-                        data.data.entity_states.forEach((state, index) => {
-                            resultsHtml += `
-                                <div class="matched-device">
-                                    <div><strong>实体 ${index + 1}:</strong></div>
-                                    <div>实体ID: ${state.entity_id}</div>
-                                    <div>状态: ${state.state || 'N/A'}</div>
-                                    <div>最后更新: ${state.last_updated || 'N/A'}</div>
-                                </div>
-                            `;
-                        });
-                    }
-                } else if (data.error) {
-                    resultsHtml += `
-                        <div><strong>错误信息:</strong></div>
-                        <div class="error-message">${data.error}</div>
-                    `;
-                }
-                
-                resultsHtml += `
-                        <div><strong>完整响应:</strong></div>
-                        <pre class="json-response">${JSON.stringify(data, null, 2)}</pre>
-                    </div>
-                `;
-                
-                document.querySelector(`#${testId} .test-result-content`).innerHTML = resultsHtml;
-            } catch (error) {
-                document.querySelector(`#${testId} .test-result-content`).innerHTML = `
-                    <div class="test-result error">
-                        <div><strong>❌ 网络错误</strong></div>
-                        <div>${error.message}</div>
-                    </div>
-                `;
-            }
-        }
-
-        // 清空批量控制输入
-        function clearBatchControlInputs() {
-            document.getElementById('control-commands-input').value = '';
-        }
-
-        // 测试实体匹配API
-        async function testEntityMatchingAPI(containerId = 'entity-matching-test') {
-            const container = document.getElementById(containerId);
-            const timestamp = new Date().toLocaleTimeString();
-            
-            let intentInput = document.getElementById('entity-intent-input').value.trim();
-            
-            // 如果是快速测试且没有输入数据，使用默认测试数据
-            if (!intentInput && containerId === 'quick-entity-test') {
-                intentInput = JSON.stringify({
-                    intent: "Control Device",
-                    confidence: 0.95,
-                    user_input: "把客房的灯和空调都关了 把客厅的空调和灯都打开",
-                    matched_rooms: ["Guest Bedroom", "Living Room"],
-                    device_types: ["light", "climate"],
-                    devices: [
-                        {
-                            room_name: "Guest Bedroom",
-                            device_type: "light",
-                            device_name: "灯",
-                            action: "关了"
-                        },
-                        {
-                            room_name: "Guest Bedroom",
-                            device_type: "climate",
-                            device_name: "空调",
-                            action: "关了"
-                        },
-                        {
-                            room_name: "Living Room",
-                            device_type: "climate",
-                            device_name: "空调",
-                            action: "打开"
-                        },
-                        {
-                            room_name: "Living Room",
-                            device_type: "light",
-                            device_name: "灯",
-                            action: "打开"
-                        }
-                    ]
-                });
-            }
-            
-            if (!intentInput) {
-                container.innerHTML = `
-                    <div class="test-result error">
-                        <div><strong>❌ 错误</strong></div>
-                        <div>请输入意图数据</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            let intentData;
-            try {
-                intentData = JSON.parse(intentInput);
-            } catch (error) {
-                container.innerHTML = `
-                    <div class="test-result error">
-                        <div><strong>❌ JSON格式错误</strong></div>
-                        <div>${error.message}</div>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = `
-                <div class="test-result loading">
-                    <div><strong>🔄 正在匹配实体...</strong></div>
-                    <div>时间: ${timestamp}</div>
-                </div>
-            `;
+            statusEl.textContent = '检查中...';
+            statusEl.className = 'status-badge status-loading';
 
             try {
-                const response = await fetch('/api/home_assistant/home_assistant/match-entities', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(intentData)
-                });
+                const response = await fetch('/api/credentials/home_assistant');
+                const result = await response.json();
 
-                const data = await response.json();
-                const responseTime = Date.now() - new Date(timestamp).getTime();
+                if (result.success && result.data) {
+                    credentials = {
+                        access_token: result.data.access_token,
+                        base_url: result.data.base_url
+                    };
 
-                if (data.success) {
-                    let resultsHtml = `
-                        <div class="test-result success">
-                            <div class="test-result-header">
-                                <div><strong>✅ 实体匹配成功</strong></div>
-                                <div>时间: ${timestamp}</div>
-                                <div>状态: ✅ 成功 (HTTP ${response.status})</div>
-                                <div>响应时间: ${responseTime}ms</div>
-                            </div>
-                            <div class="test-result-content">
-                                <div><strong>📊 匹配结果:</strong></div>
-                                <div>总实体数: ${data.data.total_entities}</div>
-                                <div>匹配房间: ${data.data.matched_rooms.join(', ')}</div>
-                                <div>设备类型: ${data.data.device_types.join(', ')}</div>
-                    `;
+                    document.getElementById('stored-base-url').textContent = credentials.base_url;
+                    document.getElementById('stored-token-preview').textContent =
+                        credentials.access_token.substring(0, 20) + '...';
+                    document.getElementById('stored-config-time').textContent =
+                        new Date().toLocaleString();
 
-                    // 显示每个设备的匹配结果
-                    data.data.devices.forEach((device, index) => {
-                        resultsHtml += `
-                            <div class="matched-device">
-                                <div><strong>设备 ${index + 1}: ${device.room_name} - ${device.device_name}</strong></div>
-                                <div>设备类型: ${device.device_type}</div>
-                                <div>操作: ${device.action}</div>
-                                <div>匹配实体数: ${device.matched_count}</div>
-                        `;
-                        
-                        if (device.entities && device.entities.length > 0) {
-                            resultsHtml += `<div><strong>实体列表:</strong></div>`;
-                            device.entities.forEach((entity, entityIndex) => {
-                                resultsHtml += `
-                                    <div style="margin-left: 20px; margin-top: 5px;">
-                                        <div><strong>实体 ${entityIndex + 1}:</strong></div>
-                                        <div>ID: ${entity.entity_id}</div>
-                                        <div>名称: ${entity.name}</div>
-                                        <div>域: ${entity.domain}</div>
-                                        <div>设备类: ${entity.device_class || 'N/A'}</div>
-                                        <div>状态: ${entity.state}</div>
-                                        <div>功能: ${entity.capabilities.join(', ')}</div>
-                                    </div>
-                                `;
-                            });
-                        } else {
-                            resultsHtml += `<div style="color: #dc3545;">❌ 未找到匹配的实体</div>`;
-                        }
-                        
-                        resultsHtml += `</div>`;
-                    });
+                    statusEl.textContent = '已连接';
+                    statusEl.className = 'status-badge status-success';
+                    infoEl.classList.remove('hidden');
 
-                    resultsHtml += `
-                                <div><strong>📋 完整响应:</strong></div>
-                                <pre><code>${JSON.stringify(data, null, 2)}</code></pre>
-                            </div>
-                        </div>
-                    `;
-
-                    container.innerHTML = resultsHtml;
+                    addLog('凭据加载成功 ✅', 'success');
                 } else {
-                    container.innerHTML = `
-                        <div class="test-result error">
-                            <div><strong>❌ 实体匹配失败</strong></div>
-                            <div>时间: ${timestamp}</div>
-                            <div>状态: ❌ 失败 (HTTP ${response.status})</div>
-                            <div>响应时间: ${responseTime}ms</div>
-                            <div>错误: ${data.error}</div>
-                        </div>
-                    `;
+                    statusEl.textContent = '未配置';
+                    statusEl.className = 'status-badge status-error';
+                    infoEl.classList.add('hidden');
+                    addLog('未找到有效凭据，请先配置Home Assistant凭据', 'error');
                 }
             } catch (error) {
-                container.innerHTML = `
-                    <div class="test-result error">
-                        <div><strong>❌ 请求失败</strong></div>
-                        <div>时间: ${timestamp}</div>
-                        <div>错误: ${error.message}</div>
-                    </div>
-                `;
+                statusEl.textContent = '连接失败';
+                statusEl.className = 'status-badge status-error';
+                infoEl.classList.add('hidden');
+                addLog('凭据服务连接失败: ' + error.message, 'error');
             }
         }
 
-        // 清空实体匹配输入
-        function clearEntityMatchingInputs() {
-            document.getElementById('entity-intent-input').value = '';
-        }
-
-        // 切换测试结果显示
-        function toggleTestResult(testId) {
-            const testResultElement = document.getElementById(testId);
-            const contentElement = testResultElement.querySelector('.test-result-content');
-            const toggleElement = testResultElement.querySelector('.test-result-toggle');
-            
-            if (contentElement.classList.contains('expanded')) {
-                contentElement.classList.remove('expanded');
-                toggleElement.classList.remove('expanded');
-            } else {
-                contentElement.classList.add('expanded');
-                toggleElement.classList.add('expanded');
+        // Test credentials
+        async function testCredentials() {
+            if (!credentials.access_token || !credentials.base_url) {
+                addLog('请先加载有效凭据', 'error');
+                return;
             }
-        }
 
-        // 清空搜索输入
-        function clearSearchInputs() {
-            document.getElementById('search-floor-id').value = '';
-            document.getElementById('search-area-id').value = '';
-            document.getElementById('search-device-type').value = '';
-            document.getElementById('search-manufacturer').value = '';
-            document.getElementById('search-model').value = '';
-            document.getElementById('search-enabled-only').value = '';
-        }
-
-        // 使用输入参数测试设备搜索API
-        async function testDeviceSearchWithInputs() {
-            const container = document.getElementById('device-search-test');
-            const timestamp = new Date().toLocaleTimeString();
-            
-            // 收集输入参数
-            const filters = {};
-            const floorId = document.getElementById('search-floor-id').value.trim();
-            const areaId = document.getElementById('search-area-id').value.trim();
-            const deviceType = document.getElementById('search-device-type').value.trim();
-            const manufacturer = document.getElementById('search-manufacturer').value.trim();
-            const model = document.getElementById('search-model').value.trim();
-            const enabledOnly = document.getElementById('search-enabled-only').value;
-            
-            if (floorId) filters.floor_id = floorId;
-            if (areaId) filters.area_id = areaId;
-            if (deviceType) filters.device_type = deviceType;
-            if (manufacturer) filters.manufacturer = manufacturer;
-            if (model) filters.model = model;
-            if (enabledOnly !== '') filters.enabled_only = enabledOnly === 'true';
-            
-            // 显示测试开始信息
-            const testId = `device-search-input-test-${Date.now()}`;
-            container.innerHTML = `
-                <div class="test-result-container" id="${testId}">
-                    <div class="test-result-header" onclick="toggleTestResult('${testId}')">
-                        <span>🔍 测试设备搜索 (自定义参数)</span>
-                        <span class="test-result-toggle">▶</span>
-                    </div>
-                    <div class="test-result-content">
-                        <div class="test-result info">
-                            <div>时间: ${timestamp}</div>
-                            <div>状态: 正在测试...</div>
-                            <div>搜索参数: ${JSON.stringify(filters)}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
             try {
-                const response = await fetch('/api/home_assistant/home_assistant/devices/search', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(filters)
-                });
-                
-                const data = await response.json();
-                const resultClass = response.ok ? 'success' : 'error';
-                const statusText = response.ok ? '✅ 成功' : '❌ 失败';
-                
-                let resultsHtml = `
-                    <div class="test-result ${resultClass}">
-                        <div><strong>设备搜索结果</strong></div>
-                        <div>状态: ${statusText}</div>
-                        <div>搜索参数: ${JSON.stringify(filters)}</div>
-                        <div>找到设备: ${data.success ? data.data.count : 0} 个</div>
-                        <div>响应时间: ${response.headers.get('X-Response-Time') || 'N/A'}</div>
-                `;
-                
-                if (data.success && data.data.devices && data.data.devices.length > 0) {
-                    resultsHtml += `
-                        <div><strong>设备列表:</strong></div>
-                        <div class="device-list">
-                    `;
-                    data.data.devices.forEach(device => {
-                        resultsHtml += `
-                            <div class="device-item">
-                                <div><strong>${device.name}</strong></div>
-                                <div>类型: ${device.device_type}</div>
-                                <div>制造商: ${device.manufacturer}</div>
-                                <div>型号: ${device.model}</div>
-                                <div>房间: ${device.area_id || '未分配'}</div>
-                            </div>
-                        `;
-                    });
-                    resultsHtml += `</div>`;
+                const response = await makeAPICall('POST', '/api/home_assistant/home_assistant/test-connection');
+                if (response.success) {
+                    addLog('连接测试成功 ✅', 'success');
+                } else {
+                    addLog('连接测试失败: ' + response.error, 'error');
                 }
-                
-                resultsHtml += `
-                        <details>
-                            <summary>查看完整响应</summary>
-                            <pre>${JSON.stringify(data, null, 2)}</pre>
-                        </details>
-                    </div>
-                `;
-                
-                // 更新结果
-                const contentElement = document.getElementById(testId).querySelector('.test-result-content');
-                contentElement.innerHTML = resultsHtml;
-                
             } catch (error) {
-                const contentElement = document.getElementById(testId).querySelector('.test-result-content');
-                contentElement.innerHTML = `
-                    <div class="test-result error">
-                        <div>❌ 测试失败</div>
-                        <div>错误: ${error.message}</div>
-                    </div>
-                `;
+                addLog('连接测试错误: ' + error.message, 'error');
             }
         }
 
-        // 测试设备搜索API
-        async function testDeviceSearch() {
-            const container = document.getElementById('device-search-test');
-            const timestamp = new Date().toLocaleTimeString();
-            
-            // 显示测试开始信息
-            const testId = `device-search-test-${Date.now()}`;
-            container.innerHTML = `
-                <div class="test-result-container" id="${testId}">
-                    <div class="test-result-header" onclick="toggleTestResult('${testId}')">
-                        <span>🔍 测试设备搜索</span>
-                        <span class="test-result-toggle">▶</span>
-                    </div>
-                    <div class="test-result-content">
-                        <div class="test-result info">
-                            <div>时间: ${timestamp}</div>
-                            <div>状态: 正在测试...</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            try {
-                // 测试不同的搜索条件
-                const testCases = [
-                    { name: "按房间搜索", filters: { area_id: "bedroom" } },
-                    { name: "按设备类型搜索", filters: { device_type: "homekit" } },
-                    { name: "按制造商搜索", filters: { manufacturer: "LinknLink" } },
-                    { name: "组合搜索", filters: { area_id: "bedroom", enabled_only: true } }
-                ];
-                
-                let resultsHtml = '';
-                
-                for (const testCase of testCases) {
-                    const response = await fetch('/api/home_assistant/home_assistant/devices/search', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(testCase.filters)
-                    });
-                    
-                    const data = await response.json();
-                    const resultClass = response.ok ? 'success' : 'error';
-                    const statusText = response.ok ? '✅ 成功' : '❌ 失败';
-                    
-                    resultsHtml += `
-                        <div class="test-result ${resultClass}">
-                            <div><strong>${testCase.name}</strong></div>
-                            <div>状态: ${statusText}</div>
-                            <div>搜索条件: ${JSON.stringify(testCase.filters)}</div>
-                            <div>找到设备: ${data.success ? data.data.count : 0} 个</div>
-                            <div>响应时间: ${response.headers.get('X-Response-Time') || 'N/A'}</div>
-                            <details>
-                                <summary>查看详细响应</summary>
-                                <pre>${JSON.stringify(data, null, 2)}</pre>
-                            </details>
-                        </div>
-                    `;
+        // Make API call
+        async function makeAPICall(method, endpoint, data = null) {
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
                 }
-                
-                // 更新结果
-                const contentElement = document.getElementById(testId).querySelector('.test-result-content');
-                contentElement.innerHTML = resultsHtml;
-                
-            } catch (error) {
-                const contentElement = document.getElementById(testId).querySelector('.test-result-content');
-                contentElement.innerHTML = `
-                    <div class="test-result error">
-                        <div>❌ 测试失败</div>
-                        <div>错误: ${error.message}</div>
-                    </div>
-                `;
-            }
-        }
+            };
 
-        // 测试实体相关API
-        async function testEntityApi(method, containerId, endpoint = '') {
-            const entityId = document.getElementById('entity-id-input').value;
-            if (!entityId) {
-                alert('请输入Entity ID');
-                return;
-            }
-            
-            const url = `/api/home_assistant/home_assistant/entity/${entityId}${endpoint}`;
-            await testApi(method, url, null, containerId);
-            
-            // 更新curl示例
-            const curlExample = document.getElementById('entity-curl-example');
-            if (curlExample) {
-                curlExample.textContent = `curl -X ${method} http://localhost:3000/api/home_assistant/home_assistant/entity/${entityId}${endpoint}`;
-            }
-        }
-
-        // 测试设置状态API
-        async function testSetStateApi(containerId) {
-            const entityId = document.getElementById('set-state-entity-input').value;
-            const state = document.getElementById('set-state-state-input').value;
-            const attributesStr = document.getElementById('set-state-attributes-input').value;
-            
-            if (!entityId || !state) {
-                alert('请输入Entity ID和State');
-                return;
-            }
-            
-            let attributes = {};
-            if (attributesStr) {
-                try {
-                    attributes = JSON.parse(attributesStr);
-                } catch (e) {
-                    alert('Attributes JSON格式错误');
-                    return;
-                }
-            }
-            
-            const data = { state, attributes };
-            const url = `/api/home_assistant/home_assistant/entity/${entityId}/set_state`;
-            await testApi('POST', url, data, containerId);
-            
-            // 更新curl示例
-            const curlExample = document.getElementById('set-state-curl-example');
-            if (curlExample) {
-                curlExample.textContent = `curl -X POST http://localhost:3000/api/home_assistant/home_assistant/entity/${entityId}/set_state \\
-  -H "Content-Type: application/json" \\
-  -d '${JSON.stringify(data)}'`;
-            }
-        }
-
-        // 测试服务调用API
-        async function testCallServiceApi(containerId) {
-            const domain = document.getElementById('call-service-domain-input').value;
-            const service = document.getElementById('call-service-service-input').value;
-            const entityId = document.getElementById('call-service-entity-input').value;
-            const serviceDataStr = document.getElementById('call-service-data-input').value;
-            
-            if (!domain || !service) {
-                alert('请输入Domain和Service');
-                return;
-            }
-            
-            let serviceData = {};
-            if (serviceDataStr) {
-                try {
-                    serviceData = JSON.parse(serviceDataStr);
-                } catch (e) {
-                    alert('Service Data JSON格式错误');
-                    return;
-                }
-            }
-            
-            const data = { domain, service, ...serviceData };
-            if (entityId) {
-                data.entity_id = entityId;
-            }
-            
-            const url = '/api/home_assistant/home_assistant/call-service';
-            await testApi('POST', url, data, containerId);
-            
-            // 更新curl示例
-            const curlExample = document.getElementById('call-service-curl-example');
-            if (curlExample) {
-                curlExample.textContent = `curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-service \\
-  -H "Content-Type: application/json" \\
-  -d '${JSON.stringify(data)}'`;
-            }
-        }
-
-        // 测试实体注册表API
-        async function testEntityRegistryApi(containerId) {
-            const timestamp = new Date().toLocaleString();
-            document.getElementById(containerId).innerHTML = `
-                <div class="test-result-header">
-                    <span class="toggle-btn" onclick="toggleTestResult('${containerId}')">▼</span>
-                    实体注册表测试结果
-                </div>
-                <div class="test-result-content">
-                    <div class="test-result info">
-                        <div>时间: ${timestamp}</div>
-                        <div>状态: 正在测试...</div>
-                    </div>
-                </div>
-            `;
-            
-            try {
-                // 获取筛选参数
-                const domainFilter = document.getElementById('entity-domain-filter').value;
-                const platformFilter = document.getElementById('entity-platform-filter').value;
-                const deviceFilter = document.getElementById('entity-device-filter').value;
-                const limit = parseInt(document.getElementById('entity-limit').value) || 20;
-                
-                const response = await fetch('/api/home_assistant/home_assistant/entity-registry');
-                const data = await response.json();
-                
-                const resultClass = response.ok ? 'success' : 'error';
-                const statusText = response.ok ? '✅ 成功' : '❌ 失败';
-                
-                let entities = data.success ? (data.data.entities || []) : [];
-                const totalEntities = entities.length;
-                
-                // 应用筛选
-                if (domainFilter) {
-                    entities = entities.filter(entity => entity.entity_id.startsWith(domainFilter + '.'));
-                }
-                
-                if (platformFilter) {
-                    entities = entities.filter(entity => 
-                        entity.platform && entity.platform.toLowerCase().includes(platformFilter.toLowerCase())
-                    );
-                }
-                
-                if (deviceFilter) {
-                    entities = entities.filter(entity => 
-                        entity.device_id && entity.device_id.includes(deviceFilter)
-                    );
-                }
-                
-                // 限制显示数量
-                const displayEntities = entities.slice(0, limit);
-                const filteredCount = entities.length;
-                
-                // 统计实体类型
-                const entityStats = {};
-                const platformStats = {};
-                entities.forEach(entity => {
-                    const domain = entity.entity_id.split('.')[0];
-                    entityStats[domain] = (entityStats[domain] || 0) + 1;
-                    
-                    if (entity.platform) {
-                        platformStats[entity.platform] = (platformStats[entity.platform] || 0) + 1;
+            if (data && (method === 'POST' || method === 'PUT')) {
+                options.body = JSON.stringify(data);
+            } else if (data && method === 'GET') {
+                // For GET requests, add data as query parameters
+                const url = new URL(endpoint, window.location.origin);
+                Object.keys(data).forEach(key => {
+                    if (data[key] !== null && data[key] !== undefined && data[key] !== '') {
+                        if (Array.isArray(data[key])) {
+                            // For arrays, pass as JSON string (backend expects JSON format)
+                            url.searchParams.append(key, JSON.stringify(data[key]));
+                        } else {
+                            url.searchParams.append(key, data[key]);
+                        }
                     }
                 });
-                
-                // 生成实体表格
-                const entityTableRows = displayEntities.map(entity => `
-                    <tr>
-                        <td><code>${entity.entity_id}</code></td>
-                        <td>${entity.name || entity.original_name || 'N/A'}</td>
-                        <td><span class="badge">${entity.platform || 'N/A'}</span></td>
-                        <td><code style="font-size: 0.8em;">${entity.device_id || 'N/A'}</code></td>
-                        <td><code style="font-size: 0.8em;">${entity.area_id || 'N/A'}</code></td>
-                        <td><span class="badge ${entity.disabled_by ? 'badge-warning' : 'badge-success'}">${entity.disabled_by ? '禁用' : '启用'}</span></td>
-                    </tr>
-                `).join('');
-                
-                // 生成统计图表
-                const topDomains = Object.entries(entityStats)
-                    .sort(([,a], [,b]) => b - a)
-                    .slice(0, 8)
-                    .map(([domain, count]) => `
-                        <div class="stat-item">
-                            <span class="stat-label">${domain}</span>
-                            <span class="stat-value">${count}</span>
-                        </div>
-                    `).join('');
-                
-                const topPlatforms = Object.entries(platformStats)
-                    .sort(([,a], [,b]) => b - a)
-                    .slice(0, 5)
-                    .map(([platform, count]) => `
-                        <div class="stat-item">
-                            <span class="stat-label">${platform}</span>
-                            <span class="stat-value">${count}</span>
-                        </div>
-                    `).join('');
-                
-                const contentElement = document.getElementById(containerId).querySelector('.test-result-content');
-                contentElement.innerHTML = `
-                    <div class="test-result ${resultClass}">
-                        <div><strong>🗂️ 实体注册表获取结果</strong></div>
-                        <div>状态: ${statusText}</div>
-                        <div>📊 总实体数: ${totalEntities}</div>
-                        <div>🔍 筛选后: ${filteredCount} 个实体</div>
-                        <div>📄 显示: ${displayEntities.length} 个实体</div>
-                        <div>📡 数据源: ${data.data?.retrieved_at ? 'WebSocket API' : 'REST API'}</div>
-                        <div>⏱️ 获取时间: ${data.data?.retrieved_at || 'N/A'}</div>
-                    </div>
-                    
-                    <div class="test-result info">
-                        <div><strong>📊 实体类型统计</strong></div>
-                        <div class="stats-grid">
-                            ${topDomains}
-                        </div>
-                    </div>
-                    
-                    <div class="test-result info">
-                        <div><strong>🔌 平台统计 (Top 5)</strong></div>
-                        <div class="stats-grid">
-                            ${topPlatforms}
-                        </div>
-                    </div>
-                    
-                    ${displayEntities.length > 0 ? `
-                    <div class="test-result success">
-                        <div><strong>📋 实体列表 (显示前 ${limit} 个)</strong></div>
-                        <div style="overflow-x: auto; margin-top: 10px;">
-                            <table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
-                                <thead>
-                                    <tr style="background-color: var(--gray-100);">
-                                        <th style="padding: 8px; text-align: left; border: 1px solid var(--gray-300);">实体ID</th>
-                                        <th style="padding: 8px; text-align: left; border: 1px solid var(--gray-300);">名称</th>
-                                        <th style="padding: 8px; text-align: left; border: 1px solid var(--gray-300);">平台</th>
-                                        <th style="padding: 8px; text-align: left; border: 1px solid var(--gray-300);">设备ID</th>
-                                        <th style="padding: 8px; text-align: left; border: 1px solid var(--gray-300);">区域ID</th>
-                                        <th style="padding: 8px; text-align: left; border: 1px solid var(--gray-300);">状态</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${entityTableRows}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    ` : ''}
-                    
-                    <details style="margin-top: 10px;">
-                        <summary>🔍 查看原始API响应</summary>
-                        <pre style="background-color: var(--gray-100); padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 0.8em;">${JSON.stringify(data, null, 2)}</pre>
-                    </details>
-                `;
-                
+                endpoint = url.pathname + url.search;
+            }
+
+            const response = await fetch(endpoint, options);
+            return await response.json();
+        }
+
+        // Quick test functions
+        async function quickTest(testType) {
+            const responseEl = document.getElementById('quick-response');
+            const bodyEl = document.getElementById('quick-response-body');
+
+            responseEl.classList.remove('hidden');
+            bodyEl.textContent = 'Loading...';
+
+            try {
+                let endpoint;
+                switch (testType) {
+                    case 'entity-registry':
+                        endpoint = '/api/home_assistant/home_assistant/entity-registry';
+                        break;
+                    case 'states':
+                        endpoint = '/api/home_assistant/home_assistant/states';
+                        break;
+                    case 'spaces':
+                        endpoint = '/api/home_assistant/home_assistant/spaces';
+                        break;
+                    case 'device-registry':
+                        endpoint = '/api/home_assistant/home_assistant/device-registry';
+                        break;
+                    case 'enhanced-entities':
+                        endpoint = '/api/home_assistant/home_assistant/enhanced-entities';
+                        break;
+                    case 'batch-control':
+                        endpoint = '/api/home_assistant/home_assistant/batch-control';
+                        // 示例批量控制数据
+                        const batchData = [
+                            {
+                                "entity_id": "light.light_test_001",
+                                "service": "light.turn_on",
+                                "service_data": {
+                                    "color_name": "blue",
+                                    "brightness": 255
+                                }
+                            }
+                        ];
+                        const response = await makeAPICall('POST', endpoint, batchData);
+                        bodyEl.textContent = JSON.stringify(response, null, 2);
+                        addLog(`快速测试 ${testType} ${response.success ? '成功' : '失败'}`,
+                              response.success ? 'success' : 'error');
+                        return;
+                }
+
+                const response = await makeAPICall('GET', endpoint);
+                bodyEl.textContent = JSON.stringify(response, null, 2);
+
+                addLog(`快速测试 ${testType} ${response.success ? '成功' : '失败'}`,
+                      response.success ? 'success' : 'error');
             } catch (error) {
-                const contentElement = document.getElementById(containerId).querySelector('.test-result-content');
-                contentElement.innerHTML = `
-                    <div class="test-result error">
-                        <div>❌ 测试失败</div>
-                        <div>错误: ${error.message}</div>
-                    </div>
-                `;
+                bodyEl.textContent = JSON.stringify({ error: error.message }, null, 2);
+                addLog(`快速测试 ${testType} 错误: ${error.message}`, 'error');
             }
         }
 
-        // 平滑滚动到锚点
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
+
+        // Tab navigation
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // Generate API documentation
+        function generateAPIDocumentation() {
+            Object.keys(API_DEFINITIONS).forEach(category => {
+                const container = document.querySelector(`#${category} .api-section`);
+                if (container) {
+                    API_DEFINITIONS[category].forEach(api => {
+                        container.appendChild(createEndpointCard(api));
                     });
                 }
             });
-        });
-
-        // 测试增强状态数据API（带筛选）
-        async function testEnhancedStatesWithFilters() {
-            const areaNamesInput = document.getElementById('area-names-filter').value.trim();
-            const deviceTypesInput = document.getElementById('device-types-filter').value.trim();
-            
-            let url = '/api/home_assistant/home_assistant/enhanced-states';
-            const params = new URLSearchParams();
-            
-            if (areaNamesInput) {
-                try {
-                    const areaNames = JSON.parse(areaNamesInput);
-                    if (Array.isArray(areaNames)) {
-                        params.append('area_names', JSON.stringify(areaNames));
-                    } else {
-                        params.append('area_names', JSON.stringify([areaNames]));
-                    }
-                } catch (e) {
-                    alert('区域名称格式错误，请输入有效的JSON数组格式');
-                    return;
-                }
-            }
-            
-            if (deviceTypesInput) {
-                try {
-                    const deviceTypes = JSON.parse(deviceTypesInput);
-                    if (Array.isArray(deviceTypes)) {
-                        params.append('device_types', JSON.stringify(deviceTypes));
-                    } else {
-                        params.append('device_types', JSON.stringify([deviceTypes]));
-                    }
-                } catch (e) {
-                    alert('设备类型格式错误，请输入有效的JSON数组格式');
-                    return;
-                }
-            }
-            
-            if (params.toString()) {
-                url += '?' + params.toString();
-            }
-            
-            await testApi('GET', url, null, 'enhanced-states-test');
         }
 
-        // 清空筛选条件
-        function clearFilters() {
-            document.getElementById('area-names-filter').value = '';
-            document.getElementById('device-types-filter').value = '';
-        }
+        // Create endpoint card
+        function createEndpointCard(api) {
+            const card = document.createElement('div');
+            card.className = 'endpoint-card';
+            card.dataset.endpoint = api.testFunction;
 
-        // 测试控制设备匹配API
-        async function testControlDeviceMatchingAPI() {
-            const container = document.getElementById('control-device-matching-test');
-            const timestamp = new Date().toLocaleTimeString();
-            
-            let intentInput = document.getElementById('control-intent-input').value.trim();
-            
-            if (!intentInput) {
-                alert('请输入意图数据');
-                return;
-            }
-            
-            let intentData;
-            try {
-                intentData = JSON.parse(intentInput);
-            } catch (e) {
-                alert('JSON格式错误: ' + e.message);
-                return;
-            }
-            
-            const testId = `control-device-matching-test-${Date.now()}`;
-            container.innerHTML = `
-                <div class="test-result-container" id="${testId}">
-                    <div class="test-result-header" onclick="toggleTestResult('${testId}')">
-                        <span>🎯 测试控制设备匹配API</span>
-                        <span class="test-result-toggle">▶</span>
+            card.innerHTML = `
+                <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                    <div class="endpoint-info">
+                        <span class="method-badge method-${api.method.toLowerCase()}">${api.method}</span>
+                        <span class="endpoint-path">${api.path}</span>
+                        <span class="endpoint-description">${api.title}</span>
                     </div>
-                    <div class="test-result-content">
-                        <div class="test-result info">
-                            <div>时间: ${timestamp}</div>
-                            <div>状态: 正在测试...</div>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="endpoint-content">
+                    <div class="endpoint-details">
+                        <div class="detail-section">
+                            <h4>📝 接口说明</h4>
+                            <p>${api.description}</p>
+
+                            <h4>📋 请求参数</h4>
+                            <ul class="param-list">
+                                ${api.parameters.map(param => `
+                                    <li class="param-item">
+                                        <span class="param-name">${param.name}</span>
+                                        <span class="param-${param.required ? 'required' : 'optional'}">
+                                            ${param.required ? 'REQUIRED' : 'OPTIONAL'}
+                                        </span>
+                                        <span class="param-type">${param.type}</span>
+                                        <div class="param-description">${param.description}</div>
+                                    </li>
+                                `).join('')}
+                                ${api.parameters.length === 0 ? '<li class="param-item">无参数</li>' : ''}
+                            </ul>
                         </div>
+                        <div class="detail-section">
+                            <div class="test-panel">
+                                <div class="test-header">
+                                    <h4 class="test-title">🧪 接口测试</h4>
+                                </div>
+                                ${generateTestForm(api)}
+                                <div class="controls mt-2">
+                                    <button class="btn btn-primary" onclick="${api.testFunction}()">
+                                        <span class="loading-spinner hidden" id="${api.testFunction}-spinner"></span>
+                                        🚀 执行测试
+                                    </button>
+                                    <button class="btn btn-info" onclick="fillExampleData('${api.testFunction}')">
+                                        📝 填充示例
+                                    </button>
+                                    ${api.testFunction === 'testBatchControl' ? `
+                                        <button class="btn btn-secondary" onclick="formatBatchControlJSON()">
+                                            ✨ 格式化JSON
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="${api.testFunction}-response" class="response-panel hidden">
+                        <div class="response-header">
+                            <span class="response-title">📤 响应结果</span>
+                            <div class="response-actions">
+                                <button class="btn btn-secondary" onclick="copyResponse('${api.testFunction}-body')">📋 复制</button>
+                            </div>
+                        </div>
+                        <div id="${api.testFunction}-body" class="response-body"></div>
                     </div>
                 </div>
             `;
-            
-            try {
-                const response = await fetch('/api/home_assistant/home_assistant/match-control-devices', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(intentData)
-                });
-                
-                const data = await response.json();
-                const resultClass = response.ok ? 'success' : 'error';
-                const statusText = response.ok ? '✅ 成功' : '❌ 失败';
-                
-                let resultsHtml = `
-                    <div class="test-result ${resultClass}">
-                        <div><strong>控制设备匹配API测试结果</strong></div>
-                        <div>状态: ${statusText}</div>
-                `;
-                
-                if (data.success && data.data) {
-                    const { matched_devices, statistics } = data.data;
-                    resultsHtml += `
-                        <div>匹配设备数量: ${matched_devices.length}</div>
-                        <div>意图设备数量: ${statistics.total_intent_devices}</div>
-                        <div>匹配房间数: ${statistics.unique_rooms}</div>
-                        <div>设备类型数: ${statistics.unique_device_types}</div>
-                        <div>操作动作: ${statistics.actions.join(', ')}</div>
-                        <div>置信度分布: 高(${statistics.confidence_scores.high}) 中(${statistics.confidence_scores.medium}) 低(${statistics.confidence_scores.low})</div>
+
+            return card;
+        }
+
+        // Generate test form based on parameters
+        function generateTestForm(api) {
+            if (api.parameters.length === 0) {
+                return '<p>此接口不需要参数，直接执行测试即可。</p>';
+            }
+
+            return api.parameters.map(param => {
+                if (param.type === 'array' || param.type === 'json-array') {
+                    return `
+                        <div class="form-group">
+                            <label class="form-label">${param.name} ${param.required ? '(必填)' : '(可选)'}</label>
+                            <textarea id="${api.testFunction}-${param.name}"
+                                     class="form-textarea"
+                                     rows="10"
+                                     placeholder="请输入JSON数组格式"></textarea>
+                            <small>${param.description}</small>
+                        </div>
                     `;
-                    
-                    if (matched_devices.length > 0) {
-                        resultsHtml += `
-                            <div style="margin-top: 15px;">
-                                <strong>匹配的设备:</strong>
-                                <div style="max-height: 300px; overflow-y: auto; margin-top: 10px;">
-                        `;
-                        
-                        matched_devices.forEach((device, index) => {
-                            resultsHtml += `
-                                <div style="background: #f8f9fa; padding: 10px; margin: 5px 0; border-radius: 4px; border-left: 4px solid #007bff;">
-                                    <div><strong>${index + 1}. ${device.entity_id}</strong></div>
-                                    <div>设备名称: ${device.device_name || 'N/A'}</div>
-                                    <div>设备类型: ${device.device_type}</div>
-                                    <div>房间: ${device.area_name || 'N/A'}</div>
-                                    <div>楼层: ${device.floor_name || 'N/A'}</div>
-                                    <div>当前状态: ${device.state}</div>
-                                    <div>操作动作: ${device.action}</div>
-                                    <div>匹配置信度: ${(device.match_confidence * 100).toFixed(1)}%</div>
-                                </div>
-                            `;
-                        });
-                        
-                        resultsHtml += `
-                                </div>
-                            </div>
-                        `;
-                    }
+                } else if (param.type === 'object') {
+                    return `
+                        <div class="form-group">
+                            <label class="form-label">${param.name} ${param.required ? '(必填)' : '(可选)'}</label>
+                            <textarea id="${api.testFunction}-${param.name}"
+                                     class="form-textarea"
+                                     rows="6"
+                                     placeholder="请输入JSON对象格式"></textarea>
+                            <small>${param.description}</small>
+                        </div>
+                    `;
                 } else {
-                    resultsHtml += `<div>错误: ${data.error || '未知错误'}</div>`;
+                    return `
+                        <div class="form-group">
+                            <label class="form-label">${param.name} ${param.required ? '(必填)' : '(可选)'}</label>
+                            <input id="${api.testFunction}-${param.name}"
+                                   class="form-input"
+                                   type="text"
+                                   placeholder="${param.description}">
+                        </div>
+                    `;
                 }
-                
-                resultsHtml += `
-                    </div>
-                    <div style="margin-top: 10px;">
-                        <strong>完整响应:</strong>
-                        <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px;">${JSON.stringify(data, null, 2)}</pre>
-                    </div>
-                `;
-                
-                document.querySelector(`#${testId} .test-result-content`).innerHTML = resultsHtml;
-                
+            }).join('');
+        }
+
+        // Toggle endpoint card
+        function toggleEndpoint(header) {
+            const card = header.closest('.endpoint-card');
+            card.classList.toggle('expanded');
+        }
+
+        // Generic test function
+        async function executeAPITest(testFunction, method, endpoint, paramNamesOrData = []) {
+            const spinner = document.getElementById(`${testFunction}-spinner`);
+            const responseEl = document.getElementById(`${testFunction}-response`);
+            const bodyEl = document.getElementById(`${testFunction}-body`);
+
+            if (spinner) spinner.classList.remove('hidden');
+            responseEl.classList.remove('hidden');
+            bodyEl.textContent = 'Loading...';
+
+            try {
+                let data = null;
+                let finalEndpoint = endpoint;
+
+                // Check if paramNamesOrData is actual data (array or non-array object) or param names
+                if (Array.isArray(paramNamesOrData)) {
+                    // If it's an array, check if it contains strings (param names) or objects (actual data)
+                    if (paramNamesOrData.length > 0) {
+                        if (typeof paramNamesOrData[0] === 'string') {
+                            // It's param names array
+                            data = {};
+                            paramNamesOrData.forEach(param => {
+                                const element = document.getElementById(`${testFunction}-${param}`);
+                                if (element && element.value) {
+                                    try {
+                                        if (element.classList.contains('form-textarea')) {
+                                            data[param] = JSON.parse(element.value);
+                                        } else {
+                                            data[param] = element.value;
+                                        }
+                                    } catch (e) {
+                                        data[param] = element.value;
+                                    }
+                                }
+                            });
+
+                            // Handle path parameters
+                            if (endpoint.includes('{')) {
+                                Object.keys(data).forEach(key => {
+                                    if (endpoint.includes(`{${key}}`)) {
+                                        finalEndpoint = endpoint.replace(`{${key}}`, data[key]);
+                                        delete data[key];
+                                    }
+                                });
+                            }
+
+                            // Special handling for match-devices endpoint
+                            if (endpoint.includes('match-devices') && data.device_commands) {
+                                data = data.device_commands; // Send array directly
+                            }
+
+                            // Clean empty data
+                            if (Object.keys(data).length === 0) {
+                                data = null;
+                            }
+                        } else {
+                            // It's actual data array (like batch control commands)
+                            data = paramNamesOrData;
+                            addLog(`发送批量数据: ${data.length} 个命令`, 'info');
+                        }
+                    }
+                } else if (paramNamesOrData && typeof paramNamesOrData === 'object') {
+                    // It's an object with actual data
+                    data = paramNamesOrData;
+                }
+
+                const response = await makeAPICall(method, finalEndpoint, data);
+                bodyEl.textContent = JSON.stringify(response, null, 2);
+
+                addLog(`API测试 ${testFunction} ${response.success ? '成功' : '失败'}`,
+                      response.success ? 'success' : 'error');
             } catch (error) {
-                document.querySelector(`#${testId} .test-result-content`).innerHTML = `
-                    <div class="test-result error">
-                        <div><strong>控制设备匹配API测试结果</strong></div>
-                        <div>状态: ❌ 网络错误</div>
-                        <div>错误: ${error.message}</div>
-                    </div>
-                `;
+                bodyEl.textContent = JSON.stringify({ error: error.message }, null, 2);
+                addLog(`API测试 ${testFunction} 错误: ${error.message}`, 'error');
+            } finally {
+                if (spinner) spinner.classList.add('hidden');
             }
         }
 
-        // 清空控制设备匹配输入
-        function clearControlDeviceMatchingInputs() {
-            document.getElementById('control-intent-input').value = '';
+        // Individual test functions
+        function testEntityRegistry() {
+            executeAPITest('testEntityRegistry', 'GET', '/api/home_assistant/home_assistant/entity-registry');
         }
+
+        function testStates() {
+            executeAPITest('testStates', 'GET', '/api/home_assistant/home_assistant/states');
+        }
+
+        function testSpaces() {
+            executeAPITest('testSpaces', 'GET', '/api/home_assistant/home_assistant/spaces', ['op']);
+        }
+
+        function testDeviceRegistry() {
+            executeAPITest('testDeviceRegistry', 'GET', '/api/home_assistant/home_assistant/device-registry');
+        }
+
+        function testEnhancedEntities() {
+            executeAPITest('testEnhancedEntities', 'GET', '/api/home_assistant/home_assistant/enhanced-entities');
+        }
+
+        function testBatchStates() {
+            try {
+                // 从textarea读取JSON数据
+                const entitiesInput = document.getElementById('testBatchStates-entities');
+                if (!entitiesInput || !entitiesInput.value.trim()) {
+                    addLog('请输入实体ID列表JSON数据', 'error');
+                    return;
+                }
+                
+                // 获取输入值并清理可能的特殊字符
+                let inputValue = entitiesInput.value.trim();
+                
+                // 尝试解析JSON
+                let entitiesData;
+                try {
+                    entitiesData = JSON.parse(inputValue);
+                } catch (parseError) {
+                    addLog('JSON格式错误: ' + parseError.message, 'error');
+                    addLog('提示: 请检查JSON格式是否正确，可以使用"📝 填充示例"按钮查看正确格式', 'info');
+                    return;
+                }
+                
+                // 验证是否为数组
+                if (!Array.isArray(entitiesData)) {
+                    addLog('实体列表必须是JSON数组格式', 'error');
+                    return;
+                }
+                
+                // 验证数组不为空
+                if (entitiesData.length === 0) {
+                    addLog('实体列表数组不能为空', 'error');
+                    return;
+                }
+                
+                // 验证每个对象的必填字段
+                for (let i = 0; i < entitiesData.length; i++) {
+                    const entity = entitiesData[i];
+                    if (!entity.entity_id) {
+                        addLog(`实体 ${i + 1} 缺少必填字段 entity_id`, 'error');
+                        return;
+                    }
+                }
+                
+                addLog(`准备获取 ${entitiesData.length} 个实体的状态`, 'info');
+                
+                // 执行测试
+                executeAPITest('testBatchStates', 'POST', '/api/home_assistant/home_assistant/batch-states', entitiesData);
+            } catch (error) {
+                addLog('执行错误: ' + error.message, 'error');
+                console.error('Batch states error:', error);
+            }
+        }
+
+        function testBatchControl() {
+            try {
+                // 从textarea读取JSON数据
+                const commandsInput = document.getElementById('testBatchControl-commands');
+                if (!commandsInput || !commandsInput.value.trim()) {
+                    addLog('请输入批量控制命令JSON数据', 'error');
+                    return;
+                }
+                
+                // 获取输入值并清理可能的特殊字符
+                let inputValue = commandsInput.value.trim();
+                
+                // 尝试解析JSON
+                let batchData;
+                try {
+                    batchData = JSON.parse(inputValue);
+                } catch (parseError) {
+                    // JSON解析失败，显示详细错误信息
+                    const errorPos = parseError.message.match(/position (\d+)/);
+                    if (errorPos) {
+                        const pos = parseInt(errorPos[1]);
+                        const context = inputValue.substring(Math.max(0, pos - 20), Math.min(inputValue.length, pos + 20));
+                        addLog(`JSON解析错误在位置 ${pos}: "${context}"`, 'error');
+                    }
+                    addLog('JSON格式错误: ' + parseError.message, 'error');
+                    addLog('提示: 请检查JSON格式是否正确，可以使用"📝 填充示例"按钮查看正确格式', 'info');
+                    return;
+                }
+                
+                // 验证是否为数组
+                if (!Array.isArray(batchData)) {
+                    addLog('批量控制命令必须是JSON数组格式', 'error');
+                    return;
+                }
+                
+                // 验证数组不为空
+                if (batchData.length === 0) {
+                    addLog('批量控制命令数组不能为空', 'error');
+                    return;
+                }
+                
+                // 验证每个命令的必填字段
+                for (let i = 0; i < batchData.length; i++) {
+                    const cmd = batchData[i];
+                    if (!cmd.entity_id) {
+                        addLog(`命令 ${i + 1} 缺少必填字段 entity_id`, 'error');
+                        return;
+                    }
+                    if (!cmd.service) {
+                        addLog(`命令 ${i + 1} 缺少必填字段 service`, 'error');
+                        return;
+                    }
+                }
+                
+                addLog(`准备执行 ${batchData.length} 个批量控制命令`, 'info');
+                
+                // 执行测试
+                executeAPITest('testBatchControl', 'POST', '/api/home_assistant/home_assistant/batch-control', batchData);
+            } catch (error) {
+                addLog('执行错误: ' + error.message, 'error');
+                console.error('Batch control error:', error);
+            }
+        }
+
+        // Format batch control JSON
+        function formatBatchControlJSON() {
+            try {
+                const commandsInput = document.getElementById('testBatchControl-commands');
+                if (!commandsInput || !commandsInput.value.trim()) {
+                    addLog('请先输入JSON数据', 'error');
+                    return;
+                }
+                
+                // 解析并格式化JSON
+                const parsed = JSON.parse(commandsInput.value.trim());
+                const formatted = JSON.stringify(parsed, null, 2);
+                commandsInput.value = formatted;
+                addLog('JSON格式化成功', 'success');
+            } catch (error) {
+                addLog('JSON格式化失败: ' + error.message, 'error');
+                addLog('提示: 请先确保输入的是有效的JSON格式', 'info');
+            }
+        }
+
+        // Fill example data
+        function fillExampleData(testFunction) {
+            const examples = {
+                testSpaces: {
+                    op: "floors"
+                },
+                testBatchControl: {
+                    commands: JSON.stringify([
+                        {
+                            "entity_id": "climate.text_ac_01",
+                            "service": "climate.set_temperature",
+                            "service_data": {
+                                "temperature": 20
+                            }
+                        },
+                        {
+                            "entity_id": "climate.ac_01",
+                            "service": "climate.set_temperature",
+                            "service_data": {
+                                "temperature": 20
+                            }
+                        },
+                        {
+                            "entity_id": "light.light_test_001",
+                            "service": "light.turn_on",
+                            "service_data": {
+                                "color_name": "blue",
+                                "brightness": 255
+                            }
+                        }
+                    ], null, 2)
+                },
+                testBatchStates: {
+                    entities: JSON.stringify([
+                        {
+                            "entity_id": "climate.text_ac_01"
+                        },
+                        {
+                            "entity_id": "light.light_test_001"
+                        },
+                        {
+                            "entity_id": "sensor.temp_01"
+                        }
+                    ], null, 2)
+                }
+            };
+
+            const example = examples[testFunction];
+            if (example) {
+                Object.keys(example).forEach(key => {
+                    const element = document.getElementById(`${testFunction}-${key}`);
+                    if (element) {
+                        element.value = example[key];
+                    }
+                });
+                addLog(`已填充 ${testFunction} 的示例数据`, 'info');
+            }
+        }
+
+        // Copy response
+        function copyResponse(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                navigator.clipboard.writeText(element.textContent);
+                addLog('响应内容已复制到剪贴板', 'info');
+            }
+        }
+
+        function copyQuickResponse() {
+            copyResponse('quick-response-body');
+        }
+
+        function closeQuickResponse() {
+            document.getElementById('quick-response').classList.add('hidden');
+        }
+
+        // Log management
+        function addLog(message, level = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            logs.unshift({ timestamp, message, level });
+
+            // Keep only last 100 logs
+            if (logs.length > 100) {
+                logs = logs.slice(0, 100);
+            }
+
+            updateLogDisplay();
+        }
+
+        function updateLogDisplay() {
+            const logContent = document.getElementById('log-content');
+            logContent.innerHTML = logs.map(log => `
+                <div class="log-entry">
+                    <span class="log-timestamp">${log.timestamp}</span>
+                    <span class="log-level-${log.level}">${log.message}</span>
+                </div>
+            `).join('');
+        }
+
+        function clearLogs() {
+            logs = [];
+            updateLogDisplay();
+        }
+
+        function toggleLogPanel() {
+            const panel = document.getElementById('log-panel');
+            panel.classList.toggle('hidden');
+        }
+
+        // Initialize with first log
+        addLog('Home Assistant API 文档已加载完成', 'success');
     </script>
 </body>
 </html>

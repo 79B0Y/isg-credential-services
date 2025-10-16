@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "DeepSeek API Credentials",
+  "description": "DeepSeek API credentials for AI model access",
+  "properties": {
+    "api_key": {
+      "type": "string",
+      "title": "API Key",
+      "description": "DeepSeek API key from your account dashboard",
+      "required": true,
+      "sensitive": true,
+      "minLength": 32,
+      "maxLength": 200,
+      "pattern": "^sk-[A-Za-z0-9-]+$",
+      "example": "sk-abcdef1234567890abcdef1234567890abcdef12",
+      "ui": {
+        "widget": "password",
+        "placeholder": "Enter your DeepSeek API key",
+        "help": "Get your API key from https://platform.deepseek.com/api-keys"
+      }
+    }
+  },
+  "required": ["api_key"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "api_key": "sk-abcdef1234567890abcdef1234567890abcdef12"
+    }
+  ]
+}
+

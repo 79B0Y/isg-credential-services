@@ -1,5 +1,6 @@
 const BaseCredentialModule = require('../../core/BaseCredentialModule');
 const https = require('https');
+const TermuxHelper = require('../../lib/termux-helper');
 
 /**
  * OpenaiModule - OpenAI API凭据管理模块
@@ -221,6 +222,13 @@ class OpenaiModule extends BaseCredentialModule {
 
             // 发送FormData
             formData.pipe(req);
+
+            // Clean up FormData after request
+            req.on('finish', () => {
+                if (formData && typeof formData.destroy === 'function') {
+                    formData.destroy();
+                }
+            });
         });
     }
 
@@ -482,7 +490,7 @@ class OpenaiModule extends BaseCredentialModule {
             form.append('response_format', finalOptions.response_format);
             form.append('temperature', finalOptions.temperature.toString());
 
-            // 调用Whisper API
+            // 调用 OpenAI API 的 audio.transcriptions.create 接口
             const response = await this.callOpenAIAPIWithFormData(
                 api_key,
                 organization,
@@ -498,7 +506,8 @@ class OpenaiModule extends BaseCredentialModule {
                         text: response.text,
                         model: finalOptions.model,
                         language: finalOptions.language || 'auto-detected',
-                        transcribed_at: new Date().toISOString()
+                        transcribed_at: new Date().toISOString(),
+                        usage: response.usage || null
                     }
                 };
             } else {
@@ -521,39 +530,248 @@ class OpenaiModule extends BaseCredentialModule {
         try {
             this.logger.info('Downloading audio from URL...');
             
-            // 下载音频文件
-            const https = require('https');
-            const http = require('http');
-            const url = require('url');
+            // 下载音频文件（带重试机制）
+            const termuxConfig = TermuxHelper.getOptimizedConfig();
+            const maxRetries = termuxConfig.network.retries;
+            let lastError;
             
-            const audioBuffer = await new Promise((resolve, reject) => {
-                const parsedUrl = url.parse(audioUrl);
-                const httpModule = parsedUrl.protocol === 'https:' ? https : http;
-                
-                const req = httpModule.get(audioUrl, (res) => {
-                    if (res.statusCode !== 200) {
-                        reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
-                        return;
-                    }
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    this.logger.info(`Download attempt ${attempt}/${maxRetries}`);
+                    const audioBuffer = await this.downloadAudioFromUrl(audioUrl);
+                    this.logger.info('Audio downloaded successfully');
                     
-                    const chunks = [];
-                    res.on('data', chunk => chunks.push(chunk));
-                    res.on('end', () => resolve(Buffer.concat(chunks)));
-                });
-                
-                req.on('error', reject);
-                req.setTimeout(this.config.timeout || 30000, () => {
-                    req.destroy();
-                    reject(new Error('Download timeout'));
-                });
-            });
-
-            // 转文字
-            return await this.transcribeAudio(audioBuffer, options, credentials);
+                    // 转文字
+                    return await this.transcribeAudio(audioBuffer, options, credentials);
+                } catch (error) {
+                    lastError = error;
+                    this.logger.warn(`Download attempt ${attempt} failed:`, error.message);
+                    
+                    if (attempt < maxRetries) {
+                        const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000); // 指数退避，最大5秒
+                        this.logger.info(`Retrying in ${delay}ms...`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                }
+            }
+            
+            throw lastError;
         } catch (error) {
             this.logger.error('Failed to download and transcribe audio:', error);
             return { success: false, error: error.message };
         }
+    }
+
+    /**
+     * 从URL下载音频文件
+     */
+    async downloadAudioFromUrl(audioUrl) {
+        // 尝试多种下载策略
+        const strategies = [
+            () => this.downloadWithIPv4(audioUrl),
+            () => this.downloadWithFallback(audioUrl),
+            () => this.downloadWithSimpleRequest(audioUrl)
+        ];
+
+        let lastError;
+        for (let i = 0; i < strategies.length; i++) {
+            try {
+                this.logger.info(`Trying download strategy ${i + 1}/${strategies.length}`);
+                return await strategies[i]();
+            } catch (error) {
+                lastError = error;
+                this.logger.warn(`Download strategy ${i + 1} failed:`, error.message);
+                if (i < strategies.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+        }
+        
+        throw lastError;
+    }
+
+    /**
+     * 使用 IPv4 下载
+     */
+    async downloadWithIPv4(audioUrl) {
+        const https = require('https');
+        const http = require('http');
+        const url = require('url');
+        
+        return new Promise((resolve, reject) => {
+            const parsedUrl = url.parse(audioUrl);
+            const httpModule = parsedUrl.protocol === 'https:' ? https : http;
+
+            const chunks = [];
+            let totalSize = 0;
+            const termuxConfig = TermuxHelper.getOptimizedConfig();
+            const maxSize = termuxConfig.memory.maxFileSize;
+            const downloadTimeout = termuxConfig.network.downloadTimeout;
+            const connectTimeout = termuxConfig.network.connectTimeout;
+
+            const req = httpModule.get(audioUrl, {
+                timeout: connectTimeout,
+                family: 4, // 强制使用 IPv4
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36',
+                    'Accept': '*/*',
+                    'Accept-Encoding': 'identity', // 禁用压缩以避免问题
+                    'Connection': 'close' // 强制关闭连接
+                }
+            }, (res) => {
+                if (res.statusCode !== 200) {
+                    reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
+                    return;
+                }
+
+                res.on('data', chunk => {
+                    totalSize += chunk.length;
+                    if (totalSize > maxSize) {
+                        req.destroy();
+                        reject(new Error(`File too large (>${Math.round(maxSize/1024/1024)}MB)`));
+                        return;
+                    }
+                    chunks.push(chunk);
+                });
+
+                res.on('end', () => {
+                    try {
+                        const buffer = Buffer.concat(chunks);
+                        chunks.length = 0; // Clear chunks array
+                        resolve(buffer);
+                    } catch (error) {
+                        reject(new Error(`Buffer creation failed: ${error.message}`));
+                    }
+                });
+            });
+
+            req.on('error', (error) => {
+                chunks.length = 0; // Clear chunks on error
+                reject(error);
+            });
+
+            req.setTimeout(downloadTimeout, () => {
+                req.destroy();
+                chunks.length = 0; // Clear chunks on timeout
+                reject(new Error(`Download timeout after ${downloadTimeout/1000}s`));
+            });
+        });
+    }
+
+    /**
+     * 备用下载方法 - 使用更简单的配置
+     */
+    async downloadWithFallback(audioUrl) {
+        const https = require('https');
+        const http = require('http');
+        
+        return new Promise((resolve, reject) => {
+            const parsedUrl = require('url').parse(audioUrl);
+            const httpModule = parsedUrl.protocol === 'https:' ? https : http;
+
+            const chunks = [];
+            let totalSize = 0;
+            const maxSize = 10 * 1024 * 1024; // 10MB limit
+
+            const req = httpModule.get(audioUrl, {
+                timeout: 45000, // 45秒超时
+                family: 4,
+                headers: {
+                    'User-Agent': 'curl/7.68.0'
+                }
+            }, (res) => {
+                if (res.statusCode !== 200) {
+                    reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
+                    return;
+                }
+
+                res.on('data', chunk => {
+                    totalSize += chunk.length;
+                    if (totalSize > maxSize) {
+                        req.destroy();
+                        reject(new Error(`File too large (>${Math.round(maxSize/1024/1024)}MB)`));
+                        return;
+                    }
+                    chunks.push(chunk);
+                });
+
+                res.on('end', () => {
+                    try {
+                        const buffer = Buffer.concat(chunks);
+                        chunks.length = 0;
+                        resolve(buffer);
+                    } catch (error) {
+                        reject(new Error(`Buffer creation failed: ${error.message}`));
+                    }
+                });
+            });
+
+            req.on('error', (error) => {
+                chunks.length = 0;
+                reject(error);
+            });
+
+            req.setTimeout(60000, () => {
+                req.destroy();
+                chunks.length = 0;
+                reject(new Error('Download timeout after 60s'));
+            });
+        });
+    }
+
+    /**
+     * 最简单的下载方法
+     */
+    async downloadWithSimpleRequest(audioUrl) {
+        const https = require('https');
+        const http = require('http');
+        
+        return new Promise((resolve, reject) => {
+            const parsedUrl = require('url').parse(audioUrl);
+            const httpModule = parsedUrl.protocol === 'https:' ? https : http;
+
+            const chunks = [];
+            let totalSize = 0;
+            const maxSize = 5 * 1024 * 1024; // 5MB limit
+
+            const req = httpModule.get(audioUrl, (res) => {
+                if (res.statusCode !== 200) {
+                    reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
+                    return;
+                }
+
+                res.on('data', chunk => {
+                    totalSize += chunk.length;
+                    if (totalSize > maxSize) {
+                        req.destroy();
+                        reject(new Error(`File too large (>${Math.round(maxSize/1024/1024)}MB)`));
+                        return;
+                    }
+                    chunks.push(chunk);
+                });
+
+                res.on('end', () => {
+                    try {
+                        const buffer = Buffer.concat(chunks);
+                        chunks.length = 0;
+                        resolve(buffer);
+                    } catch (error) {
+                        reject(new Error(`Buffer creation failed: ${error.message}`));
+                    }
+                });
+            });
+
+            req.on('error', (error) => {
+                chunks.length = 0;
+                reject(error);
+            });
+
+            req.setTimeout(30000, () => {
+                req.destroy();
+                chunks.length = 0;
+                reject(new Error('Download timeout after 30s'));
+            });
+        });
     }
 
     /**

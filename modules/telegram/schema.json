@@ -11,7 +11,7 @@
       "required": true,
       "sensitive": true,
       "minLength": 45,
-      "maxLength": 50,
+      "maxLength": 200,
       "pattern": "^\\d+:[A-Za-z0-9_-]+$",
       "example": "123456789:ABCdefGHIjklMNOpqrsTUVwxyz",
       "ui": {

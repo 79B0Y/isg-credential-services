@@ -1,46 +1,133 @@
 const BaseCredentialModule = require('../../core/BaseCredentialModule');
-const https = require('https');
-const http = require('http');
+const InfoListModule = require('./InfoListModule');
+const BasicInfoModule = require('./BasicInfoModule');
+const DeviceControlModule = require('./DeviceControlModule');
 const WebSocket = require('ws');
 
 /**
- * Home_assistantModule - Home Assistant API凭据管理模块
- * 支持access_token和base_url验证
+ * Home_assistantModule - 重构后的Home Assistant API凭据管理模块
+ * 使用模块化设计，分为三个子模块：信息列表、基础信息、设备控制
  */
 class Home_assistantModule extends BaseCredentialModule {
     constructor(name, moduleDir) {
         super(name, moduleDir);
-        
+
         // Home Assistant API配置
         this.defaultTimeout = 10000;
+
+        // 初始化子模块
+        this.infoListModule = null;
+        this.basicInfoModule = null;
+        this.deviceControlModule = null;
         
-        // 增强状态数据缓存系统
-        this.enhancedStatesCache = {
-            data: null,
-            lastUpdated: null,
-            isUpdating: false,
-            updateInterval: 60000, // 1分钟
-            maxAge: 120000 // 2分钟最大缓存时间
-        };
+        // 空间列表监控
+        this.spaceMonitorTimer = null;
+        this.lastSpacesHash = null;
+        this.floorMappings = {};
+        this.roomMappings = {};
         
-        // 缓存更新定时器
-        this.cacheUpdateTimer = null;
+        // WebSocket 服务器
+        this.wss = null;
+        this.websocketPort = 8081; // 使用不同的端口（Telegram 使用 8080）
+        this.websocketClients = new Set();
     }
 
     /**
      * 模块特定初始化
      */
     async onInitialize() {
-        this.logger.info('Home Assistant module initializing...');
-        
+        this.logger.info('Home Assistant module initializing with modular architecture...');
+
         if (!this.config.timeout) {
             this.config.timeout = this.defaultTimeout;
         }
+
+        // 初始化子模块
+        this.infoListModule = new InfoListModule(this.logger, this);
+        this.basicInfoModule = new BasicInfoModule(this.logger, this);
+        this.deviceControlModule = new DeviceControlModule(this.logger, this);
+
+        // 启动信息列表缓存更新器
+        this.infoListModule.startEnhancedListCacheUpdater();
         
-        // 启动增强状态数据缓存更新定时器
-        this.startEnhancedStatesCacheUpdater();
+        // 启动空间列表监控（每5分钟检查一次）
+        this.startSpaceMonitoring();
+
+        this.logger.info('Home Assistant module initialized with modular architecture');
         
-        this.logger.info('Home Assistant module initialized with enhanced states cache');
+        // 检查是否已有有效凭据，如果有则自动启动 WebSocket
+        this.autoStartWebSocket();
+    }
+    
+    /**
+     * 自动启动 WebSocket 服务器（如果有有效凭据）
+     */
+    async autoStartWebSocket() {
+        try {
+            // 延迟启动，避免初始化冲突
+            setTimeout(async () => {
+                try {
+                    const credentialsResult = await this.getCredentials();
+                    if (credentialsResult.success && credentialsResult.data.access_token && credentialsResult.data.base_url) {
+                        this.logger.info('[AUTO-START] 发现已保存的 Home Assistant 凭据，自动启动 WebSocket 服务器...');
+                        
+                        // 启动 WebSocket 服务器
+                        if (!this.wss) {
+                            const result = await this.startWebSocketServer();
+                            if (result.success) {
+                                this.logger.info(`[AUTO-START] ✅ Home Assistant WebSocket 服务器启动成功 - ${result.url}`);
+                            } else {
+                                this.logger.warn('[AUTO-START] Home Assistant WebSocket 服务器启动失败:', result.error);
+                            }
+                        } else {
+                            this.logger.info('[AUTO-START] Home Assistant WebSocket 服务器已在运行');
+                        }
+                    } else {
+                        this.logger.info('[AUTO-START] 未找到有效的 Home Assistant 凭据，跳过 WebSocket 自动启动');
+                    }
+                } catch (autoStartError) {
+                    this.logger.warn('[AUTO-START] Home Assistant WebSocket 自动启动失败:', autoStartError.message);
+                }
+            }, 3000); // 3秒延迟，确保所有模块初始化完成
+        } catch (error) {
+            this.logger.warn('[AUTO-START] Home Assistant WebSocket 自动启动检查失败:', error.message);
+        }
+    }
+    
+    /**
+     * 启动空间列表监控
+     */
+    startSpaceMonitoring() {
+        if (this.spaceMonitorTimer) {
+            return;
+        }
+        
+        this.logger.info('[Space Monitor] Starting space list monitoring (every 5 minutes)');
+        
+        // 立即执行一次
+        this.checkSpaceChanges().catch(err => {
+            this.logger.error('[Space Monitor] Initial check error:', err);
+        });
+        
+        // 每 5 分钟检查一次
+        this.spaceMonitorTimer = setInterval(async () => {
+            try {
+                await this.checkSpaceChanges();
+            } catch (error) {
+                this.logger.error('[Space Monitor] Check error:', error);
+            }
+        }, 5 * 60 * 1000); // 5 minutes
+    }
+    
+    /**
+     * 停止空间列表监控
+     */
+    stopSpaceMonitoring() {
+        if (this.spaceMonitorTimer) {
+            clearInterval(this.spaceMonitorTimer);
+            this.spaceMonitorTimer = null;
+            this.logger.info('[Space Monitor] Space list monitoring stopped');
+        }
     }
 
     /**
@@ -48,7 +135,7 @@ class Home_assistantModule extends BaseCredentialModule {
      */
     async performValidation(credentials) {
         const { access_token, base_url } = credentials;
-        
+
         if (!access_token) {
             return {
                 success: false,
@@ -67,7 +154,7 @@ class Home_assistantModule extends BaseCredentialModule {
 
         try {
             this.logger.info('Validating Home Assistant API credentials...');
-            
+
             // 验证URL格式
             let baseUrl;
             try {
@@ -80,56 +167,23 @@ class Home_assistantModule extends BaseCredentialModule {
                 };
             }
 
-            // 调用API验证连接
-            const apiResult = await this.callHomeAssistantAPI(access_token, base_url, '/api/');
-            
-            if (apiResult.error) {
+            // 使用基础信息模块进行连接测试
+            const testResult = await this.basicInfoModule.testConnection(credentials);
+
+            if (!testResult.success) {
                 return {
                     success: false,
-                    error: apiResult.error,
-                    details: apiResult.details
+                    error: testResult.error,
+                    details: testResult.details
                 };
-            }
-
-            // 获取配置信息
-            let configInfo = null;
-            try {
-                const configResult = await this.callHomeAssistantAPI(access_token, base_url, '/api/config');
-                if (!configResult.error) {
-                    configInfo = configResult;
-                }
-            } catch (error) {
-                this.logger.warn('Could not get config info:', error.message);
-            }
-
-            // 获取状态统计
-            let statesCount = 0;
-            try {
-                const statesResult = await this.callHomeAssistantAPI(access_token, base_url, '/api/states');
-                if (!statesResult.error && Array.isArray(statesResult)) {
-                    statesCount = statesResult.length;
-                }
-            } catch (error) {
-                this.logger.warn('Could not get states count:', error.message);
             }
 
             return {
                 success: true,
                 message: 'Home Assistant API credentials are valid',
-                data: {
-                    api_info: apiResult,
-                    config: configInfo ? {
-                        location_name: configInfo.location_name,
-                        version: configInfo.version,
-                        elevation: configInfo.elevation,
-                        unit_system: configInfo.unit_system,
-                        time_zone: configInfo.time_zone
-                    } : null,
-                    entities_count: statesCount,
-                    base_url: base_url,
-                    validated_at: new Date().toISOString()
-                }
+                data: testResult.data
             };
+
         } catch (error) {
             this.logger.error('Home Assistant validation error:', error);
             return {
@@ -144,1384 +198,41 @@ class Home_assistantModule extends BaseCredentialModule {
     }
 
     /**
-     * 调用Home Assistant API
-     */
-    async callHomeAssistantAPI(accessToken, baseUrl, endpoint, method = 'GET', data = null) {
-        return new Promise((resolve, reject) => {
-            const url = baseUrl.endsWith('/') ? baseUrl + endpoint.substring(1) : baseUrl + endpoint;
-            const urlObj = new URL(url);
-            const isHttps = urlObj.protocol === 'https:';
-            const httpModule = isHttps ? https : http;
-            
-            const headers = {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-                'User-Agent': 'CredentialService/1.0'
-            };
-
-            const postData = data ? JSON.stringify(data) : null;
-            if (postData) {
-                headers['Content-Length'] = Buffer.byteLength(postData);
-            }
-
-            const options = {
-                hostname: urlObj.hostname,
-                port: urlObj.port || (isHttps ? 443 : 80),
-                path: urlObj.pathname + urlObj.search,
-                method: method,
-                headers: headers,
-                timeout: this.config.timeout,
-                // 允许自签名证书（适用于本地Home Assistant）
-                rejectUnauthorized: false
-            };
-
-            const req = httpModule.request(options, (res) => {
-                let responseData = '';
-                
-                res.on('data', (chunk) => {
-                    responseData += chunk;
-                });
-                
-                res.on('end', () => {
-                    if (res.statusCode >= 400) {
-                        let errorMessage = `HTTP ${res.statusCode}`;
-                        try {
-                            const errorData = JSON.parse(responseData);
-                            errorMessage = errorData.message || errorMessage;
-                        } catch (parseError) {
-                            // 使用默认错误消息
-                        }
-                        
-                        resolve({
-                            error: errorMessage,
-                            details: {
-                                status: res.statusCode,
-                                statusText: res.statusMessage
-                            }
-                        });
-                        return;
-                    }
-
-                    try {
-                        const response = JSON.parse(responseData);
-                        resolve(response);
-                    } catch (parseError) {
-                        // 如果不是JSON，返回原始响应（某些API端点返回文本）
-                        if (responseData.trim()) {
-                            resolve({ message: responseData.trim() });
-                        } else {
-                            reject(new Error(`Invalid response: ${parseError.message}`));
-                        }
-                    }
-                });
-            });
-
-            req.on('error', (error) => {
-                let errorMessage = 'Connection failed';
-                if (error.code === 'ECONNREFUSED') {
-                    errorMessage = 'Connection refused - check if Home Assistant is running';
-                } else if (error.code === 'ENOTFOUND') {
-                    errorMessage = 'Host not found - check your base URL';
-                } else if (error.code === 'ECONNRESET') {
-                    errorMessage = 'Connection reset - check your network or SSL settings';
-                }
-                
-                resolve({
-                    error: errorMessage,
-                    details: {
-                        code: error.code,
-                        message: error.message
-                    }
-                });
-            });
-
-            req.on('timeout', () => {
-                req.destroy();
-                resolve({
-                    error: `Request timeout after ${this.config.timeout}ms`,
-                    details: { timeout: this.config.timeout }
-                });
-            });
-
-            if (postData) {
-                req.write(postData);
-            }
-            
-            req.end();
-        });
-    }
-
-    /**
-     * 获取实体状态
-     */
-    async getStates(credentials = null) {
-        try {
-            if (!credentials) {
-                const credResult = await this.getCredentials();
-                if (!credResult.success) {
-                    return { success: false, error: 'No credentials found' };
-                }
-                credentials = credResult.data;
-            }
-
-            const { access_token, base_url } = credentials;
-            if (!access_token || !base_url) {
-                return { success: false, error: 'Access token and base URL are required' };
-            }
-
-            const result = await this.callHomeAssistantAPI(access_token, base_url, '/api/states');
-
-            if (result.error) {
-                return { success: false, error: result.error, details: result.details };
-            }
-
-            return {
-                success: true,
-                data: {
-                    states: result,
-                    count: Array.isArray(result) ? result.length : 0,
-                    retrieved_at: new Date().toISOString()
-                }
-            };
-        } catch (error) {
-            return { success: false, error: error.message };
-        }
-    }
-
-    /**
-     * 使用WebSocket API获取设备列表
-     * @param {string} access_token - 访问令牌
-     * @param {string} base_url - 基础URL
-     * @returns {Promise<Object>} 设备列表
-     */
-    async getDevicesViaWebSocket(access_token, base_url) {
-        return new Promise((resolve, reject) => {
-            const wsUrl = base_url.replace('http://', 'ws://').replace('https://', 'wss://') + '/api/websocket';
-            const ws = new WebSocket(wsUrl);
-            let messageId = 1;
-            let resolved = false;
-
-            const timeout = setTimeout(() => {
-                if (!resolved) {
-                    resolved = true;
-                    ws.close();
-                    reject(new Error('WebSocket request timeout'));
-                }
-            }, 10000);
-
-            ws.on('open', () => {
-                // 发送认证消息
-                ws.send(JSON.stringify({
-                    type: 'auth',
-                    access_token: access_token
-                }));
-            });
-
-            ws.on('message', (data) => {
-                try {
-                    const msg = JSON.parse(data);
-                    
-                    if (msg.type === 'auth_ok') {
-                        // 请求设备注册表
-                        ws.send(JSON.stringify({
-                            id: messageId++,
-                            type: 'config/device_registry/list'
-                        }));
-                    } else if (msg.type === 'result' && msg.success) {
-                        if (!resolved) {
-                            resolved = true;
-                            clearTimeout(timeout);
-                            ws.close();
-                            resolve({
-                                success: true,
-                                data: {
-                                    devices: msg.result,
-                                    count: Array.isArray(msg.result) ? msg.result.length : 0,
-                                    retrieved_at: new Date().toISOString()
-                                }
-                            });
-                        }
-                    } else if (msg.type === 'result' && !msg.success) {
-                        if (!resolved) {
-                            resolved = true;
-                            clearTimeout(timeout);
-                            ws.close();
-                            reject(new Error(msg.error?.message || 'WebSocket request failed'));
-                        }
-                    }
-                } catch (error) {
-                    if (!resolved) {
-                        resolved = true;
-                        clearTimeout(timeout);
-                        ws.close();
-                        reject(error);
-                    }
-                }
-            });
-
-            ws.on('error', (error) => {
-                if (!resolved) {
-                    resolved = true;
-                    clearTimeout(timeout);
-                    reject(error);
-                }
-            });
-
-            ws.on('close', () => {
-                if (!resolved) {
-                    resolved = true;
-                    clearTimeout(timeout);
-                    reject(new Error('WebSocket connection closed'));
-                }
-            });
-        });
-    }
-
-    /**
-     * 使用WebSocket API获取楼层列表
-     * @param {string} access_token - 访问令牌
-     * @param {string} base_url - 基础URL
-     * @returns {Promise<Object>} 楼层列表
-     */
-    async getFloorsViaWebSocket(access_token, base_url) {
-        return new Promise((resolve, reject) => {
-            const wsUrl = base_url.replace('http://', 'ws://').replace('https://', 'wss://') + '/api/websocket';
-            const ws = new WebSocket(wsUrl);
-            let messageId = 1;
-            let resolved = false;
-
-            const timeout = setTimeout(() => {
-                if (!resolved) {
-                    resolved = true;
-                    ws.close();
-                    reject(new Error('WebSocket request timeout'));
-                }
-            }, 10000);
-
-            ws.on('open', () => {
-                // 发送认证消息
-                ws.send(JSON.stringify({
-                    type: 'auth',
-                    access_token: access_token
-                }));
-            });
-
-            ws.on('message', (data) => {
-                try {
-                    const msg = JSON.parse(data);
-                    
-                    if (msg.type === 'auth_ok') {
-                        // 请求楼层注册表
-                        ws.send(JSON.stringify({
-                            id: messageId++,
-                            type: 'config/floor_registry/list'
-                        }));
-                    } else if (msg.type === 'result' && msg.success) {
-                        if (!resolved) {
-                            resolved = true;
-                            clearTimeout(timeout);
-                            ws.close();
-                            resolve({
-                                success: true,
-                                data: {
-                                    floors: msg.result,
-                                    count: Array.isArray(msg.result) ? msg.result.length : 0,
-                                    retrieved_at: new Date().toISOString()
-                                }
-                            });
-                        }
-                    } else if (msg.type === 'result' && !msg.success) {
-                        if (!resolved) {
-                            resolved = true;
-                            clearTimeout(timeout);
-                            ws.close();
-                            reject(new Error(msg.error?.message || 'WebSocket request failed'));
-                        }
-                    }
-                } catch (error) {
-                    if (!resolved) {
-                        resolved = true;
-                        clearTimeout(timeout);
-                        ws.close();
-                        reject(error);
-                    }
-                }
-            });
-
-            ws.on('error', (error) => {
-                if (!resolved) {
-                    resolved = true;
-                    clearTimeout(timeout);
-                    reject(error);
-                }
-            });
-
-            ws.on('close', () => {
-                if (!resolved) {
-                    resolved = true;
-                    clearTimeout(timeout);
-                    reject(new Error('WebSocket connection closed'));
-                }
-            });
-        });
-    }
-
-    /**
-     * 使用WebSocket API获取实体注册表列表
-     * @param {string} access_token - 访问令牌
-     * @param {string} base_url - 基础URL
-     * @returns {Promise<Object>} 实体注册表列表
-     */
-    async getEntityRegistryViaWebSocket(access_token, base_url) {
-        return new Promise((resolve, reject) => {
-            const wsUrl = base_url.replace('http://', 'ws://').replace('https://', 'wss://') + '/api/websocket';
-            const ws = new WebSocket(wsUrl);
-            let messageId = 1;
-            let resolved = false;
-
-            const timeout = setTimeout(() => {
-                if (!resolved) {
-                    resolved = true;
-                    ws.close();
-                    reject(new Error('WebSocket request timeout'));
-                }
-            }, 10000);
-
-            ws.on('open', () => {
-                // 发送认证消息
-                ws.send(JSON.stringify({
-                    type: 'auth',
-                    access_token: access_token
-                }));
-            });
-
-            ws.on('message', (data) => {
-                try {
-                    const msg = JSON.parse(data);
-                    
-                    if (msg.type === 'auth_ok') {
-                        // 请求实体注册表
-                        ws.send(JSON.stringify({
-                            id: messageId++,
-                            type: 'config/entity_registry/list'
-                        }));
-                    } else if (msg.type === 'result' && msg.success) {
-                        if (!resolved) {
-                            resolved = true;
-                            clearTimeout(timeout);
-                            ws.close();
-                            resolve({
-                                success: true,
-                                data: {
-                                    entities: msg.result,
-                                    count: Array.isArray(msg.result) ? msg.result.length : 0,
-                                    retrieved_at: new Date().toISOString()
-                                }
-                            });
-                        }
-                    } else if (msg.type === 'result' && !msg.success) {
-                        if (!resolved) {
-                            resolved = true;
-                            clearTimeout(timeout);
-                            ws.close();
-                            reject(new Error(msg.error?.message || 'WebSocket request failed'));
-                        }
-                    }
-                } catch (error) {
-                    if (!resolved) {
-                        resolved = true;
-                        clearTimeout(timeout);
-                        ws.close();
-                        reject(error);
-                    }
-                }
-            });
-
-            ws.on('error', (error) => {
-                if (!resolved) {
-                    resolved = true;
-                    clearTimeout(timeout);
-                    reject(error);
-                }
-            });
-
-            ws.on('close', () => {
-                if (!resolved) {
-                    resolved = true;
-                    clearTimeout(timeout);
-                    reject(new Error('WebSocket connection closed'));
-                }
-            });
-        });
-    }
-
-    /**
-     * 使用WebSocket API获取区域列表
-     * @param {string} access_token - 访问令牌
-     * @param {string} base_url - 基础URL
-     * @returns {Promise<Object>} 区域列表
-     */
-    async getRoomsViaWebSocket(access_token, base_url) {
-        return new Promise((resolve, reject) => {
-            const wsUrl = base_url.replace('http://', 'ws://').replace('https://', 'wss://') + '/api/websocket';
-            const ws = new WebSocket(wsUrl);
-            let messageId = 1;
-            let resolved = false;
-
-            const timeout = setTimeout(() => {
-                if (!resolved) {
-                    resolved = true;
-                    ws.close();
-                    reject(new Error('WebSocket request timeout'));
-                }
-            }, 10000);
-
-            ws.on('open', () => {
-                // 发送认证消息
-                ws.send(JSON.stringify({
-                    type: 'auth',
-                    access_token: access_token
-                }));
-            });
-
-            ws.on('message', (data) => {
-                try {
-                    const msg = JSON.parse(data);
-                    
-                    if (msg.type === 'auth_ok') {
-                        // 请求区域注册表
-                        ws.send(JSON.stringify({
-                            id: messageId++,
-                            type: 'config/area_registry/list'
-                        }));
-                    } else if (msg.type === 'result' && msg.success) {
-                        if (!resolved) {
-                            resolved = true;
-                            clearTimeout(timeout);
-                            ws.close();
-                            
-                            // 返回完整的房间信息，包括floor_id
-                            const rooms = Array.isArray(msg.result) ? msg.result : [];
-                            const processedRooms = rooms.map(room => {
-                                // 确保room是对象且有必要的属性
-                                if (typeof room === 'object' && room !== null) {
-                                    return {
-                                        area_id: room.area_id || room.id || null,
-                                        name: room.name || room.friendly_name || 'Unknown Room',
-                                        floor_id: room.floor_id || null,
-                                        icon: room.icon || null,
-                                        aliases: room.aliases || []
-                                    };
-                                }
-                                return {
-                                    area_id: null,
-                                    name: 'Unknown Room',
-                                    floor_id: null,
-                                    icon: null,
-                                    aliases: []
-                                };
-                            }).filter(room => room.name && room.name !== 'Unknown Room');
-                            
-                            resolve({
-                                success: true,
-                                data: {
-                                    rooms: processedRooms,
-                                    count: processedRooms.length,
-                                    retrieved_at: new Date().toISOString()
-                                }
-                            });
-                        }
-                    } else if (msg.type === 'result' && !msg.success) {
-                        if (!resolved) {
-                            resolved = true;
-                            clearTimeout(timeout);
-                            ws.close();
-                            reject(new Error(msg.error?.message || 'WebSocket request failed'));
-                        }
-                    }
-                } catch (error) {
-                    if (!resolved) {
-                        resolved = true;
-                        clearTimeout(timeout);
-                        ws.close();
-                        reject(error);
-                    }
-                }
-            });
-
-            ws.on('error', (error) => {
-                if (!resolved) {
-                    resolved = true;
-                    clearTimeout(timeout);
-                    reject(error);
-                }
-            });
-
-            ws.on('close', () => {
-                if (!resolved) {
-                    resolved = true;
-                    clearTimeout(timeout);
-                    reject(new Error('WebSocket connection closed'));
-                }
-            });
-        });
-    }
-
-    /**
-     * 高级设备查询 - 支持按楼层、房间、设备类型筛选
-     * @param {Object} filters - 筛选条件
-     * @param {string} filters.floor_id - 楼层ID
-     * @param {string} filters.area_id - 房间/区域ID
-     * @param {string} filters.device_type - 设备类型
-     * @param {string} filters.manufacturer - 制造商
-     * @param {string} filters.model - 型号
-     * @param {boolean} filters.enabled_only - 仅显示启用的设备
-     * @param {Object} credentials - 凭据对象
-     * @returns {Promise<Object>} 筛选后的设备列表
-     */
-    async searchDevices(filters = {}, credentials = null) {
-        try {
-            if (!credentials) {
-                const credResult = await this.getCredentials();
-                if (!credResult.success) {
-                    return { success: false, error: 'No credentials found' };
-                }
-                credentials = credResult.data;
-            }
-
-            const { access_token, base_url } = credentials;
-            if (!access_token || !base_url) {
-                return { success: false, error: 'Access token and base URL are required' };
-            }
-
-            // 首先获取所有设备
-            const devicesResult = await this.getDevices(credentials);
-            if (!devicesResult.success) {
-                return devicesResult;
-            }
-
-            let devices = devicesResult.data.devices || [];
-
-            // 应用筛选条件
-            if (filters.floor_id) {
-                // 需要获取房间信息来匹配楼层
-                const roomsResult = await this.getRooms(credentials);
-                if (roomsResult.success) {
-                    const rooms = roomsResult.data.rooms || [];
-                    const floorRooms = rooms.filter(room => room.floor_id === filters.floor_id);
-                    const floorRoomIds = floorRooms.map(room => room.area_id);
-                    devices = devices.filter(device => floorRoomIds.includes(device.area_id));
-                }
-            }
-
-            if (filters.area_id) {
-                devices = devices.filter(device => device.area_id === filters.area_id);
-            }
-
-            if (filters.device_type) {
-                devices = devices.filter(device => {
-                    const deviceType = this.getDeviceType(device);
-                    return deviceType && deviceType.toLowerCase().includes(filters.device_type.toLowerCase());
-                });
-            }
-
-            if (filters.manufacturer) {
-                devices = devices.filter(device => 
-                    device.manufacturer && 
-                    device.manufacturer.toLowerCase().includes(filters.manufacturer.toLowerCase())
-                );
-            }
-
-            if (filters.model) {
-                devices = devices.filter(device => 
-                    device.model && 
-                    device.model.toLowerCase().includes(filters.model.toLowerCase())
-                );
-            }
-
-            if (filters.enabled_only) {
-                devices = devices.filter(device => !device.disabled_by);
-            }
-
-            return {
-                success: true,
-                data: {
-                    devices: devices,
-                    count: devices.length,
-                    filters: filters,
-                    retrieved_at: new Date().toISOString()
-                }
-            };
-        } catch (error) {
-            return { success: false, error: error.message };
-        }
-    }
-
-    /**
-     * 获取设备类型（基于设备信息推断）
-     * @param {Object} device - 设备对象
-     * @returns {string} 设备类型
-     */
-    getDeviceType(device) {
-        if (!device.identifiers || !Array.isArray(device.identifiers)) {
-            return 'unknown';
-        }
-
-        // 基于identifiers推断设备类型
-        for (const identifier of device.identifiers) {
-            if (Array.isArray(identifier) && identifier.length > 0) {
-                const domain = identifier[0];
-                switch (domain) {
-                    case 'homekit':
-                        return 'homekit';
-                    case 'hacs':
-                        return 'integration';
-                    case 'mqtt':
-                        return 'mqtt_device';
-                    case 'mobile_app':
-                        return 'mobile_device';
-                    case 'backup':
-                        return 'backup_system';
-                    case 'sun':
-                        return 'sensor';
-                    case 'met':
-                        return 'weather_sensor';
-                    default:
-                        return domain;
-                }
-            }
-        }
-
-        return 'unknown';
-    }
-
-    /**
-     * 获取设备列表
-     */
-    async getDevices(credentials = null) {
-        try {
-            if (!credentials) {
-                const credResult = await this.getCredentials();
-                if (!credResult.success) {
-                    return { success: false, error: 'No credentials found' };
-                }
-                credentials = credResult.data;
-            }
-
-            const { access_token, base_url } = credentials;
-            if (!access_token || !base_url) {
-                return { success: false, error: 'Access token and base URL are required' };
-            }
-
-            // 首先尝试WebSocket API
-            let rawDevices = [];
-            try {
-                const result = await this.getDevicesViaWebSocket(access_token, base_url);
-                if (result.success && Array.isArray(result.data.devices)) {
-                    rawDevices = result.data.devices;
-                }
-            } catch (wsError) {
-                console.log('WebSocket API failed, trying REST API:', wsError.message);
-            }
-
-            // 如果WebSocket失败，尝试REST API端点
-            if (rawDevices.length === 0) {
-                let result = await this.callHomeAssistantAPI(access_token, base_url, '/api/config/device_registry/list');
-                
-                if (result.error) {
-                    result = await this.callHomeAssistantAPI(access_token, base_url, '/api/config/device_registry');
-                }
-                
-                if (result.error) {
-                    result = await this.callHomeAssistantAPI(access_token, base_url, '/api/devices');
-                }
-                
-                if (!result.error && Array.isArray(result)) {
-                    rawDevices = result;
-                }
-            }
-
-            // 过滤和优化设备列表
-            const filteredDevices = this.filterAndOptimizeDevices(rawDevices);
-            
-            return {
-                success: true,
-                data: {
-                    devices: filteredDevices,
-                    count: filteredDevices.length,
-                    total_raw: rawDevices.length,
-                    filtered_out: rawDevices.length - filteredDevices.length,
-                    retrieved_at: new Date().toISOString()
-                }
-            };
-        } catch (error) {
-            return { success: false, error: error.message };
-        }
-    }
-
-    /**
-     * 过滤和优化设备列表
-     */
-    filterAndOptimizeDevices(rawDevices) {
-        if (!Array.isArray(rawDevices)) {
-            return [];
-        }
-
-        return rawDevices
-            .filter(device => {
-                // 过滤掉无用的设备
-                if (!device || typeof device !== 'object') return false;
-                
-                // 过滤掉虚拟设备和服务
-                const virtualDomains = ['sun', 'moon', 'person', 'zone', 'timer', 'counter', 'input_boolean', 'input_text', 'input_number', 'input_select', 'input_datetime', 'schedule', 'scene', 'script', 'automation', 'group', 'zone', 'weather', 'calendar', 'timer', 'counter', 'input_boolean', 'input_text', 'input_number', 'input_select', 'input_datetime', 'schedule', 'scene', 'script', 'automation', 'group', 'zone', 'weather', 'calendar'];
-                
-                // 过滤掉HACS集成和服务
-                const serviceDomains = ['hacs', 'backup', 'met', 'config_editor'];
-                
-                if (device.identifiers && Array.isArray(device.identifiers)) {
-                    for (const identifier of device.identifiers) {
-                        if (Array.isArray(identifier) && identifier.length > 0) {
-                            const domain = identifier[0];
-                            if (virtualDomains.includes(domain) || serviceDomains.includes(domain)) {
-                                return false;
-                            }
-                        }
-                    }
-                }
-                
-                // 过滤掉服务类型的设备，但保留HomeKit设备
-                if (device.entry_type === 'service') {
-                    // 检查是否是HomeKit设备
-                    const isHomeKit = device.identifiers && device.identifiers.some(id => 
-                        Array.isArray(id) && id.length > 0 && id[0] === 'homekit'
-                    );
-                    if (!isHomeKit) {
-                        return false;
-                    }
-                }
-                
-                // 过滤掉没有名称且没有实体的设备
-                if (!device.name && (!device.identifiers || device.identifiers.length === 0)) {
-                    return false;
-                }
-                
-                // 过滤掉被禁用的设备
-                if (device.disabled_by) {
-                    return false;
-                }
-                
-                // 过滤掉集成设备（HACS等）
-                if (device.manufacturer && device.model === 'integration') {
-                    return false;
-                }
-                
-                // 过滤掉插件设备
-                if (device.model === 'plugin') {
-                    return false;
-                }
-                
-                // 只保留真正的物理设备，但允许未知类型的设备（如WiZ等）
-                const physicalDeviceTypes = ['homekit', 'mqtt_device', 'mobile_device', 'zigbee', 'z-wave', 'bluetooth', 'wifi', 'ethernet', 'unknown'];
-                const deviceType = this.getDeviceType(device);
-                
-                // 如果设备有制造商信息，即使类型未知也保留
-                if (device.manufacturer && device.manufacturer !== 'Unknown') {
-                    return true;
-                }
-                
-                // 如果设备有名称，即使类型未知也保留
-                if (device.name || device.name_by_user) {
-                    return true;
-                }
-                
-                // 其他情况按类型过滤
-                if (!physicalDeviceTypes.includes(deviceType)) {
-                    return false;
-                }
-                
-                return true;
-            })
-            .map(device => {
-                // 优化设备信息，只保留有用的字段
-                return {
-                    device_id: device.id,
-                    device_name: device.name_by_user || device.name || this.generateDeviceName(device),
-                    name_by_user: device.name_by_user || null,
-                    manufacturer: device.manufacturer || 'Unknown',
-                    model: device.model || 'Unknown',
-                    area_id: device.area_id || null,
-                    area_name: device.area_id || null, // 稍后会通过房间信息填充
-                    device_type: this.getDeviceType(device),
-                    sw_version: device.sw_version || null,
-                    hw_version: device.hw_version || null,
-                    entry_type: device.entry_type || null,
-                    identifiers: device.identifiers || [],
-                    connections: device.connections || [],
-                    created_at: device.created_at ? new Date(device.created_at * 1000).toISOString() : null,
-                    modified_at: device.modified_at ? new Date(device.modified_at * 1000).toISOString() : null,
-                    configuration_url: device.configuration_url || null,
-                    disabled_by: device.disabled_by || null
-                };
-            })
-            .sort((a, b) => {
-                // 按名称排序
-                const nameA = a.name || '';
-                const nameB = b.name || '';
-                return nameA.localeCompare(nameB);
-            });
-    }
-
-    /**
-     * 生成设备名称（当设备没有名称时）
-     */
-    generateDeviceName(device) {
-        if (device.name) return device.name;
-        
-        // 基于制造商和型号生成名称
-        if (device.manufacturer && device.model) {
-            return `${device.manufacturer} ${device.model}`;
-        }
-        
-        if (device.manufacturer) {
-            return `${device.manufacturer} Device`;
-        }
-        
-        // 基于设备类型生成名称
-        const deviceType = this.getDeviceType(device);
-        if (deviceType !== 'unknown') {
-            return `${deviceType.charAt(0).toUpperCase() + deviceType.slice(1)} Device`;
-        }
-        
-        return 'Unknown Device';
-    }
-
-    /**
-     * 获取楼层列表
-     */
-    async getFloors(credentials = null) {
-        try {
-            if (!credentials) {
-                const credResult = await this.getCredentials();
-                if (!credResult.success) {
-                    return { success: false, error: 'No credentials found' };
-                }
-                credentials = credResult.data;
-            }
-
-            const { access_token, base_url } = credentials;
-            if (!access_token || !base_url) {
-                return { success: false, error: 'Access token and base URL are required' };
-            }
-
-            // 首先尝试WebSocket API
-            try {
-                const result = await this.getFloorsViaWebSocket(access_token, base_url);
-                return result;
-            } catch (wsError) {
-                console.log('WebSocket API failed, trying REST API:', wsError.message);
-            }
-
-            // 如果WebSocket失败，尝试REST API端点
-            let result = await this.callHomeAssistantAPI(access_token, base_url, '/api/config/floor_registry/list');
-            
-            // 如果失败，尝试其他可能的端点
-            if (result.error) {
-                result = await this.callHomeAssistantAPI(access_token, base_url, '/api/config/floor_registry');
-            }
-            
-            // 如果还是失败，尝试简化的端点
-            if (result.error) {
-                result = await this.callHomeAssistantAPI(access_token, base_url, '/api/floors');
-            }
-
-            if (result.error) {
-                return { success: false, error: result.error };
-            }
-
-            return {
-                success: true,
-                data: {
-                    floors: result.data || result,
-                    count: Array.isArray(result.data || result) ? (result.data || result).length : 0,
-                    retrieved_at: new Date().toISOString()
-                }
-            };
-        } catch (error) {
-            return { success: false, error: error.message };
-        }
-    }
-
-    /**
-     * 获取实体注册表列表
-     */
-    async getEntityRegistry(credentials = null) {
-        try {
-            if (!credentials) {
-                const credResult = await this.getCredentials();
-                if (!credResult.success) {
-                    return { success: false, error: 'No credentials found' };
-                }
-                credentials = credResult.data;
-            }
-
-            const { access_token, base_url } = credentials;
-            if (!access_token || !base_url) {
-                return { success: false, error: 'Access token and base URL are required' };
-            }
-
-            // 首先尝试WebSocket API
-            try {
-                const result = await this.getEntityRegistryViaWebSocket(access_token, base_url);
-                return result;
-            } catch (wsError) {
-                console.log('WebSocket API failed, trying REST API:', wsError.message);
-            }
-
-            // 如果WebSocket失败，尝试REST API端点
-            let result = await this.callHomeAssistantAPI(access_token, base_url, '/api/config/entity_registry/list');
-            
-            // 如果失败，尝试其他可能的端点
-            if (result.error) {
-                result = await this.callHomeAssistantAPI(access_token, base_url, '/api/config/entity_registry');
-            }
-            
-            // 如果还是失败，尝试简化的端点
-            if (result.error) {
-                result = await this.callHomeAssistantAPI(access_token, base_url, '/api/entities');
-            }
-
-            if (result.error) {
-                return { success: false, error: result.error };
-            }
-
-            return {
-                success: true,
-                data: {
-                    entities: result.data || result,
-                    count: Array.isArray(result.data || result) ? (result.data || result).length : 0,
-                    retrieved_at: new Date().toISOString()
-                }
-            };
-        } catch (error) {
-            return { success: false, error: error.message };
-        }
-    }
-
-    /**
-     * 获取房间列表（简化版，只返回房间名称）
-     */
-    async getRooms(credentials = null) {
-        try {
-            if (!credentials) {
-                const credResult = await this.getCredentials();
-                if (!credResult.success) {
-                    return { success: false, error: 'No credentials found' };
-                }
-                credentials = credResult.data;
-            }
-
-            const { access_token, base_url } = credentials;
-            if (!access_token || !base_url) {
-                return { success: false, error: 'Access token and base URL are required' };
-            }
-
-            // 首先尝试WebSocket API
-            try {
-                const result = await this.getRoomsViaWebSocket(access_token, base_url);
-                return result;
-            } catch (wsError) {
-                console.log('WebSocket API failed, trying REST API:', wsError.message);
-            }
-
-            // 如果WebSocket失败，尝试REST API端点
-            let result = await this.callHomeAssistantAPI(access_token, base_url, '/api/config/area_registry/list');
-            
-            // 如果失败，尝试其他可能的端点
-            if (result.error) {
-                result = await this.callHomeAssistantAPI(access_token, base_url, '/api/config/area_registry');
-            }
-            
-            // 如果还是失败，尝试简化的端点
-            if (result.error) {
-                result = await this.callHomeAssistantAPI(access_token, base_url, '/api/areas');
-            }
-            
-            // 如果还是失败，尝试使用states端点来获取区域信息
-            if (result.error) {
-                const statesResult = await this.callHomeAssistantAPI(access_token, base_url, '/api/states');
-                if (!statesResult.error && Array.isArray(statesResult)) {
-                    // 从实体状态中提取区域信息
-                    const areas = new Map();
-                    statesResult.forEach(state => {
-                        if (state.attributes && state.attributes.area_id) {
-                            const areaId = state.attributes.area_id;
-                            if (!areas.has(areaId)) {
-                                areas.set(areaId, {
-                                    area_id: areaId,
-                                    name: state.attributes.area_name || state.attributes.friendly_name || 'Unknown Area',
-                                    entities: []
-                                });
-                            }
-                            areas.get(areaId).entities.push(state.entity_id);
-                        }
-                    });
-                    result = Array.from(areas.values());
-                }
-            }
-
-            if (result.error) {
-                return { success: false, error: result.error, details: result.details };
-            }
-
-            // 返回完整的房间信息，包括floor_id
-            const rooms = Array.isArray(result) ? result : [];
-            const processedRooms = rooms.map(room => {
-                // 确保room是对象且有必要的属性
-                if (typeof room === 'object' && room !== null) {
-                    return {
-                        area_id: room.area_id || room.id || null,
-                        name: room.name || room.friendly_name || 'Unknown Room',
-                        floor_id: room.floor_id || null,
-                        icon: room.icon || null,
-                        aliases: room.aliases || []
-                    };
-                }
-                return {
-                    area_id: null,
-                    name: 'Unknown Room',
-                    floor_id: null,
-                    icon: null,
-                    aliases: []
-                };
-            }).filter(room => room.name && room.name !== 'Unknown Room');
-
-            return {
-                success: true,
-                data: {
-                    rooms: processedRooms,
-                    count: processedRooms.length,
-                    retrieved_at: new Date().toISOString()
-                }
-            };
-        } catch (error) {
-            return { success: false, error: error.message };
-        }
-    }
-
-    /**
-     * 根据房间名称、设备名称和设备类型匹配实体
-     */
-    async matchEntitiesByRoomAndDevice(intentData, credentials = null) {
-        try {
-            if (!credentials) {
-                const credResult = await this.getCredentials();
-                if (!credResult.success) {
-                    return { success: false, error: 'No credentials found' };
-                }
-                credentials = credResult.data;
-            }
-
-            const { access_token, base_url } = credentials;
-            if (!access_token || !base_url) {
-                return { success: false, error: 'Access token and base URL are required' };
-            }
-
-            // 获取所有设备、区域和实体数据
-            const [devicesResult, areasResult, entitiesResult] = await Promise.all([
-                this.getDevices(credentials),
-                this.getRooms(credentials),
-                this.getEntityRegistry(credentials)
-            ]);
-
-            if (!devicesResult.success || !areasResult.success || !entitiesResult.success) {
-                return { 
-                    success: false, 
-                    error: 'Failed to fetch Home Assistant data',
-                    details: {
-                        devices: devicesResult.success,
-                        areas: areasResult.success,
-                        entities: entitiesResult.success
-                    }
-                };
-            }
-
-            const devices = devicesResult.data.devices || [];
-            const areas = areasResult.data.rooms || []; // 注意：这里rooms是简化的房间名称数组
-            const entities = entitiesResult.data.entities || [];
-
-            // 创建房间名称到区域ID的映射
-            const roomNameToAreaId = new Map();
-            // 由于areas现在是简化的房间名称数组，我们需要从设备数据中获取房间映射
-            devices.forEach(device => {
-                if (device.area_id && device.area_name) {
-                    roomNameToAreaId.set(device.area_name, device.area_id);
-                }
-            });
-
-            // 添加从简化房间名称到区域ID的映射
-            areas.forEach(roomName => {
-                // 查找匹配的区域ID
-                for (const [areaName, areaId] of roomNameToAreaId.entries()) {
-                    if (this.normalizeRoomName(roomName) === this.normalizeRoomName(areaName)) {
-                        roomNameToAreaId.set(roomName, areaId);
-                        break;
-                    }
-                }
-            });
-
-            // 处理每个设备，匹配实体
-            const processedDevices = intentData.devices.map(deviceInfo => {
-                const matchedEntities = [];
-                
-                // 查找匹配的房间
-                const roomName = deviceInfo.room_name;
-                const deviceType = deviceInfo.device_type;
-                const deviceName = deviceInfo.device_name;
-
-                // 通过房间名称找到区域ID
-                let areaId = null;
-                const normalizedRoomName = this.normalizeRoomName(roomName);
-                
-                for (const [areaName, id] of roomNameToAreaId.entries()) {
-                    const normalizedAreaName = this.normalizeRoomName(areaName);
-                    if (normalizedRoomName === normalizedAreaName || 
-                        normalizedAreaName.includes(normalizedRoomName) ||
-                        normalizedRoomName.includes(normalizedAreaName)) {
-                        areaId = id;
-                        break;
-                    }
-                }
-
-                if (areaId) {
-                    // 查找该区域下的设备
-                    const areaDevices = devices.filter(device => device.area_id === areaId);
-                    
-                    // 根据设备名称和类型匹配设备 - 优先名称匹配，其次类型匹配
-                    let matchedDevices = [];
-                    
-                    // 1. 首先尝试根据设备名称匹配
-                    if (deviceName) {
-                        matchedDevices = areaDevices.filter(device => {
-                            const deviceNameMatch = (device.name && device.name.toLowerCase().includes(deviceName.toLowerCase())) ||
-                                                  (device.name_by_user && device.name_by_user.toLowerCase().includes(deviceName.toLowerCase()));
-                            return deviceNameMatch;
-                        });
-                    }
-                    
-                    // 2. 如果没有找到名称匹配的设备，则使用设备类型匹配
-                    if (matchedDevices.length === 0) {
-                        matchedDevices = areaDevices.filter(device => {
-                            // 改进设备类型匹配逻辑
-                            if (deviceType === 'light') {
-                                // 对于light类型，匹配mqtt_device或包含light的设备类型
-                                return device.device_type === 'light' || 
-                                       device.device_type === 'mqtt_device' ||
-                                       (device.device_type && device.device_type.toLowerCase().includes('light'));
-                            } else if (deviceType === 'climate') {
-                                // 对于climate类型，匹配climate或包含climate的设备类型
-                                return device.device_type === 'climate' || 
-                                       (device.device_type && device.device_type.toLowerCase().includes('climate'));
-                            } else {
-                                // 其他类型使用原来的匹配逻辑
-                                return device.device_type === deviceType || 
-                                       (device.device_type && device.device_type.toLowerCase().includes(deviceType.toLowerCase()));
-                            }
-                        });
-                    }
-
-                    // 为每个匹配的设备查找相关实体
-                    const processedEntityIds = new Set(); // 避免重复添加实体
-                    
-                    matchedDevices.forEach(device => {
-                        const deviceEntities = entities.filter(entity => {
-                            const entityDomain = entity.entity_id.split('.')[0];
-                            
-                            // 只匹配正确类型的实体
-                            if (entityDomain !== deviceType) {
-                                return false;
-                            }
-                            
-                            // 优先通过设备ID匹配
-                            if (entity.device_id === device.id) {
-                                return true;
-                            }
-                            
-                            return false;
-                        });
-
-                        deviceEntities.forEach(entity => {
-                            // 避免重复添加相同的实体
-                            if (!processedEntityIds.has(entity.entity_id)) {
-                                processedEntityIds.add(entity.entity_id);
-                                const entityDomain = entity.entity_id.split('.')[0];
-                                matchedEntities.push({
-                                    entity_id: entity.entity_id,
-                                    name: entity.name || entity.original_name,
-                                    domain: entityDomain,
-                                    device_class: entity.device_class,
-                                    capabilities: this.getEntityCapabilities(entity),
-                                    state: entity.state || 'unknown',
-                                    attributes: entity.attributes || {}
-                                });
-                            }
-                        });
-                    });
-
-                    // 只有在真的没有找到任何实体时，才尝试fallback逻辑
-                    if (matchedEntities.length === 0 && matchedDevices.length === 0) {
-                        const areaEntities = entities.filter(entity => {
-                            const entityDomain = entity.entity_id.split('.')[0];
-                            // 只匹配正确类型的实体，并且在该区域内
-                            return entityDomain === deviceType && entity.area_id === areaId;
-                        });
-                        
-                        // 限制每个房间最多返回3个实体，避免返回太多
-                        const limitedEntities = areaEntities.slice(0, 3);
-                        
-                        limitedEntities.forEach(entity => {
-                            const entityDomain = entity.entity_id.split('.')[0];
-                            matchedEntities.push({
-                                entity_id: entity.entity_id,
-                                name: entity.name || entity.original_name,
-                                domain: entityDomain,
-                                device_class: entity.device_class,
-                                capabilities: this.getEntityCapabilities(entity),
-                                state: entity.state || 'unknown',
-                                attributes: entity.attributes || {}
-                            });
-                        });
-                    }
-                }
-
-                return {
-                    ...deviceInfo,
-                    entities: matchedEntities,
-                    matched_count: matchedEntities.length
-                };
-            });
-
-            return {
-                success: true,
-                data: {
-                    intent: intentData.intent,
-                    confidence: intentData.confidence,
-                    user_input: intentData.user_input,
-                    matched_rooms: intentData.matched_rooms,
-                    device_types: intentData.device_types,
-                    devices: processedDevices,
-                    total_entities: processedDevices.reduce((sum, device) => sum + device.matched_count, 0),
-                    retrieved_at: new Date().toISOString()
-                }
-            };
-
-        } catch (error) {
-            return { success: false, error: error.message };
-        }
-    }
-
-    /**
-     * 标准化房间名称用于匹配
-     */
-    normalizeRoomName(roomName) {
-        if (!roomName) return '';
-        return roomName.toLowerCase()
-            .replace(/\s+/g, '_')
-            .replace(/[^a-z0-9_]/g, '');
-    }
-
-    /**
-     * 获取实体功能列表
-     */
-    getEntityCapabilities(entity) {
-        const capabilities = [];
-        const domain = entity.platform;
-        const deviceClass = entity.device_class;
-
-        // 根据域和设备类推断功能
-        switch (domain) {
-            case 'light':
-                capabilities.push('turn_on', 'turn_off');
-                if (entity.attributes && entity.attributes.brightness !== undefined) {
-                    capabilities.push('set_brightness');
-                }
-                if (entity.attributes && entity.attributes.color_temp !== undefined) {
-                    capabilities.push('set_color_temp');
-                }
-                if (entity.attributes && entity.attributes.rgb_color !== undefined) {
-                    capabilities.push('set_color');
-                }
-                break;
-            case 'climate':
-                capabilities.push('turn_on', 'turn_off');
-                capabilities.push('set_temperature');
-                if (entity.attributes && entity.attributes.hvac_modes) {
-                    capabilities.push('set_hvac_mode');
-                }
-                if (entity.attributes && entity.attributes.fan_modes) {
-                    capabilities.push('set_fan_mode');
-                }
-                break;
-            case 'switch':
-                capabilities.push('turn_on', 'turn_off');
-                break;
-            case 'fan':
-                capabilities.push('turn_on', 'turn_off');
-                if (entity.attributes && entity.attributes.speed !== undefined) {
-                    capabilities.push('set_speed');
-                }
-                break;
-            case 'cover':
-                capabilities.push('open_cover', 'close_cover', 'stop_cover');
-                break;
-            case 'media_player':
-                capabilities.push('turn_on', 'turn_off');
-                capabilities.push('play_media', 'pause', 'stop');
-                break;
-            default:
-                capabilities.push('turn_on', 'turn_off');
-        }
-
-        return capabilities;
-    }
-
-    /**
-     * 获取当前配置的access_token
-     */
-    async getAccessToken(credentials = null) {
-        try {
-            if (!credentials) {
-                const credResult = await this.getCredentials();
-                if (!credResult.success) {
-                    return { success: false, error: 'No credentials found' };
-                }
-                credentials = credResult.data;
-            }
-
-            const { access_token, base_url } = credentials;
-            if (!access_token || !base_url) {
-                return { success: false, error: 'Access token and base URL are required' };
-            }
-
-            // 返回完整的access_token信息
-            return {
-                success: true,
-                data: {
-                    access_token: access_token,
-                    base_url: base_url,
-                    token_length: access_token.length,
-                    has_credentials: true,
-                    retrieved_at: new Date().toISOString()
-                }
-            };
-        } catch (error) {
-            return { success: false, error: error.message };
-        }
-    }
-
-    /**
-     * 测试API连接性
+     * 测试连接
      */
     async testConnection(credentials = null) {
+        return await this.basicInfoModule.testConnection(credentials);
+    }
+
+    // ========== 信息列表相关方法 ==========
+
+    /**
+     * 获取实体注册表
+     */
+    async getEntityRegistry(credentials = null) {
+        const creds = credentials || (await this.getCredentials()).data;
+        return await this.infoListModule.getEntityRegistryViaWebSocket(creds.access_token, creds.base_url);
+    }
+
+    /**
+     * 获取设备注册表
+     */
+    async getDeviceRegistry(credentials = null) {
+        const creds = credentials || (await this.getCredentials()).data;
+        return await this.infoListModule.getDevicesViaWebSocket(creds.access_token, creds.base_url);
+    }
+
+    /**
+     * 获取空间列表（楼层 + 房间），支持op格式
+     */
+    async getSpaces(op = 'floors', credentials = null) {
+        return await this.infoListModule.getSpaces(op, credentials);
+    }
+
+    /**
+     * 获取Home Assistant配置信息（用于健康检查）
+     */
+    async getConfig(credentials = null) {
         try {
             if (!credentials) {
                 const credResult = await this.getCredentials();
@@ -1531,1689 +242,528 @@ class Home_assistantModule extends BaseCredentialModule {
                 credentials = credResult.data;
             }
 
-            const startTime = Date.now();
-            const validationResult = await this.performValidation(credentials);
-            const responseTime = Date.now() - startTime;
+            const { base_url, access_token } = credentials;
+            if (!base_url || !access_token) {
+                return { success: false, error: 'Base URL and access token are required' };
+            }
 
-            if (validationResult.success) {
-                return {
-                    success: true,
-                    message: 'Connection test successful',
-                    data: {
-                        response_time: responseTime,
-                        version: validationResult.data.config?.version,
-                        location: validationResult.data.config?.location_name,
-                        entities_count: validationResult.data.entities_count,
-                        tested_at: new Date().toISOString()
-                    }
+            // 使用 basicInfoModule 调用 Home Assistant API /api/config
+            const result = await this.basicInfoModule.callHomeAssistantAPI(
+                access_token, 
+                base_url, 
+                '/api/config'
+            );
+            
+            if (result && typeof result === 'object') {
+        return {
+            success: true,
+                    data: result
                 };
             } else {
                 return {
                     success: false,
-                    error: validationResult.error,
-                    data: {
-                        response_time: responseTime,
-                        details: validationResult.details
-                    }
+                    error: 'Invalid response from Home Assistant'
                 };
             }
         } catch (error) {
+            this.logger.error('Failed to get Home Assistant config:', error);
             return { success: false, error: error.message };
         }
     }
 
     /**
-     * 智能设备匹配 - 根据OpenAI返回的结构化数据匹配Home Assistant设备
+     * 获取所有实体状态
      */
-    async matchDevicesByIntent(intentData, credentials = null) {
+    async getStates(credentials = null) {
+        return await this.basicInfoModule.getStates(credentials);
+    }
+
+    /**
+     * 检查空间列表变化
+     */
+    async checkSpaceChanges() {
         try {
-            if (!credentials) {
-                const credResult = await this.getCredentials();
-                if (!credResult.success) {
-                    return { success: false, error: 'No credentials found' };
-                }
-                credentials = credResult.data;
+            // 获取当前空间列表
+            const spacesResult = await this.getSpaces();
+            if (!spacesResult || !spacesResult.success || !spacesResult.data) {
+                this.logger.warn('[Space Monitor] Failed to get spaces');
+                return;
             }
-
-            if (!intentData || !intentData.devices || !Array.isArray(intentData.devices)) {
-                return { success: false, error: 'Invalid intent data: devices array is required' };
-            }
-
-            // 获取所有设备和区域数据
-            const [devicesResult, areasResult, entitiesResult] = await Promise.all([
-                this.getDevices(credentials),
-                this.getRooms(credentials),
-                this.getEntityRegistry(credentials)
-            ]);
-
-            if (!devicesResult.success || !areasResult.success || !entitiesResult.success) {
-                return { 
-                    success: false, 
-                    error: 'Failed to fetch Home Assistant data',
-                    details: {
-                        devices: devicesResult.success,
-                        areas: areasResult.success,
-                        entities: entitiesResult.success
-                    }
-                };
-            }
-
-            const devices = devicesResult.data.devices || [];
-            const areas = areasResult.data.areas || [];
-            const entities = entitiesResult.data.entities || [];
-
-            // 构建匹配结果
-            const matchedDevices = [];
-
-            for (const intentDevice of intentData.devices) {
-                const matched = await this.matchSingleDevice(intentDevice, devices, areas, entities);
-                if (matched.length > 0) {
-                    matchedDevices.push(...matched);
-                }
-            }
-
-            return {
-                success: true,
-                data: {
-                    matched_devices: matchedDevices,
-                    total_matched: matchedDevices.length,
-                    intent_devices: intentData.devices.length,
-                    match_rate: intentData.devices.length > 0 ? 
-                        (matchedDevices.length / intentData.devices.length * 100).toFixed(1) + '%' : '0%',
-                    matched_at: new Date().toISOString()
-                }
-            };
-
-        } catch (error) {
-            this.logger.error('Failed to match devices by intent:', error);
-            return { success: false, error: error.message };
-        }
-    }
-
-    /**
-     * 匹配单个设备
-     */
-    async matchSingleDevice(intentDevice, devices, areas, entities) {
-        const { space_name, space_type, device_name, device_type, action } = intentDevice;
-        const matched = [];
-
-        // 1. 首先匹配空间（area）
-        let matchedArea = null;
-        
-        // 精确匹配空间名称
-        matchedArea = areas.find(area => 
-            area.name && area.name.toLowerCase().includes(space_name.toLowerCase())
-        );
-        
-        // 如果精确匹配失败，尝试类型匹配
-        if (!matchedArea) {
-            matchedArea = areas.find(area => 
-                area.name && area.name.toLowerCase().includes(space_type.toLowerCase())
-            );
-        }
-
-        if (!matchedArea) {
-            this.logger.warn(`No area found for space: ${space_name} (${space_type})`);
-            return matched;
-        }
-
-        // 2. 在该空间下查找设备
-        const areaDevices = devices.filter(device => 
-            device.area_id === matchedArea.area_id
-        );
-
-        // 3. 匹配设备
-        let matchedDevice = null;
-        
-        // 精确匹配设备名称
-        matchedDevice = areaDevices.find(device => 
-            device.name && device.name.toLowerCase().includes(device_name.toLowerCase())
-        );
-        
-        // 如果精确匹配失败，尝试类型匹配
-        if (!matchedDevice) {
-            matchedDevice = areaDevices.find(device => 
-                this.matchDeviceType(device, device_type)
-            );
-        }
-
-        if (!matchedDevice) {
-            this.logger.warn(`No device found for: ${device_name} (${device_type}) in area: ${matchedArea.name}`);
-            return matched;
-        }
-
-        // 4. 查找该设备相关的实体
-        const deviceEntities = entities.filter(entity => 
-            entity.device_id === matchedDevice.id
-        );
-
-        // 5. 为每个实体构建结果
-        for (const entity of deviceEntities) {
-            const entityFunctions = this.getEntityFunctions(entity, action);
             
-            matched.push({
-                entity_id: entity.entity_id,
-                entity_name: entity.name || entity.original_name || entity.entity_id,
-                entity_functions: entityFunctions,
-                device_name: matchedDevice.name || matchedDevice.name_by_user || 'Unknown Device',
-                device_type: this.getDeviceTypeName(matchedDevice),
-                space_name: matchedArea.name,
-                space_type: matchedArea.name, // Home Assistant中area没有type字段
-                action: action,
-                confidence: this.calculateMatchConfidence(intentDevice, matchedDevice, matchedArea)
-            });
-        }
-
-        return matched;
-    }
-
-    /**
-     * 匹配设备类型
-     */
-    matchDeviceType(device, targetType) {
-        if (!device || !targetType) return false;
-        
-        const deviceName = (device.name || '').toLowerCase();
-        const deviceType = this.getDeviceTypeName(device).toLowerCase();
-        const target = targetType.toLowerCase();
-
-        // 类型映射
-        const typeMappings = {
-            'light': ['light', 'lamp', 'bulb', '灯', '照明'],
-            'air_conditioner': ['air', 'conditioner', 'ac', '空调', '冷气'],
-            'switch': ['switch', 'switch', '开关'],
-            'fan': ['fan', '风扇', '风机'],
-            'sensor': ['sensor', '传感器', '感应器'],
-            'camera': ['camera', '摄像头', '监控'],
-            'lock': ['lock', 'lock', '锁', '门锁'],
-            'cover': ['cover', 'blind', 'curtain', '窗帘', '百叶窗']
-        };
-
-        // 检查直接匹配
-        if (deviceName.includes(target) || deviceType.includes(target)) {
-            return true;
-        }
-
-        // 检查类型映射
-        for (const [key, values] of Object.entries(typeMappings)) {
-            if (values.some(v => v.includes(target))) {
-                if (values.some(v => deviceName.includes(v) || deviceType.includes(v))) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * 获取设备类型名称
-     */
-    getDeviceTypeName(device) {
-        if (!device) return 'Unknown';
-        
-        // 从设备信息中推断类型
-        const name = (device.name || '').toLowerCase();
-        const model = (device.model || '').toLowerCase();
-        const manufacturer = (device.manufacturer || '').toLowerCase();
-
-        if (name.includes('light') || name.includes('灯') || name.includes('照明')) {
-            return 'Light';
-        }
-        if (name.includes('air') || name.includes('conditioner') || name.includes('空调')) {
-            return 'Air Conditioner';
-        }
-        if (name.includes('switch') || name.includes('开关')) {
-            return 'Switch';
-        }
-        if (name.includes('fan') || name.includes('风扇')) {
-            return 'Fan';
-        }
-        if (name.includes('camera') || name.includes('摄像头')) {
-            return 'Camera';
-        }
-        if (name.includes('lock') || name.includes('锁')) {
-            return 'Lock';
-        }
-        if (name.includes('cover') || name.includes('窗帘')) {
-            return 'Cover';
-        }
-
-        return 'Unknown';
-    }
-
-    /**
-     * 获取实体功能
-     */
-    getEntityFunctions(entity, action) {
-        const functions = [];
-        const domain = entity.entity_id.split('.')[0];
-
-        // 根据实体域和动作确定功能
-        switch (domain) {
-            case 'light':
-                functions.push('turn_on', 'turn_off');
-                if (action.includes('调') || action.includes('度') || action.includes('brightness')) {
-                    functions.push('set_brightness');
-                }
-                if (action.includes('色') || action.includes('color')) {
-                    functions.push('set_color');
-                }
-                break;
-            case 'climate':
-                functions.push('turn_on', 'turn_off', 'set_temperature');
-                if (action.includes('调') || action.includes('度')) {
-                    functions.push('set_temperature');
-                }
-                break;
-            case 'switch':
-                functions.push('turn_on', 'turn_off');
-                break;
-            case 'fan':
-                functions.push('turn_on', 'turn_off', 'set_speed');
-                break;
-            case 'cover':
-                functions.push('open_cover', 'close_cover', 'stop_cover');
-                break;
-            case 'lock':
-                functions.push('lock', 'unlock');
-                break;
-            case 'camera':
-                functions.push('turn_on', 'turn_off', 'snapshot');
-                break;
-            default:
-                functions.push('turn_on', 'turn_off');
-        }
-
-        return functions;
-    }
-
-    /**
-     * 计算匹配置信度
-     */
-    calculateMatchConfidence(intentDevice, matchedDevice, matchedArea) {
-        let confidence = 0.5; // 基础置信度
-
-        // 空间匹配加分
-        if (matchedArea) {
-            confidence += 0.2;
-        }
-
-        // 设备名称匹配加分
-        if (matchedDevice.name && matchedDevice.name.toLowerCase().includes(intentDevice.device_name.toLowerCase())) {
-            confidence += 0.3;
-        }
-
-        // 设备类型匹配加分
-        if (this.matchDeviceType(matchedDevice, intentDevice.device_type)) {
-            confidence += 0.2;
-        }
-
-        return Math.min(confidence, 1.0);
-    }
-
-    /**
-     * 批量控制设备 - 根据OpenAI返回的命令执行设备控制
-     */
-    async batchControlDevices(controlCommands, credentials = null) {
-        try {
-            if (!credentials) {
-                const credResult = await this.getCredentials();
-                if (!credResult.success) {
-                    return { success: false, error: 'No credentials found' };
-                }
-                credentials = credResult.data;
-            }
-
-            if (!controlCommands || !Array.isArray(controlCommands)) {
-                return { success: false, error: 'Invalid control commands: array is required' };
-            }
-
-            const { access_token, base_url } = credentials;
-            if (!access_token || !base_url) {
-                return { success: false, error: 'Access token and base URL are required' };
-            }
-
-            this.logger.info(`Starting batch control for ${controlCommands.length} devices`);
-
-            // 并行执行所有控制命令
-            const controlPromises = controlCommands.map(async (command, index) => {
-                try {
-                    const result = await this.executeControlCommand(command, access_token, base_url);
-                    return {
-                        index,
-                        entity_id: command.entity_id,
-                        success: true,
-                        result: result
-                    };
-                } catch (error) {
-                    this.logger.error(`Failed to control device ${command.entity_id}:`, error);
-                    return {
-                        index,
-                        entity_id: command.entity_id,
-                        success: false,
-                        error: error.message
-                    };
-                }
-            });
-
-            const results = await Promise.all(controlPromises);
-
-            // 统计结果
-            const successful = results.filter(r => r.success);
-            const failed = results.filter(r => !r.success);
-
-            // 获取所有实体的当前状态
-            const entityStates = await this.getEntityStates(access_token, base_url, controlCommands.map(c => c.entity_id));
-
-            return {
-                success: true,
-                data: {
-                    total_commands: controlCommands.length,
-                    successful_commands: successful.length,
-                    failed_commands: failed.length,
-                    success_rate: controlCommands.length > 0 ? 
-                        (successful.length / controlCommands.length * 100).toFixed(1) + '%' : '0%',
-                    results: results,
-                    entity_states: entityStates,
-                    executed_at: new Date().toISOString()
-                }
-            };
-
-        } catch (error) {
-            this.logger.error('Failed to batch control devices:', error);
-            return { success: false, error: error.message };
-        }
-    }
-
-    /**
-     * 执行单个控制命令
-     */
-    async executeControlCommand(command, accessToken, baseUrl) {
-        const { entity_id, entity_functions, action, parameters = {} } = command;
-
-        if (!entity_id || !entity_functions || !action) {
-            throw new Error('Missing required fields: entity_id, entity_functions, action');
-        }
-
-        // 根据action和entity_functions确定要调用的服务
-        const serviceCall = this.determineServiceCall(entity_id, entity_functions, action, parameters);
-
-        if (!serviceCall) {
-            throw new Error(`No suitable service found for action: ${action} on entity: ${entity_id}`);
-        }
-
-        // 调用Home Assistant服务
-        const result = await this.callHomeAssistantAPI(
-            accessToken,
-            baseUrl,
-            '/api/services/' + serviceCall.domain + '/' + serviceCall.service,
-            'POST',
-            serviceCall.data
-        );
-
-        if (result.error) {
-            throw new Error(`Service call failed: ${result.error}`);
-        }
-
-        return {
-            service_called: `${serviceCall.domain}.${serviceCall.service}`,
-            service_data: serviceCall.data,
-            result: result
-        };
-    }
-
-    /**
-     * 确定要调用的服务
-     */
-    determineServiceCall(entityId, entityFunctions, action, parameters) {
-        const domain = entityId.split('.')[0];
-        const actionLower = action.toLowerCase();
-
-        // 根据动作和实体功能确定服务调用
-        if (actionLower.includes('开') || actionLower.includes('on') || actionLower.includes('turn_on')) {
-            if (entityFunctions.includes('turn_on')) {
-                return {
-                    domain: domain,
-                    service: 'turn_on',
-                    data: {
-                        entity_id: entityId,
-                        ...parameters
-                    }
-                };
-            }
-        }
-
-        if (actionLower.includes('关') || actionLower.includes('off') || actionLower.includes('turn_off')) {
-            if (entityFunctions.includes('turn_off')) {
-                return {
-                    domain: domain,
-                    service: 'turn_off',
-                    data: {
-                        entity_id: entityId,
-                        ...parameters
-                    }
-                };
-            }
-        }
-
-        // 温度控制
-        if (actionLower.includes('调') || actionLower.includes('度') || actionLower.includes('temperature')) {
-            if (entityFunctions.includes('set_temperature')) {
-                const temperature = this.extractTemperature(action, parameters);
-                return {
-                    domain: domain,
-                    service: 'set_temperature',
-                    data: {
-                        entity_id: entityId,
-                        temperature: temperature,
-                        ...parameters
-                    }
-                };
-            }
-        }
-
-        // 亮度控制
-        if (actionLower.includes('亮度') || actionLower.includes('brightness')) {
-            if (entityFunctions.includes('set_brightness')) {
-                const brightness = this.extractBrightness(action, parameters);
-                return {
-                    domain: domain,
-                    service: 'turn_on',
-                    data: {
-                        entity_id: entityId,
-                        brightness_pct: brightness,
-                        ...parameters
-                    }
-                };
-            }
-        }
-
-        // 颜色控制
-        if (actionLower.includes('色') || actionLower.includes('color')) {
-            if (entityFunctions.includes('set_color')) {
-                const color = this.extractColor(action, parameters);
-                return {
-                    domain: domain,
-                    service: 'turn_on',
-                    data: {
-                        entity_id: entityId,
-                        rgb_color: color,
-                        ...parameters
-                    }
-                };
-            }
-        }
-
-        // 风扇速度控制
-        if (actionLower.includes('速度') || actionLower.includes('speed')) {
-            if (entityFunctions.includes('set_speed')) {
-                const speed = this.extractSpeed(action, parameters);
-                return {
-                    domain: domain,
-                    service: 'set_speed',
-                    data: {
-                        entity_id: entityId,
-                        speed: speed,
-                        ...parameters
-                    }
-                };
-            }
-        }
-
-        // 窗帘控制
-        if (actionLower.includes('开') && (actionLower.includes('窗帘') || actionLower.includes('cover'))) {
-            if (entityFunctions.includes('open_cover')) {
-                return {
-                    domain: domain,
-                    service: 'open_cover',
-                    data: {
-                        entity_id: entityId,
-                        ...parameters
-                    }
-                };
-            }
-        }
-
-        if (actionLower.includes('关') && (actionLower.includes('窗帘') || actionLower.includes('cover'))) {
-            if (entityFunctions.includes('close_cover')) {
-                return {
-                    domain: domain,
-                    service: 'close_cover',
-                    data: {
-                        entity_id: entityId,
-                        ...parameters
-                    }
-                };
-            }
-        }
-
-        // 锁控制
-        if (actionLower.includes('锁') || actionLower.includes('lock')) {
-            if (actionLower.includes('开') || actionLower.includes('unlock')) {
-                if (entityFunctions.includes('unlock')) {
-                    return {
-                        domain: domain,
-                        service: 'unlock',
-                        data: {
-                            entity_id: entityId,
-                            ...parameters
-                        }
-                    };
-                }
-            }
-            if (actionLower.includes('关') || actionLower.includes('lock')) {
-                if (entityFunctions.includes('lock')) {
-                    return {
-                        domain: domain,
-                        service: 'lock',
-                        data: {
-                            entity_id: entityId,
-                            ...parameters
-                        }
-                    };
-                }
-            }
-        }
-
-        // 默认开关控制
-        if (entityFunctions.includes('turn_on') && (actionLower.includes('开') || actionLower.includes('on'))) {
-            return {
-                domain: domain,
-                service: 'turn_on',
-                data: {
-                    entity_id: entityId,
-                    ...parameters
-                }
-            };
-        }
-
-        if (entityFunctions.includes('turn_off') && (actionLower.includes('关') || actionLower.includes('off'))) {
-            return {
-                domain: domain,
-                service: 'turn_off',
-                data: {
-                    entity_id: entityId,
-                    ...parameters
-                }
-            };
-        }
-
-        return null;
-    }
-
-    /**
-     * 提取温度值
-     */
-    extractTemperature(action, parameters) {
-        // 从参数中获取温度
-        if (parameters.temperature) {
-            return parseFloat(parameters.temperature);
-        }
-
-        // 从动作中提取温度
-        const tempMatch = action.match(/(\d+(?:\.\d+)?)度/);
-        if (tempMatch) {
-            return parseFloat(tempMatch[1]);
-        }
-
-        // 默认温度
-        return 22;
-    }
-
-    /**
-     * 提取亮度值
-     */
-    extractBrightness(action, parameters) {
-        if (parameters.brightness) {
-            return parseInt(parameters.brightness);
-        }
-
-        const brightnessMatch = action.match(/(\d+)%/);
-        if (brightnessMatch) {
-            return parseInt(brightnessMatch[1]);
-        }
-
-        return 50;
-    }
-
-    /**
-     * 提取颜色值
-     */
-    extractColor(action, parameters) {
-        if (parameters.rgb_color) {
-            return parameters.rgb_color;
-        }
-
-        // 简单的颜色映射
-        const colorMap = {
-            '红': [255, 0, 0],
-            '绿': [0, 255, 0],
-            '蓝': [0, 0, 255],
-            '白': [255, 255, 255],
-            '黄': [255, 255, 0],
-            '紫': [255, 0, 255],
-            '青': [0, 255, 255]
-        };
-
-        for (const [color, rgb] of Object.entries(colorMap)) {
-            if (action.includes(color)) {
-                return rgb;
-            }
-        }
-
-        return [255, 255, 255]; // 默认白色
-    }
-
-    /**
-     * 提取速度值
-     */
-    extractSpeed(action, parameters) {
-        if (parameters.speed) {
-            return parameters.speed;
-        }
-
-        const speedMap = {
-            '低': 'low',
-            '中': 'medium',
-            '高': 'high',
-            '最高': 'max'
-        };
-
-        for (const [speed, value] of Object.entries(speedMap)) {
-            if (action.includes(speed)) {
-                return value;
-            }
-        }
-
-        return 'medium';
-    }
-
-    /**
-     * 获取实体状态
-     */
-    async getEntityStates(accessToken, baseUrl, entityIds) {
-        try {
-            const states = [];
-            
-            for (const entityId of entityIds) {
-                try {
-                    const state = await this.callHomeAssistantAPI(
-                        accessToken,
-                        baseUrl,
-                        `/api/states/${entityId}`,
-                        'GET'
-                    );
-                    
-                    if (state && !state.error) {
-                        states.push({
-                            entity_id: entityId,
-                            state: state.state,
-                            attributes: state.attributes,
-                            last_changed: state.last_changed,
-                            last_updated: state.last_updated
-                        });
-                    } else {
-                        states.push({
-                            entity_id: entityId,
-                            error: state.error || 'Unknown error'
-                        });
-                    }
-                } catch (error) {
-                    states.push({
-                        entity_id: entityId,
-                        error: error.message
-                    });
-                }
-            }
-
-            return states;
-        } catch (error) {
-            this.logger.error('Failed to get entity states:', error);
-            return [];
-        }
-    }
-
-    /**
-     * 获取默认配置
-     */
-    getDefaultConfig() {
-        return {
-            ...super.getDefaultConfig(),
-            timeout: 10000,
-            retries: 3,
-            cacheTimeout: 120000, // 2分钟缓存
-            features: {
-                states: true,
-                config: true,
-                connectionTest: true,
-                services: true
-            }
-        };
-    }
-
-    /**
-     * 获取默认Schema
-     */
-    getDefaultSchema() {
-        return {
-            type: 'object',
-            properties: {
-                access_token: {
-                    type: 'string',
-                    title: 'Access Token',
-                    description: 'Home Assistant long-lived access token',
-                    required: true,
-                    sensitive: true,
-                    minLength: 100,
-                    maxLength: 300,
-                    example: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...'
-                },
-                base_url: {
-                    type: 'string',
-                    title: 'Base URL',
-                    description: 'Home Assistant base URL (with protocol)',
-                    required: true,
-                    sensitive: false,
-                    minLength: 10,
-                    maxLength: 200,
-                    pattern: '^https?://[^\\s/$.?#].[^\\s]*$',
-                    example: 'http://homeassistant.local:8123'
-                }
-            },
-            required: ['access_token', 'base_url'],
-            additionalProperties: false
-        };
-    }
-
-    /**
-     * 获取增强的实体状态信息
-     * 结合entity registry、devices和rooms信息
-     * @param {Object} credentials - 凭据信息
-     * @param {Array} areaNames - 按区域名称筛选
-     * @param {Array} deviceTypes - 按设备类型筛选
-     */
-    async getEnhancedStates(credentials = null, areaNames = null, deviceTypes = null) {
-        // 优先尝试从缓存获取数据
-        const cachedResult = this.getCachedEnhancedStates(areaNames, deviceTypes);
-        if (cachedResult) {
-            this.logger.info(`Returning cached enhanced states, age: ${cachedResult.data.cache_age}ms`);
-            return cachedResult;
-        }
-
-        // 缓存无效，从API获取新数据
-        this.logger.info('Cache invalid or expired, fetching fresh enhanced states data');
-        return await this.getEnhancedStatesInternal(credentials, areaNames, deviceTypes);
-    }
-
-    // 保留原来的方法作为内部实现
-    async getEnhancedStatesOriginal(credentials = null, areaNames = null, deviceTypes = null) {
-        try {
-            if (!credentials) {
-                const credResult = await this.getCredentials();
-                if (!credResult.success) {
-                    return { success: false, error: 'No credentials found' };
-                }
-                credentials = credResult.data;
-            }
-
-            const { access_token, base_url } = credentials;
-            if (!access_token || !base_url) {
-                return { success: false, error: 'Access token and base URL are required' };
-            }
-
-            this.logger.info('Fetching enhanced states with entity registry, devices, and rooms data');
-
-            // 并行获取所有必要的数据
-            const [statesResult, entitiesResult, devicesResult, roomsResult, floorsResult] = await Promise.all([
-                this.getStates(credentials),
-                this.getEntityRegistry(credentials),
-                this.getDevices(credentials),
-                this.getRooms(credentials),
-                this.getFloors(credentials)
-            ]);
-
-            if (!statesResult.success) {
-                return { success: false, error: 'Failed to fetch states: ' + statesResult.error };
-            }
-
-            if (!entitiesResult.success) {
-                return { success: false, error: 'Failed to fetch entity registry: ' + entitiesResult.error };
-            }
-
-            if (!devicesResult.success) {
-                return { success: false, error: 'Failed to fetch devices: ' + devicesResult.error };
-            }
-
-            if (!roomsResult.success) {
-                return { success: false, error: 'Failed to fetch rooms: ' + roomsResult.error };
-            }
-
-            if (!floorsResult.success) {
-                return { success: false, error: 'Failed to fetch floors: ' + floorsResult.error };
-            }
-
-            const states = statesResult.data.states || [];
-            const entities = entitiesResult.data.entities || [];
-            const devices = devicesResult.data.devices || [];
-            const rooms = roomsResult.data.rooms || [];
-            const floors = floorsResult.data.floors || [];
-
-            // 创建查找映射以提高性能
-            const entityMap = new Map();
-            entities.forEach(entity => {
-                entityMap.set(entity.entity_id, entity);
-            });
-
-            const deviceMap = new Map();
-            devices.forEach(device => {
-                deviceMap.set(device.id, device);
-            });
-
-            const roomMap = new Map();
-            rooms.forEach(room => {
-                roomMap.set(room.area_id, room);
-            });
-
-            const floorMap = new Map();
+            // 从 buildSpaces 提取 floors 和 rooms
+            const floors = spacesResult.data.floors || [];
+            const rooms = [];
+            // 从 floors 中提取所有 rooms
             floors.forEach(floor => {
-                floorMap.set(floor.floor_id, floor);
+                if (floor.rooms && Array.isArray(floor.rooms)) {
+                    rooms.push(...floor.rooms);
+                }
             });
-
-            // 增强每个状态信息
-            const enhancedStates = states.map(state => {
-                const enhancedState = {
-                    ...state,
-                    device_id: null,
-                    device_name: null,
-                    device_manufacturer: null,
-                    device_model: null,
-                    area_id: null,
-                    area_name: null,
-                    floor_id: null,
-                    floor_name: null,
-                    device_type: null
+            
+            // 计算哈希值来检测变化
+            const currentHash = this.calculateSpacesHash(floors, rooms);
+            
+            if (this.lastSpacesHash === null) {
+                // 首次运行，保存哈希值
+                this.lastSpacesHash = currentHash;
+                this.logger.info(`[Space Monitor] Initial spaces recorded (${floors.length} floors, ${rooms.length} rooms)`);
+                
+                // 尝试从现有数据加载映射
+                await this.loadExistingMappings(floors, rooms);
+                return;
+            }
+            
+            if (this.lastSpacesHash !== currentHash) {
+                this.logger.info('[Space Monitor] Space list changed, enriching with OpenAI...');
+                await this.enrichSpacesWithOpenAI(floors, rooms);
+                this.lastSpacesHash = currentHash;
+                
+                // 广播空间列表变化到 WebSocket 客户端
+                await this.broadcastSpaceChanges(spacesResult.data);
+            } else {
+                this.logger.info('[Space Monitor] No changes detected');
+            }
+        } catch (error) {
+            this.logger.error('[Space Monitor] Error checking space changes:', error);
+        }
+    }
+    
+    /**
+     * 计算空间列表的哈希值
+     */
+    calculateSpacesHash(floors, rooms) {
+        const crypto = require('crypto');
+        const data = JSON.stringify({ floors, rooms });
+        return crypto.createHash('md5').update(data).digest('hex');
+    }
+    
+    /**
+     * 从现有数据加载映射（如果实体已有标准化字段）
+     */
+    async loadExistingMappings(floors, rooms) {
+        // 检查楼层是否已有标准化字段
+        for (const floor of floors) {
+            if (floor.floor_name_en && floor.floor_type && floor.level !== undefined) {
+                this.floorMappings[floor.floor_name] = {
+                    floor_name_en: floor.floor_name_en,
+                    floor_type: floor.floor_type,
+                    level: floor.level
                 };
-
-                // 获取device_type：优先使用device_class，其次使用entity_id前缀
-                if (state.attributes && state.attributes.device_class) {
-                    enhancedState.device_type = state.attributes.device_class;
-                } else {
-                    // 从entity_id中提取前缀作为device_type
-                    const entityIdParts = state.entity_id.split('.');
-                    if (entityIdParts.length > 0) {
-                        enhancedState.device_type = entityIdParts[0];
-                    }
-                }
-
-                // 从entity registry获取device_id和area_id
-                const entityInfo = entityMap.get(state.entity_id);
-                if (entityInfo) {
-                    enhancedState.device_id = entityInfo.device_id;
-                    enhancedState.area_id = entityInfo.area_id;
-
-                    // 如果有device_id，从devices获取设备信息
-                    if (entityInfo.device_id) {
-                        const deviceInfo = deviceMap.get(entityInfo.device_id);
-                        if (deviceInfo) {
-                            enhancedState.device_name = deviceInfo.name_by_user || deviceInfo.name || null;
-                            enhancedState.device_manufacturer = deviceInfo.manufacturer || null;
-                            enhancedState.device_model = deviceInfo.model || null;
-                            
-                            // 如果实体没有area_id，但设备有area_id，则使用设备的area_id
-                            if (!enhancedState.area_id && deviceInfo.area_id) {
-                                enhancedState.area_id = deviceInfo.area_id;
-                            }
-                        }
-                    }
-
-                    // 如果有area_id，从rooms获取房间和楼层信息
-                    if (enhancedState.area_id) {
-                        const roomInfo = roomMap.get(enhancedState.area_id);
-                        if (roomInfo) {
-                            enhancedState.area_name = roomInfo.name || null;
-                            enhancedState.floor_id = roomInfo.floor_id || null;
-                            
-                            // 从楼层映射中获取楼层名称
-                            if (roomInfo.floor_id) {
-                                const floorInfo = floorMap.get(roomInfo.floor_id);
-                                enhancedState.floor_name = floorInfo ? floorInfo.name : null;
-                            } else {
-                                enhancedState.floor_name = null;
-                            }
-                        } else {
-                            // 如果rooms中没有找到，但设备有area_name，则使用设备的area_name
-                            if (entityInfo.device_id) {
-                                const deviceInfo = deviceMap.get(entityInfo.device_id);
-                                if (deviceInfo && deviceInfo.area_name) {
-                                    enhancedState.area_name = deviceInfo.area_name;
-                                }
-                            }
-                        }
-                        
-                        // 如果还没有楼层信息，尝试从房间的floor_id获取
-                        if (!enhancedState.floor_id && roomInfo && roomInfo.floor_id) {
-                            enhancedState.floor_id = roomInfo.floor_id;
-                            const floorInfo = floorMap.get(roomInfo.floor_id);
-                            if (floorInfo) {
-                                enhancedState.floor_name = floorInfo.name || null;
-                            }
-                        }
-                    }
-                }
-
-                return enhancedState;
-            });
-
-            // 应用筛选条件
-            let filteredStates = enhancedStates;
-            
-            // 按区域名称筛选
-            if (areaNames && Array.isArray(areaNames) && areaNames.length > 0) {
-                const normalizedAreaNames = areaNames.map(name => name.toLowerCase().trim()).filter(name => name);
-                if (normalizedAreaNames.length > 0) {
-                    filteredStates = filteredStates.filter(state => {
-                        if (!state.area_name) return false;
-                        const normalizedAreaName = state.area_name.toLowerCase().trim();
-                        return normalizedAreaNames.some(filterName => 
-                            normalizedAreaName.includes(filterName) || 
-                            filterName.includes(normalizedAreaName)
-                        );
-                    });
-                }
             }
-            
-            // 按设备类型筛选
-            if (deviceTypes && Array.isArray(deviceTypes) && deviceTypes.length > 0) {
-                const normalizedDeviceTypes = deviceTypes.map(type => type.toLowerCase().trim()).filter(type => type);
-                if (normalizedDeviceTypes.length > 0) {
-                    filteredStates = filteredStates.filter(state => {
-                        if (!state.device_type) return false;
-                        const normalizedDeviceType = state.device_type.toLowerCase().trim();
-                        return normalizedDeviceTypes.some(filterType => 
-                            normalizedDeviceType.includes(filterType) || 
-                            filterType.includes(normalizedDeviceType)
-                        );
-                    });
-                }
+        }
+        
+        // 检查房间是否已有标准化字段
+        for (const room of rooms) {
+            if (room.room_name_en && room.room_type) {
+                this.roomMappings[room.room_name] = {
+                    room_name_en: room.room_name_en,
+                    room_type: room.room_type
+                };
             }
-
-            // 统计信息
-            const stats = {
-                total_states: filteredStates.length,
-                total_states_before_filter: enhancedStates.length,
-                with_device_info: filteredStates.filter(s => s.device_id).length,
-                with_room_info: filteredStates.filter(s => s.area_id).length,
-                with_floor_info: filteredStates.filter(s => s.floor_id).length,
-                with_device_type: filteredStates.filter(s => s.device_type).length,
-                unique_devices: new Set(filteredStates.filter(s => s.device_id).map(s => s.device_id)).size,
-                unique_rooms: new Set(filteredStates.filter(s => s.area_id).map(s => s.area_id)).size,
-                unique_floors: new Set(filteredStates.filter(s => s.floor_id).map(s => s.floor_id)).size,
-                unique_device_types: new Set(filteredStates.filter(s => s.device_type).map(s => s.device_type)).size,
-                // 筛选条件
-                filters_applied: {
-                    area_names: areaNames || [],
-                    device_types: deviceTypes || []
-                },
-                // 新增：数据完整性统计
-                device_registry_count: devices.length,
-                entity_registry_count: entities.length,
-                rooms_count: rooms.length,
-                floors_count: floors.length,
-                missing_devices: new Set(filteredStates.filter(s => s.device_id && !deviceMap.has(s.device_id)).map(s => s.device_id)).size,
-                missing_rooms: new Set(filteredStates.filter(s => s.area_id && !roomMap.has(s.area_id)).map(s => s.area_id)).size,
-                missing_floors: new Set(filteredStates.filter(s => s.floor_id && !floorMap.has(s.floor_id)).map(s => s.floor_id)).size
-            };
-
-            return {
-                success: true,
-                data: {
-                    states: filteredStates,
-                    statistics: stats,
-                    data_sources: {
-                        states: statesResult.data.retrieved_at || new Date().toISOString(),
-                        entity_registry: entitiesResult.data.retrieved_at || new Date().toISOString(),
-                        devices: devicesResult.data.retrieved_at || new Date().toISOString(),
-                        rooms: roomsResult.data.retrieved_at || new Date().toISOString(),
-                        floors: floorsResult.data.retrieved_at || new Date().toISOString()
-                    },
-                    retrieved_at: new Date().toISOString()
-                }
-            };
-
-        } catch (error) {
-            this.logger.error('Failed to get enhanced states:', error);
-            return { success: false, error: error.message };
+        }
+        
+        if (Object.keys(this.floorMappings).length > 0 || Object.keys(this.roomMappings).length > 0) {
+            this.logger.info(`[Space Monitor] Loaded existing mappings: ${Object.keys(this.floorMappings).length} floors, ${Object.keys(this.roomMappings).length} rooms`);
         }
     }
-
+    
     /**
-     * 基于意图数据匹配需要控制的设备
-     * @param {Object} intentData - 意图数据
-     * @param {Object} credentials - 凭据信息
+     * 使用 OpenAI 丰富空间数据
      */
-    async matchControlDevices(intentData, credentials = null) {
+    async enrichSpacesWithOpenAI(floors, rooms) {
         try {
-            if (!credentials) {
-                const credResult = await this.getCredentials();
-                if (!credResult.success) {
-                    return { success: false, error: 'No credentials found' };
-                }
-                credentials = credResult.data;
+            // 获取 OpenAI 模块
+            const openaiModule = global.moduleManager?.getModule('openai');
+            if (!openaiModule) {
+                this.logger.error('[Space Monitor] OpenAI module not found');
+                return;
             }
-
-            // 验证意图数据格式
-            if (!intentData || !intentData.intent || !intentData.devices || !Array.isArray(intentData.devices)) {
-                return { success: false, error: 'Invalid intent data format' };
-            }
-
-            // 获取增强状态数据（优先使用缓存）
-            const enhancedStatesResult = await this.getEnhancedStates(credentials);
-            if (!enhancedStatesResult.success) {
-                return { success: false, error: 'Failed to get enhanced states: ' + enhancedStatesResult.error };
-            }
-
-            const allEntities = enhancedStatesResult.data.states;
-            const isFromCache = enhancedStatesResult.data.from_cache || false;
-            const matchedDevices = [];
-            const matchedEntityIds = new Set(); // 防止重复匹配
-
-            // 处理每个意图设备
-            for (const intentDevice of intentData.devices) {
-                const { room_name, device_type, device_name, action } = intentDevice;
-                
-                // 1. 匹配空间（房间）
-                const roomEntities = allEntities.filter(entity => {
-                    if (!entity.area_name) return false;
-                    return this.normalizeRoomName(entity.area_name) === this.normalizeRoomName(room_name);
-                });
-
-                if (roomEntities.length === 0) {
-                    this.logger.warn(`No entities found for room: ${room_name}`);
-                    continue;
-                }
-
-                // 2. 严格匹配设备类型
-                const typeMatchedEntities = roomEntities.filter(entity => {
-                    return this.strictDeviceTypeMatch(entity.device_type, device_type);
-                });
-
-                if (typeMatchedEntities.length === 0) {
-                    this.logger.warn(`No entities with device type '${device_type}' found in room: ${room_name}`);
-                    continue;
-                }
-
-                // 3. 在类型匹配的基础上，进一步按设备名称匹配
-                let matchedEntities = [];
-                
-                if (device_name) {
-                    // 尝试按设备名称匹配
-                    matchedEntities = typeMatchedEntities.filter(entity => {
-                        const entityDeviceName = entity.device_name || '';
-                        const normalizedEntityName = this.normalizeDeviceName(entityDeviceName);
-                        const normalizedIntentName = this.normalizeDeviceName(device_name);
-                        
-                        return normalizedEntityName.includes(normalizedIntentName) || 
-                               normalizedIntentName.includes(normalizedEntityName) ||
-                               this.matchDeviceNameByType(entityDeviceName, device_name, device_type);
-                    });
-                }
-
-                // 如果没有设备名称或设备名称匹配失败，使用所有类型匹配的实体
-                if (matchedEntities.length === 0) {
-                    matchedEntities = typeMatchedEntities;
-                }
-
-                // 4. 为匹配的实体添加动作信息，避免重复
-                matchedEntities.forEach(entity => {
-                    // 避免同一个实体被重复添加
-                    if (!matchedEntityIds.has(entity.entity_id)) {
-                        matchedEntityIds.add(entity.entity_id);
-                        matchedDevices.push({
-                            ...entity, // 保留增强状态的所有字段
-                            action: action,
-                            intent_room: room_name,
-                            intent_device_type: device_type,
-                            intent_device_name: device_name,
-                            match_confidence: this.calculateMatchConfidence(intentDevice, entity)
-                        });
-                    }
-                });
-
-                this.logger.info(`Matched ${matchedEntities.length} entities for ${room_name} ${device_name || device_type}`);
-            }
-
-            // 统计信息
-            const stats = {
-                total_intent_devices: intentData.devices.length,
-                matched_entities: matchedDevices.length,
-                unique_rooms: new Set(matchedDevices.map(d => d.area_name)).size,
-                unique_device_types: new Set(matchedDevices.map(d => d.device_type)).size,
-                actions: [...new Set(matchedDevices.map(d => d.action))],
-                confidence_scores: {
-                    high: matchedDevices.filter(d => d.match_confidence >= 0.8).length,
-                    medium: matchedDevices.filter(d => d.match_confidence >= 0.5 && d.match_confidence < 0.8).length,
-                    low: matchedDevices.filter(d => d.match_confidence < 0.5).length
-                }
+            
+            // 准备输入数据
+            const inputData = {
+                floors: floors.map(f => ({
+                    floor_name: f.floor_name,
+                    floor_name_en: f.floor_name_en,
+                    floor_type: f.floor_type,
+                    level: f.level
+                })),
+                rooms: rooms.map(r => ({
+                    room_name: r.room_name,
+                    room_name_en: r.room_name_en,
+                    room_type: r.room_type
+                }))
             };
+            
+            const systemPrompt = `您是专业的智能家居数据补全专家,专门负责为现有的房间楼层JSON数据补充缺失的标准化字段。
 
-            return {
-                success: true,
-                data: {
-                    matched_devices: matchedDevices,
-                    statistics: stats,
-                    intent_data: intentData,
-                    from_cache: isFromCache,
-                    cache_age: enhancedStatesResult.data.cache_age || null,
-                    retrieved_at: new Date().toISOString()
+## 核心任务
+- 接收用户提供的现有JSON数据
+- 识别数据中缺失的必填字段
+- 楼层名称统一翻译为标准英文(如 First Floor, Second Floor)
+- 房间名称翻译为标准英文(如 Living Room, Kitchen等)
+
+## 房间类型智能识别规则
+
+**基于中文房间类型映射：**
+- 客厅/大厅/会客厅/起居室 → "living_room"
+- 卧室/睡房 → "bedroom"
+- 主卧/主卧室 → "master_bedroom"
+- 客卧/次卧 → "guest_bedroom"
+- 儿童房/小孩房 → "kids_room"
+- 厨房/烹饪间 → "kitchen"
+- 餐厅/饭厅/用餐区 → "dining_room"
+- 书房/办公室/工作室/学习室 → "study"
+- 卫生间/洗手间/厕所/浴室 → "bathroom"
+- 主卫/主卫生间 → "master_bathroom"
+- 客卫/公卫 → "guest_bathroom"
+- 储物间/杂物间/收纳间 → "storage"
+- 衣帽间/更衣室 → "closet"
+- 走廊/过道/通道 → "hallway"
+- 玄关/门厅/入户 → "entrance"
+- 阳台/露台/平台 → "balcony"
+- 花园/后院/前院/庭院 → "garden"
+- 车库/停车库 → "garage"
+- 地下室/地库 → "basement"
+- 阁楼/顶层 → "attic"
+- 楼梯间 → "stairway"
+- 娱乐室/游戏室/影音室/TV room → "entertainment"
+- 健身房/运动室 → "gym"
+- 洗衣房/洗衣间 → "laundry"
+
+**多语言支持：**
+- 当房间名称为其他语言时,先理解其含义,再参照上述映射规则进行类型判断
+- 例如：英文"Living Room"对应"living_room"
+- 例如：日文"寝室"对应"bedroom"
+
+## 楼层类型识别规则
+
+**基于楼层命名映射：**
+- 一楼/1F/1层/地面层/first floor → "first_floor", level: 1
+- 二楼/2F/2层/second floor → "second_floor", level: 2
+- 三楼/3F/3层/third floor → "third_floor", level: 3
+- 四楼及以上类推
+- 地下室/地库/B1/basement → "basement", level: -1
+- 阁楼/顶层/attic → "attic"
+
+## 输出要求
+
+必须严格按照以下JSON格式输出,不要添加任何markdown标记或额外文字:
+
+{
+  "floors": [
+    {
+      "floor_name": "原始楼层名称",
+      "floor_name_en": "标准英文楼层名",
+      "floor_type": "楼层类型",
+      "level": 数字
+    }
+  ],
+  "rooms": [
+    {
+      "room_name": "原始房间名称",
+      "room_name_en": "标准英文房间名",
+      "room_type": "房间类型"
+    }
+  ]
+}
+
+请直接返回JSON数据,不要包含任何解释说明。`;
+            
+            // 调用 OpenAI Simple Chat
+            this.logger.info('[Space Monitor] Calling OpenAI to enrich space data...');
+            const result = await openaiModule.sendSimpleChat(
+                systemPrompt,
+                JSON.stringify(inputData, null, 2),
+                {
+                    model: 'gpt-4o-mini',
+                    temperature: 0.3,
+                    max_tokens: 2000
                 }
-            };
+            );
+            
+            if (!result.success) {
+                this.logger.error('[Space Monitor] OpenAI enrichment failed:', result.error);
+                return;
+            }
+            
+            // 解析 OpenAI 响应（应该是 JSON 对象）
+            const enrichedData = result.data?.response_text || result.data?.message?.content || result.data?.content;
+            
+            if (!enrichedData) {
+                this.logger.error('[Space Monitor] No content in OpenAI response');
+                return;
+            }
+            
+            // 如果是字符串，尝试解析
+            let parsedData;
+            if (typeof enrichedData === 'string') {
+                try {
+                    parsedData = JSON.parse(enrichedData);
+                } catch (e) {
+                    this.logger.error('[Space Monitor] Failed to parse OpenAI response as JSON');
+                    return;
+                }
+            } else {
+                parsedData = enrichedData;
+            }
+            
+            // 更新映射表
+            if (parsedData.floors) {
+                for (const floor of parsedData.floors) {
+                    this.floorMappings[floor.floor_name] = {
+                        floor_name_en: floor.floor_name_en,
+                        floor_type: floor.floor_type,
+                        level: floor.level
+                    };
+                }
+            }
+            
+            if (parsedData.rooms) {
+                for (const room of parsedData.rooms) {
+                    this.roomMappings[room.room_name] = {
+                        room_name_en: room.room_name_en,
+                        room_type: room.room_type
+                    };
+                }
+            }
+            
+            this.logger.info(`[Space Monitor] Enrichment complete: ${Object.keys(this.floorMappings).length} floors, ${Object.keys(this.roomMappings).length} rooms mapped`);
+            
+            // 触发缓存更新
+            if (this.infoListModule) {
+                this.infoListModule.invalidateCache();
+            }
 
         } catch (error) {
-            this.logger.error('Failed to match control devices:', error);
+            this.logger.error('[Space Monitor] Error enriching spaces with OpenAI:', error);
+        }
+    }
+    
+    /**
+     * 获取楼层映射表
+     */
+    getFloorMappings() {
+        return this.floorMappings;
+    }
+    
+    /**
+     * 获取房间映射表
+     */
+    getRoomMappings() {
+        return this.roomMappings;
+    }
+
+    // ========== WebSocket 相关方法 ==========
+
+    /**
+     * 启动 WebSocket 服务器
+     */
+    async startWebSocketServer(port = null) {
+        try {
+            if (this.wss) {
+                this.logger.warn('[WebSocket] Server is already running');
+                return { success: true, message: 'WebSocket server already running' };
+            }
+
+            const wsPort = port || this.websocketPort;
+            this.wss = new WebSocket.Server({ port: wsPort });
+            
+            this.wss.on('connection', (ws, req) => {
+                this.logger.info(`[WebSocket] New client connected from ${req.socket.remoteAddress}`);
+                this.websocketClients.add(ws);
+                
+                // 设置客户端为活跃状态
+                ws.isAlive = true;
+                
+                // 监听 pong 响应
+                ws.on('pong', () => {
+                    ws.isAlive = true;
+                });
+                
+                // 不发送欢迎消息（根据用户要求）
+                // 只发送当前空间列表
+                this.sendCurrentSpaces(ws).catch(err => {
+                    this.logger.error('[WebSocket] Error sending current spaces:', err);
+                });
+                
+                ws.on('close', () => {
+                    this.logger.info('[WebSocket] Client disconnected');
+                    this.websocketClients.delete(ws);
+                });
+                
+                ws.on('error', (error) => {
+                    this.logger.error('[WebSocket] Client error:', error);
+                    this.websocketClients.delete(ws);
+                });
+            });
+
+            // 启动心跳检测（每30秒）
+            this.startWebSocketHeartbeat();
+            
+            this.logger.info(`[WebSocket] Server started on port ${wsPort}`);
+            return { 
+                success: true, 
+                message: 'WebSocket server started',
+                port: wsPort,
+                url: `ws://localhost:${wsPort}`
+            };
+        } catch (error) {
+            this.logger.error('[WebSocket] Failed to start server:', error);
             return { success: false, error: error.message };
         }
     }
 
     /**
-     * 标准化房间名称
+     * 启动 WebSocket 心跳检测
      */
-    normalizeRoomName(roomName) {
-        if (!roomName) return '';
-        return roomName.toLowerCase().trim().replace(/[^\w\s]/g, '');
-    }
-
-    /**
-     * 标准化设备名称
-     */
-    normalizeDeviceName(deviceName) {
-        if (!deviceName) return '';
-        return deviceName.toLowerCase().trim().replace(/[^\w\s]/g, '');
-    }
-
-    /**
-     * 根据设备类型匹配设备名称
-     */
-    matchDeviceNameByType(entityName, intentName, deviceType) {
-        const typeMappings = {
-            'light': ['light', 'lamp', 'bulb', '灯', '照明', 'lighting'],
-            'climate': ['air', 'conditioner', 'ac', '空调', '冷气', 'heating', 'cooling'],
-            'switch': ['switch', 'switch', '开关', 'button'],
-            'fan': ['fan', '风扇', '风机', 'blower'],
-            'sensor': ['sensor', '传感器', '感应器', 'detector'],
-            'camera': ['camera', '摄像头', '监控', 'cam'],
-            'lock': ['lock', 'lock', '锁', '门锁', 'door'],
-            'cover': ['cover', 'blind', 'curtain', '窗帘', '百叶窗', 'shade']
-        };
-
-        const normalizedEntity = this.normalizeDeviceName(entityName);
-        const normalizedIntent = this.normalizeDeviceName(intentName);
-        
-        // 检查直接匹配
-        if (normalizedEntity.includes(normalizedIntent) || normalizedIntent.includes(normalizedEntity)) {
-            return true;
+    startWebSocketHeartbeat() {
+        if (this.wsHeartbeatTimer) {
+            clearInterval(this.wsHeartbeatTimer);
         }
-
-        // 检查类型映射
-        const typeKeywords = typeMappings[deviceType] || [];
-        return typeKeywords.some(keyword => 
-            normalizedEntity.includes(keyword) || normalizedIntent.includes(keyword)
-        );
-    }
-
-    /**
-     * 严格匹配设备类型（只匹配确切的类型）
-     */
-    strictDeviceTypeMatch(entityType, targetType) {
-        if (!entityType || !targetType) return false;
         
-        // 直接类型匹配
-        if (entityType === targetType) return true;
-        
-        // 严格的类型映射，只允许明确相关的类型
-        const strictTypeMappings = {
-            'light': ['light'],
-            'climate': ['climate'],
-            'switch': ['switch'],
-            'fan': ['fan'],
-            'sensor': ['sensor', 'binary_sensor'],
-            'camera': ['camera'],
-            'lock': ['lock'],
-            'cover': ['cover']
-        };
-
-        const allowedTypes = strictTypeMappings[targetType] || [];
-        return allowedTypes.includes(entityType);
-    }
-
-    /**
-     * 匹配设备类型（保留原有的宽松匹配逻辑）
-     */
-    matchDeviceType(entity, targetType) {
-        if (!entity || !targetType) return false;
-        
-        const entityType = entity.device_type;
-        const typeMappings = {
-            'light': ['light', 'lamp', 'bulb'],
-            'climate': ['climate', 'air_conditioner', 'heater', 'thermostat'],
-            'switch': ['switch', 'button'],
-            'fan': ['fan'],
-            'sensor': ['sensor', 'binary_sensor'],
-            'camera': ['camera'],
-            'lock': ['lock'],
-            'cover': ['cover', 'blind', 'curtain']
-        };
-
-        // 直接匹配
-        if (entityType === targetType) return true;
-
-        // 类型映射匹配
-        const mappedTypes = typeMappings[targetType] || [];
-        return mappedTypes.includes(entityType);
-    }
-
-    /**
-     * 计算匹配置信度
-     */
-    calculateMatchConfidence(intentDevice, entity) {
-        let confidence = 0;
-
-        // 房间匹配 (40%)
-        if (entity.area_name && this.normalizeRoomName(entity.area_name) === this.normalizeRoomName(intentDevice.room_name)) {
-            confidence += 0.4;
-        }
-
-        // 设备类型匹配 (30%)
-        if (entity.device_type === intentDevice.device_type) {
-            confidence += 0.3;
-        }
-
-        // 设备名称匹配 (30%)
-        if (intentDevice.device_name && entity.device_name) {
-            const entityName = this.normalizeDeviceName(entity.device_name);
-            const intentName = this.normalizeDeviceName(intentDevice.device_name);
+        this.wsHeartbeatTimer = setInterval(() => {
+            if (!this.wss) return;
             
-            if (entityName === intentName) {
-                confidence += 0.3;
-            } else if (entityName.includes(intentName) || intentName.includes(entityName)) {
-                confidence += 0.2;
-            } else if (this.matchDeviceNameByType(entity.device_name, intentDevice.device_name, intentDevice.device_type)) {
-                confidence += 0.15;
-            }
-        }
-
-        return Math.min(confidence, 1.0);
-    }
-
-    /**
-     * 启动增强状态数据缓存更新定时器
-     */
-    startEnhancedStatesCacheUpdater() {
-        // 清除现有定时器
-        if (this.cacheUpdateTimer) {
-            clearInterval(this.cacheUpdateTimer);
-        }
-
-        // 立即执行一次更新
-        this.updateEnhancedStatesCache();
-
-        // 设置定时更新（绑定this上下文）
-        this.cacheUpdateTimer = setInterval(() => {
-            this.updateEnhancedStatesCache().catch(error => {
-                console.error('Cache update error:', error);
+            this.websocketClients.forEach((ws) => {
+                if (ws.isAlive === false) {
+                    this.logger.info('[WebSocket] Terminating inactive client');
+                    this.websocketClients.delete(ws);
+                    return ws.terminate();
+                }
+                
+                ws.isAlive = false;
+                ws.ping();
             });
-        }, this.enhancedStatesCache.updateInterval);
-
-        this.logger.info(`Enhanced states cache updater started, updating every ${this.enhancedStatesCache.updateInterval / 1000} seconds`);
+        }, 30000); // 每30秒检测一次
     }
-
+    
     /**
-     * 停止增强状态数据缓存更新定时器
+     * 停止 WebSocket 心跳检测
      */
-    stopEnhancedStatesCacheUpdater() {
-        if (this.cacheUpdateTimer) {
-            clearInterval(this.cacheUpdateTimer);
-            this.cacheUpdateTimer = null;
-            this.logger.info('Enhanced states cache updater stopped');
+    stopWebSocketHeartbeat() {
+        if (this.wsHeartbeatTimer) {
+            clearInterval(this.wsHeartbeatTimer);
+            this.wsHeartbeatTimer = null;
         }
     }
 
     /**
-     * 更新增强状态数据缓存
+     * 停止 WebSocket 服务器
      */
-    async updateEnhancedStatesCache() {
-        // 如果正在更新中，跳过此次更新
-        if (this.enhancedStatesCache.isUpdating) {
-            this.logger.info('Enhanced states cache update already in progress, skipping');
+    async stopWebSocketServer() {
+        return new Promise((resolve) => {
+            try {
+                if (!this.wss) {
+                    resolve({ success: true, message: 'WebSocket server is not running' });
+                    return;
+                }
+
+                // 停止心跳检测
+                this.stopWebSocketHeartbeat();
+
+                // 关闭所有客户端连接
+                this.websocketClients.forEach(ws => {
+                    try {
+                        if (ws.readyState === WebSocket.OPEN) {
+                            ws.close(1000, 'Server shutdown');
+                        }
+                    } catch (error) {
+                        this.logger.warn('[WebSocket] Error closing client:', error);
+                    }
+                });
+                this.websocketClients.clear();
+
+                // 关闭服务器
+                this.wss.close(() => {
+                    this.logger.info('[WebSocket] Server stopped');
+                    this.wss = null;
+                    resolve({ success: true, message: 'WebSocket server stopped' });
+                });
+            } catch (error) {
+                this.logger.error('[WebSocket] Error stopping server:', error);
+                resolve({ success: false, error: error.message });
+            }
+        });
+    }
+
+    /**
+     * 获取 WebSocket 状态
+     */
+    getWebSocketStatus() {
+        return {
+            running: !!this.wss,
+            port: this.websocketPort,
+            clients: this.websocketClients.size,
+            url: this.wss ? `ws://localhost:${this.websocketPort}` : null
+        };
+    }
+
+    /**
+     * 发送当前空间列表给新连接的客户端
+     * 格式与 HTTP API 完全一致: {success: true, data: {...}}
+     */
+    async sendCurrentSpaces(ws) {
+        try {
+            const spacesResult = await this.getSpaces();
+            if (spacesResult && spacesResult.success) {
+                // 直接发送与 HTTP API 相同的格式
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify(spacesResult));
+                }
+            }
+        } catch (error) {
+            this.logger.error('[WebSocket] Error sending current spaces:', error);
+        }
+    }
+
+    /**
+     * 广播空间列表变化到所有连接的客户端
+     */
+    async broadcastSpaceChanges(spacesData) {
+        if (!this.wss || this.websocketClients.size === 0) {
+            this.logger.info('[WebSocket] No clients connected, skipping broadcast');
             return;
         }
 
-        try {
-            this.enhancedStatesCache.isUpdating = true;
-            this.logger.info('Updating enhanced states cache...');
-
-            // 获取凭据
-            const credResult = await this.getCredentials();
-            if (!credResult.success) {
-                this.logger.warn('Failed to get credentials for cache update:', credResult.error);
-                return;
-            }
-
-            // 获取增强状态数据
-            const enhancedStatesResult = await this.getEnhancedStatesInternal(credResult.data);
-            if (enhancedStatesResult.success) {
-                this.enhancedStatesCache.data = enhancedStatesResult.data;
-                this.enhancedStatesCache.lastUpdated = Date.now();
-                this.logger.info(`Enhanced states cache updated successfully, ${enhancedStatesResult.data.states.length} entities cached`);
-            } else {
-                this.logger.error('Failed to update enhanced states cache:', enhancedStatesResult.error);
-            }
-
-        } catch (error) {
-            this.logger.error('Error updating enhanced states cache:', error);
-        } finally {
-            this.enhancedStatesCache.isUpdating = false;
-        }
-    }
-
-    /**
-     * 获取缓存的增强状态数据
-     */
-    getCachedEnhancedStates(areaNames = null, deviceTypes = null) {
-        const now = Date.now();
-        const cache = this.enhancedStatesCache;
-
-        // 检查缓存是否有效
-        if (!cache.data || !cache.lastUpdated || (now - cache.lastUpdated) > cache.maxAge) {
-            this.logger.warn('Enhanced states cache is invalid or expired');
-            return null;
-        }
-
-        // 如果没有筛选条件，直接返回缓存数据
-        if (!areaNames && !deviceTypes) {
-            this.logger.info('Returning cached enhanced states without filters');
-            return {
+        // 构造与 HTTP API 相同的格式
+        const message = {
                 success: true,
-                data: {
-                    ...cache.data,
-                    from_cache: true,
-                    cache_age: now - cache.lastUpdated
-                }
-            };
-        }
-
-        // 应用筛选条件
-        let filteredStates = cache.data.states;
-
-        // 按区域名称筛选
-        if (areaNames && Array.isArray(areaNames) && areaNames.length > 0) {
-            const normalizedAreaNames = areaNames.map(name => name.toLowerCase().trim()).filter(name => name);
-            if (normalizedAreaNames.length > 0) {
-                filteredStates = filteredStates.filter(state => {
-                    if (!state.area_name) return false;
-                    const normalizedAreaName = state.area_name.toLowerCase().trim();
-                    return normalizedAreaNames.some(filterName =>
-                        normalizedAreaName.includes(filterName) ||
-                        filterName.includes(normalizedAreaName)
-                    );
-                });
-            }
-        }
-
-        // 按设备类型筛选
-        if (deviceTypes && Array.isArray(deviceTypes) && deviceTypes.length > 0) {
-            const normalizedDeviceTypes = deviceTypes.map(type => type.toLowerCase().trim()).filter(type => type);
-            if (normalizedDeviceTypes.length > 0) {
-                filteredStates = filteredStates.filter(state => {
-                    if (!state.device_type) return false;
-                    const normalizedDeviceType = state.device_type.toLowerCase().trim();
-                    return normalizedDeviceTypes.some(filterType =>
-                        normalizedDeviceType.includes(filterType) ||
-                        filterType.includes(normalizedDeviceType)
-                    );
-                });
-            }
-        }
-
-        // 更新统计信息
-        const originalStats = cache.data.statistics;
-        const filteredStats = {
-            ...originalStats,
-            total_states: filteredStates.length,
-            total_states_before_filter: cache.data.states.length,
-            filters_applied: {
-                area_names: areaNames,
-                device_types: deviceTypes
-            }
+            data: spacesData
         };
 
-        this.logger.info(`Returning filtered cached enhanced states: ${filteredStates.length} entities`);
+        const messageStr = JSON.stringify(message);
+        let successCount = 0;
+        let failCount = 0;
 
-        return {
-            success: true,
-            data: {
-                states: filteredStates,
-                statistics: filteredStats,
-                from_cache: true,
-                cache_age: now - cache.lastUpdated,
-                retrieved_at: new Date().toISOString()
-            }
-        };
-    }
-
-    /**
-     * 内部方法：获取增强状态数据（不使用缓存）
-     */
-    async getEnhancedStatesInternal(credentials, areaNames = null, deviceTypes = null) {
-        // 这是原来的 getEnhancedStates 方法的实现
-        try {
-            if (!credentials) {
-                const credResult = await this.getCredentials();
-                if (!credResult.success) {
-                    return { success: false, error: 'No credentials found' };
-                }
-                credentials = credResult.data;
-            }
-
-            this.logger.info('Fetching enhanced states with entity registry, devices, and rooms data');
-
-            // 并行获取所有必要的数据
-            const [statesResult, entitiesResult, devicesResult, roomsResult, floorsResult] = await Promise.all([
-                this.getStates(credentials),
-                this.getEntityRegistry(credentials),
-                this.getDevices(credentials),
-                this.getRooms(credentials),
-                this.getFloors(credentials)
-            ]);
-
-            if (!statesResult.success) {
-                return { success: false, error: 'Failed to get states: ' + statesResult.error };
-            }
-
-            if (!entitiesResult.success) {
-                return { success: false, error: 'Failed to get entity registry: ' + entitiesResult.error };
-            }
-
-            if (!devicesResult.success) {
-                return { success: false, error: 'Failed to get devices: ' + devicesResult.error };
-            }
-
-            if (!roomsResult.success) {
-                return { success: false, error: 'Failed to get rooms: ' + roomsResult.error };
-            }
-
-            if (!floorsResult.success) {
-                return { success: false, error: 'Failed to get floors: ' + floorsResult.error };
-            }
-
-            const states = statesResult.data.states || [];
-            const entities = entitiesResult.data.entities || [];
-            const devices = devicesResult.data.devices || [];
-            const rooms = roomsResult.data.rooms || [];
-            const floors = floorsResult.data.floors || [];
-
-            // 创建映射表以提高查询效率
-            const entityMap = new Map();
-            entities.forEach(entity => {
-                entityMap.set(entity.entity_id, entity);
-            });
-
-            const deviceMap = new Map();
-            devices.forEach(device => {
-                deviceMap.set(device.device_id, device);
-            });
-
-            const roomMap = new Map();
-            rooms.forEach(room => {
-                roomMap.set(room.area_id, room);
-            });
-
-            const floorMap = new Map();
-            floors.forEach(floor => {
-                floorMap.set(floor.floor_id, floor);
-            });
-
-            // 增强每个状态实体
-            const enhancedStates = states.map(state => {
-                const entityInfo = entityMap.get(state.entity_id) || {};
-                const deviceInfo = deviceMap.get(entityInfo.device_id) || {};
-
-                const enhancedState = {
-                    ...state,
-                    device_id: entityInfo.device_id || null,
-                    device_name: deviceInfo.device_name || deviceInfo.name_by_user || deviceInfo.name || null,
-                    device_manufacturer: deviceInfo.manufacturer || null,
-                    device_model: deviceInfo.model || null,
-                    area_id: entityInfo.area_id || null,
-                    area_name: null,
-                    floor_id: null,
-                    floor_name: null,
-                    device_type: null
-                };
-
-                // 获取area_id，优先使用entity的area_id，如果为null则使用device的area_id
-                if (!enhancedState.area_id && deviceInfo.area_id) {
-                    enhancedState.area_id = deviceInfo.area_id;
-                }
-
-                // 获取区域名称和楼层信息
-                if (enhancedState.area_id) {
-                    const roomInfo = roomMap.get(enhancedState.area_id);
-                    if (roomInfo) {
-                        enhancedState.area_name = roomInfo.name || null;
-                        enhancedState.floor_id = roomInfo.floor_id || null;
-                        
-                        if (roomInfo.floor_id) {
-                            const floorInfo = floorMap.get(roomInfo.floor_id);
-                            enhancedState.floor_name = floorInfo ? floorInfo.name : null;
-                        } else {
-                            enhancedState.floor_name = null;
-                        }
-                    } else {
-                        // 如果roomMap中没有找到，尝试从deviceInfo获取
-                        if (entityInfo.device_id) {
-                            const deviceInfo = deviceMap.get(entityInfo.device_id);
-                            if (deviceInfo && deviceInfo.area_name) {
-                                enhancedState.area_name = deviceInfo.area_name;
-                            }
-                        }
-                    }
-                }
-
-                // 获取device_type：优先使用device_class，其次使用entity_id前缀
-                if (state.attributes && state.attributes.device_class) {
-                    enhancedState.device_type = state.attributes.device_class;
+        this.websocketClients.forEach(ws => {
+            try {
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(messageStr);
+                    successCount++;
                 } else {
-                    const entityIdParts = state.entity_id.split('.');
-                    if (entityIdParts.length > 0) {
-                        enhancedState.device_type = entityIdParts[0];
-                    }
+                    failCount++;
+                    this.websocketClients.delete(ws);
                 }
-
-                return enhancedState;
-            });
-
-            // 应用筛选条件
-            let filteredStates = enhancedStates;
-
-            // 按区域名称筛选
-            if (areaNames && Array.isArray(areaNames) && areaNames.length > 0) {
-                const normalizedAreaNames = areaNames.map(name => name.toLowerCase().trim()).filter(name => name);
-                if (normalizedAreaNames.length > 0) {
-                    filteredStates = filteredStates.filter(state => {
-                        if (!state.area_name) return false;
-                        const normalizedAreaName = state.area_name.toLowerCase().trim();
-                        return normalizedAreaNames.some(filterName =>
-                            normalizedAreaName.includes(filterName) ||
-                            filterName.includes(normalizedAreaName)
-                        );
-                    });
-                }
-            }
-
-            // 按设备类型筛选
-            if (deviceTypes && Array.isArray(deviceTypes) && deviceTypes.length > 0) {
-                const normalizedDeviceTypes = deviceTypes.map(type => type.toLowerCase().trim()).filter(type => type);
-                if (normalizedDeviceTypes.length > 0) {
-                    filteredStates = filteredStates.filter(state => {
-                        if (!state.device_type) return false;
-                        const normalizedDeviceType = state.device_type.toLowerCase().trim();
-                        return normalizedDeviceTypes.some(filterType =>
-                            normalizedDeviceType.includes(filterType) ||
-                            filterType.includes(normalizedDeviceType)
-                        );
-                    });
-                }
-            }
-
-            // 统计信息
-            const uniqueEntityIds = new Set(enhancedStates.map(s => s.entity_id));
-            const uniqueDeviceIds = new Set(enhancedStates.map(s => s.device_id).filter(id => id));
-            const uniqueAreaIds = new Set(enhancedStates.map(s => s.area_id).filter(id => id));
-            const uniqueFloorIds = new Set(enhancedStates.map(s => s.floor_id).filter(id => id));
-            const uniqueDeviceTypes = new Set(enhancedStates.map(s => s.device_type).filter(type => type));
-
-            const statistics = {
-                total_states: filteredStates.length,
-                total_states_before_filter: enhancedStates.length,
-                total_entities: uniqueEntityIds.size,
-                total_devices: uniqueDeviceIds.size,
-                areas_count: uniqueAreaIds.size,
-                floors_count: uniqueFloorIds.size,
-                with_device_info: enhancedStates.filter(s => s.device_id).length,
-                with_area_info: enhancedStates.filter(s => s.area_name).length,
-                with_floor_info: enhancedStates.filter(s => s.floor_name).length,
-                with_device_type: enhancedStates.filter(s => s.device_type).length,
-                unique_device_types: uniqueDeviceTypes.size,
-                missing_devices: enhancedStates.filter(s => !s.device_id).length,
-                missing_areas: enhancedStates.filter(s => !s.area_name).length,
-                missing_floors: enhancedStates.filter(s => !s.floor_name).length,
-                filters_applied: {
-                    area_names: areaNames,
-                    device_types: deviceTypes
-                }
-            };
-
-            return {
-                success: true,
-                data: {
-                    states: filteredStates,
-                    statistics: statistics,
-                    source_data: {
-                        states_count: states.length,
-                        entities_count: entities.length,
-                        devices_count: devices.length,
-                        rooms_count: rooms.length,
-                        floors_count: floors.length
-                    },
-                    retrieved_at: new Date().toISOString()
-                }
-            };
-
         } catch (error) {
-            this.logger.error('Failed to get enhanced states:', error);
-            return { success: false, error: error.message };
+                this.logger.error('[WebSocket] Error broadcasting to client:', error);
+                failCount++;
+                this.websocketClients.delete(ws);
+            }
+        });
+
+        this.logger.info(`[WebSocket] Broadcast complete: ${successCount} success, ${failCount} failed`);
+    }
+
+    /**
+     * 模块清理
+     */
+    async cleanup() {
+        this.stopSpaceMonitoring();
+        await this.stopWebSocketServer();
+        if (this.infoListModule) {
+            this.infoListModule.cleanup();
         }
+        this.logger.info('Home Assistant module cleanup completed');
     }
 }
 

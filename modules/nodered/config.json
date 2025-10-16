@@ -1,0 +1,36 @@
+{
+  "name": "nodered",
+  "displayName": "Node-RED",
+  "description": "Node-RED flow management and deployment service",
+  "version": "1.0.0",
+  "author": "Credential Service",
+  "enabled": true,
+  "apiBaseUrl": "http://localhost:1880",
+  "timeout": 15000,
+  "retries": 3,
+  "cacheTimeout": 300000,
+  "features": {
+    "flowUpload": true,
+    "flowDeployment": true,
+    "flowValidation": true,
+    "connectionTest": true,
+    "backup": true,
+    "restore": true
+  },
+  "flowManagement": {
+    "autoBackup": true,
+    "backupInterval": 3600000,
+    "maxBackups": 10,
+    "validationTimeout": 30000
+  },
+  "security": {
+    "requireAuth": true,
+    "allowedOrigins": ["*"],
+    "maxFileSize": "10MB"
+  },
+  "rateLimit": {
+    "enabled": true,
+    "requestsPerSecond": 10,
+    "burstLimit": 20
+  }
+}

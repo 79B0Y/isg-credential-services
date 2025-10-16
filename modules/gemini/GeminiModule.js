@@ -442,6 +442,92 @@ class GeminiModule extends BaseCredentialModule {
             additionalProperties: false
         };
     }
+
+    /**
+     * 简化的聊天接口（类似 OpenAI simple-chat）
+     * 支持任意数据输入，自动转换为对话格式
+     */
+    async sendSimpleChat(system_prompt, user_prompt, options = {}, credentials = null) {
+        try {
+            if (!credentials) {
+                const credResult = await this.getCredentials();
+                if (!credResult.success) {
+                    return { success: false, error: 'No credentials found' };
+                }
+                credentials = credResult.data;
+            }
+
+            // 处理输入数据，转换为文本
+            let userContent = '';
+            let systemContent = system_prompt || '';
+
+            if (user_prompt) {
+                if (typeof user_prompt === 'string') {
+                    userContent = user_prompt;
+                } else if (typeof user_prompt === 'object') {
+                    try {
+                        userContent = JSON.stringify(user_prompt, null, 2);
+                    } catch (e) {
+                        userContent = String(user_prompt);
+                    }
+                } else {
+                    userContent = String(user_prompt);
+                }
+            }
+
+            // 构建消息数组（Gemini 格式）
+            const messages = [];
+            
+            // Gemini 不支持 system role，将 system prompt 放在第一个 user 消息中
+            if (systemContent && userContent) {
+                messages.push({
+                    role: 'user',
+                    content: `${systemContent}\n\n${userContent}`
+                });
+            } else if (systemContent) {
+                messages.push({
+                    role: 'user',
+                    content: systemContent
+                });
+            } else if (userContent) {
+                messages.push({
+                    role: 'user',
+                    content: userContent
+                });
+            } else {
+                return { success: false, error: 'No prompt provided' };
+            }
+
+            this.logger.info('Sending simple chat to Gemini');
+
+            // 调用 sendChatMessage
+            const result = await this.sendChatMessage(messages, options, credentials);
+
+            if (result.success) {
+                // 提取响应文本（注意 Gemini 返回的字段名）
+                const responseText = result.data?.response_text || result.data?.message?.content || result.data?.content || '';
+                
+                return {
+                    success: true,
+                    data: {
+                        response_text: responseText,
+                        message: {
+                            role: 'model',
+                            content: responseText
+                        },
+                        usage: result.data?.usage,
+                        model: result.data?.model || options.model || 'gemini-2.5-flash',
+                        finish_reason: result.data?.finish_reason
+                    }
+                };
+            } else {
+                return result;
+            }
+        } catch (error) {
+            this.logger.error('Simple chat error:', error);
+            return { success: false, error: error.message };
+        }
+    }
 }
 
 module.exports = GeminiModule;

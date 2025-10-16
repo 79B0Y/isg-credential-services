@@ -60,19 +60,6 @@
             opacity: 0.9;
         }
 
-        .api-key-section {
-            background: white;
-            border-radius: 1rem;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .api-key-section h2 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--gray-700);
-        }
 
         .input-group {
             display: flex;
@@ -339,6 +326,90 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* QR Code Modal Styles */
+        .qr-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .qr-modal .modal-content {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .qr-modal .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .qr-modal .modal-header h3 {
+            margin: 0;
+            color: var(--gray-800);
+        }
+        
+        .qr-modal .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-500);
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+        }
+        
+        .qr-modal .modal-close:hover {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+        
+        .qr-container {
+            text-align: center;
+        }
+        
+        .qr-container #qrCode {
+            margin: 1rem 0;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .qr-info {
+            margin-top: 1.5rem;
+        }
+        
+        .qr-url {
+            background: var(--gray-100);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+            margin: 1rem 0;
+        }
+        
+        .qr-instructions {
+            color: var(--gray-600);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-top: 1rem;
+        }
+
         .toast {
             position: fixed;
             top: 2rem;
@@ -366,6 +437,229 @@
             padding: 2rem;
             margin-bottom: 2rem;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .health-check-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .health-check-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--gray-700);
+        }
+
+        .health-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .health-results {
+            background: var(--gray-50);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            min-height: 200px;
+        }
+
+        .health-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: white;
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--gray-300);
+        }
+
+        .health-item.healthy {
+            border-left-color: var(--success-color);
+        }
+
+        .health-item.warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .health-item.error {
+            border-left-color: var(--danger-color);
+        }
+
+        .health-item-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .health-status {
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .health-status.healthy {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .health-status.warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .health-status.info {
+            background: var(--gray-400);
+            color: white;
+        }
+
+        .health-status.error {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .nodered-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .nodered-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--gray-700);
+        }
+
+        .nodered-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .nodered-results {
+            background: var(--gray-50);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            min-height: 200px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: var(--gray-400);
+            float: right;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: var(--gray-600);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--gray-300);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .upload-preview {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--gray-50);
+            border-radius: 0.5rem;
+        }
+
+        .upload-preview pre {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            overflow-x: auto;
+            max-height: 300px;
+            font-size: 0.875rem;
+        }
+
+        .backup-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .backup-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .backup-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: white;
+            border-radius: 0.5rem;
+            border: 1px solid var(--gray-200);
+        }
+
+        .backup-info {
+            flex: 1;
+        }
+
+        .backup-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .backup-item h4 {
+            margin: 0 0 0.25rem 0;
+            color: var(--gray-700);
+        }
+
+        .backup-item p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--gray-600);
         }
 
         .stats-grid {
@@ -510,6 +804,7 @@
             border-radius: 0.5rem;
             background: var(--gray-50);
             border-left: 4px solid var(--primary-color);
+            overflow: visible !important;
         }
 
         .message-header {
@@ -537,6 +832,7 @@
 
         .message-media {
             margin-top: 0.5rem;
+            overflow: visible !important;
         }
 
         .media-item {
@@ -564,6 +860,24 @@
             max-width: 400px;
             height: auto;
             border-radius: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .media-video:hover {
+            transform: scale(1.02);
+        }
+        
+        .media-video-note {
+            border-radius: 50% !important;
+            width: 240px !important;
+            height: 240px !important;
+            object-fit: cover;
+            cursor: pointer;
+        }
+        
+        .media-video-note:hover {
+            transform: scale(1.05);
         }
 
         .media-audio {
@@ -589,10 +903,131 @@
             font-size: 0.8rem;
             color: var(--gray-600);
             margin-top: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        /* Voice message styles */
+        .voice-container {
+            width: 100%;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            position: relative;
+            overflow: visible !important;
+        }
+
+        .voice-player-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .voice-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .voice-info {
+            font-size: 0.85rem;
+            color: var(--gray-600);
+        }
+
+        .transcribe-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .transcribe-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .transcribe-btn:disabled {
+            background: var(--gray-400);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .transcription-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid #007bff;
+            display: none !important;
+            background: #fffacd !important;
+        }
+
+        .transcription-section.show {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            height: auto !important;
+            min-height: 100px !important;
+        }
+
+        .transcription-header {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+        }
+
+        .transcription-body {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #dee2e6;
+            min-height: 60px;
+        }
+
+        .transcription-text-content {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #212529;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .transcription-loading {
+            color: var(--gray-600);
+            font-style: italic;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .transcription-error {
+            color: var(--danger-color);
+            padding: 1rem;
             text-align: center;
         }
 
-        /* 媒体模态框样式 */
+        .transcription-meta {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Media modal styles */
         .media-modal {
             position: fixed;
             top: 0;
@@ -680,7 +1115,7 @@
             z-index: 1002;
         }
 
-        /* API文档样式 */
+        /* API documentation styles */
         .api-documentation {
             padding: 1rem;
         }
@@ -845,6 +1280,7 @@
             background: white;
             border-radius: 0.25rem;
             border: 1px solid var(--gray-200);
+            overflow: visible !important;
         }
 
         .media-info {
@@ -898,15 +1334,38 @@
             gap: 0.5rem;
             padding: 0.5rem 1rem;
             border-radius: 0.5rem;
+            margin-left: 1rem;
             font-size: 0.9rem;
             font-weight: 500;
-            margin-left: 1rem;
+            border: 2px solid;
+            transition: all 0.3s ease;
         }
 
         .polling-active {
             background-color: rgba(16, 185, 129, 0.1);
+            border-color: var(--success-color);
             color: var(--success-color);
+            animation: pulse-success 2s infinite;
         }
+        
+        .polling-inactive {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-color: var(--danger-color);
+            color: var(--danger-color);
+        }
+        
+        .status-detail {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            font-weight: 400;
+        }
+        
+        @keyframes pulse-success {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
 
         .polling-inactive {
             background-color: rgba(239, 68, 68, 0.1);
@@ -969,82 +1428,148 @@
 </head>
 <body>
     <div class="container">
-        <!-- 头部 -->
+        <!-- Header -->
         <div class="header">
             <h1>🔐 Credential Service Manager</h1>
-            <p>统一管理和验证您的API凭据</p>
+            <p>Unified management and validation of your API credentials</p>
             <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 1rem;">
                 <div class="connection-status" id="connectionStatus">
                     <span class="status-dot"></span>
-                    <span>检查连接中...</span>
+                    <span>Checking connection...</span>
                 </div>
                 <button class="btn btn-primary" onclick="showApiDocumentation()" style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3);">
-                    📚 API 文档
+                    📚 API Documentation
+                </button>
+                <button class="btn btn-primary" onclick="showQRCode()" style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3);">
+                    📱 QR Code
                 </button>
             </div>
         </div>
 
-        <!-- API密钥配置 -->
-        <div class="api-key-section">
-            <h2>🔑 API密钥配置</h2>
-            <div class="input-group">
-                <label>
-                    服务API密钥
-                    <input type="password" id="apiKey" placeholder="输入服务API密钥以启用管理功能">
-                </label>
-                <button class="btn btn-primary" onclick="setApiKey()">连接</button>
-            </div>
-        </div>
 
-        <!-- 统计信息 -->
+        <!-- Statistics -->
         <div class="statistics hidden" id="statistics">
-            <h2>📊 系统统计</h2>
+            <h2>📊 System Statistics</h2>
             <div class="stats-grid" id="statsGrid">
-                <!-- 动态生成 -->
+                <!-- Dynamically generated -->
             </div>
         </div>
 
-        <!-- API文档链接 -->
+        <!-- Health Check Section -->
+        <div class="health-check-section">
+            <h2>🏥 Health Check & Validation</h2>
+            <div class="health-controls">
+                <button class="btn btn-primary" onclick="runHealthCheck()">🔍 Run Health Check</button>
+                <button class="btn btn-success" onclick="startPeriodicHealthCheck()">⏰ Start Periodic Check</button>
+                <button class="btn btn-warning" onclick="stopPeriodicHealthCheck()">⏹️ Stop Periodic Check</button>
+            </div>
+            <div class="health-results" id="healthResults">
+                <!-- Health check results will be displayed here -->
+            </div>
+        </div>
+
+        <!-- Node-RED Management Section -->
+        <div class="nodered-section">
+            <h2>🔴 Node-RED Flow Management</h2>
+            
+            <!-- Node-RED Service Info -->
+            <div class="nodered-info" id="noderedInfo" style="background: var(--gray-50); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; border: 2px solid var(--gray-200);">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                    <strong style="color: var(--gray-700);">🌐 Service Address:</strong>
+                    <span id="noderedServiceUrl" style="font-family: 'Courier New', monospace; color: var(--primary-color); font-weight: 500;">Loading...</span>
+                    <button class="btn btn-sm" onclick="openNodeRedService()" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;">🔗 Open</button>
+                </div>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <strong style="color: var(--gray-700);">📊 Total Flows:</strong>
+                    <span id="noderedFlowCount" style="font-weight: 600; color: var(--success-color);">-</span>
+                </div>
+            </div>
+            
+            <div class="nodered-controls">
+                <button class="btn btn-primary" onclick="showFlowUpload()">📤 Upload Flow</button>
+                <button class="btn btn-info" onclick="loadNodeRedFlows()">📋 Load Current Flows</button>
+                <button class="btn btn-success" onclick="showBackupManager()">💾 Backup Manager</button>
+                <button class="btn btn-warning" onclick="validateCurrentFlows()">✅ Validate Flows</button>
+            </div>
+            
+            <!-- Flow Upload Modal -->
+            <div class="modal" id="flowUploadModal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeFlowUpload()">&times;</span>
+                    <h3>📤 Upload Node-RED Flow</h3>
+                    <div class="upload-area" id="uploadArea">
+                        <p>📁 Drag & drop your flow JSON file here or click to select</p>
+                        <input type="file" id="flowFileInput" accept=".json" style="display: none;">
+                    </div>
+                    <div class="upload-preview" id="uploadPreview" style="display: none;">
+                        <h4>Flow Preview:</h4>
+                        <pre id="flowPreview"></pre>
+                        <button class="btn btn-primary" onclick="deployFlow()">🚀 Deploy Flow</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Backup Manager Modal -->
+            <div class="modal" id="backupModal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeBackupManager()">&times;</span>
+                    <h3>💾 Backup Manager</h3>
+                    <div class="backup-controls">
+                        <button class="btn btn-success" onclick="createBackup()">📦 Create Backup</button>
+                        <button class="btn btn-info" onclick="refreshBackups()">🔄 Refresh</button>
+                    </div>
+                    <div class="backup-list" id="backupList">
+                        <!-- Backup list will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="nodered-results" id="noderedResults">
+                <!-- Node-RED operation results will be displayed here -->
+            </div>
+        </div>
+
+        <!-- API Documentation Links -->
         <div class="api-documentation hidden" id="apiDocumentation">
             <div class="messaging-header">
-                <h2>📚 API 文档</h2>
-                <p>访问各服务的详细API文档和测试工具</p>
+                <h2>📚 API Documentation</h2>
+                <p>Access detailed API documentation and testing tools for each service</p>
             </div>
             
             <div class="api-section">
-                <h3>🔗 服务API文档</h3>
-                <p>点击下方按钮访问各服务的完整API文档，包含详细的端点说明、curl示例和实时测试功能。</p>
+                <h3>🔗 Service API Documentation</h3>
+                <p>Click the buttons below to access complete API documentation for each service, including detailed endpoint descriptions, curl examples, and real-time testing features.</p>
                 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
-                    <a href="/api-docs.html" target="_blank" class="btn btn-primary" style="text-decoration: none; text-align: center; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                    <a href="/telegram-api-docs.html" target="_blank" class="btn btn-primary" style="text-decoration: none; text-align: center; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
                         <span style="font-size: 2rem;">📱</span>
-                        <span style="font-weight: 600;">Telegram API 文档</span>
-                        <span style="font-size: 0.9rem; opacity: 0.8;">消息管理、文件处理、Webhook</span>
+                        <span style="font-weight: 600;">Telegram API Documentation</span>
+                        <span style="font-size: 0.9rem; opacity: 0.8;">语音转文字, 快速回复, 消息管理</span>
                     </a>
                     
                     <a href="/home-assistant-api-docs.html" target="_blank" class="btn btn-warning" style="text-decoration: none; text-align: center; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
                         <span style="font-size: 2rem;">🏠</span>
-                        <span style="font-weight: 600;">Home Assistant API 文档</span>
-                        <span style="font-size: 0.9rem; opacity: 0.8;">实体管理、服务调用、状态控制</span>
+                        <span style="font-weight: 600;">Home Assistant API Documentation</span>
+                        <span style="font-size: 0.9rem; opacity: 0.8;">Entity management, service calls, state control</span>
                     </a>
                     
                     <a href="/openai-api-docs.html" target="_blank" class="btn btn-success" style="text-decoration: none; text-align: center; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
                         <span style="font-size: 2rem;">🤖</span>
-                        <span style="font-weight: 600;">OpenAI API 文档</span>
-                        <span style="font-size: 0.9rem; opacity: 0.8;">AI聊天、模型管理、智能对话</span>
+                        <span style="font-weight: 600;">OpenAI API Documentation</span>
+                        <span style="font-size: 0.9rem; opacity: 0.8;">AI chat, model management, intelligent conversation</span>
                     </a>
                     
                     <a href="/gemini-api-docs.html" target="_blank" class="btn btn-info" style="text-decoration: none; text-align: center; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
                         <span style="font-size: 2rem;">💎</span>
-                        <span style="font-weight: 600;">Google Gemini API 文档</span>
-                        <span style="font-size: 0.9rem; opacity: 0.8;">多模态AI、安全对话、智能助手</span>
+                        <span style="font-weight: 600;">Google Gemini API Documentation</span>
+                        <span style="font-size: 0.9rem; opacity: 0.8;">Multimodal AI, secure conversation, intelligent assistant</span>
                     </a>
                 </div>
             </div>
             
             <div class="api-section">
-                <h3>🔧 基础API信息</h3>
-                <p>Credential Service 提供的基础API端点：</p>
+                <h3>🔧 Basic API Information</h3>
+                <p>Basic API endpoints provided by Credential Service:</p>
                 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
                     <div style="background: var(--gray-50); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--gray-200);">
@@ -1052,7 +1577,7 @@
                             <span style="background: var(--success-color); color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: bold;">GET</span>
                             <span style="font-family: 'Courier New', monospace; font-size: 0.9rem;">/api/health</span>
                         </div>
-                        <div style="font-size: 0.9rem; color: var(--gray-600);">检查服务健康状态</div>
+                        <div style="font-size: 0.9rem; color: var(--gray-600);">Check service health status</div>
                     </div>
                     
                     <div style="background: var(--gray-50); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--gray-200);">
@@ -1060,7 +1585,7 @@
                             <span style="background: var(--success-color); color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: bold;">GET</span>
                             <span style="font-family: 'Courier New', monospace; font-size: 0.9rem;">/api/modules</span>
                         </div>
-                        <div style="font-size: 0.9rem; color: var(--gray-600);">获取所有模块列表</div>
+                        <div style="font-size: 0.9rem; color: var(--gray-600);">Get all module list</div>
                     </div>
                     
                     <div style="background: var(--gray-50); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--gray-200);">
@@ -1068,88 +1593,89 @@
                             <span style="background: var(--success-color); color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: bold;">GET</span>
                             <span style="font-family: 'Courier New', monospace; font-size: 0.9rem;">/api/statistics</span>
                         </div>
-                        <div style="font-size: 0.9rem; color: var(--gray-600);">获取系统统计信息</div>
+                        <div style="font-size: 0.9rem; color: var(--gray-600);">Get system statistics information</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Telegram 消息管理 -->
+        <!-- Telegram Message Management -->
         <div class="telegram-messaging hidden" id="telegramMessaging">
             <div class="messaging-header">
-                <h2>📱 Telegram 消息管理</h2>
+                <h2>📱 Telegram Message Management</h2>
                 <div class="messaging-controls">
-                    <button class="btn btn-success" onclick="startTelegramPolling()">开始轮询</button>
-                    <button class="btn btn-warning" onclick="stopTelegramPolling()">停止轮询</button>
-                    <button class="btn btn-primary" onclick="refreshMessages()">刷新消息</button>
-                    <button class="btn btn-danger" onclick="clearMessages()">清除历史</button>
+                    <button class="btn btn-success" onclick="startTelegramPolling()">Start Polling</button>
+                    <button class="btn btn-warning" onclick="stopTelegramPolling()">Stop Polling</button>
+                    <button class="btn btn-primary" onclick="refreshMessages()">Refresh Messages</button>
+                    <button class="btn btn-primary" onclick="reprocessMessages()">Reprocess</button>
+                    <button class="btn btn-danger" onclick="clearMessages()">Clear History</button>
                 </div>
             </div>
             
             <div class="messaging-stats" id="messagingStats">
                 <div class="stat-item">
-                    <span class="stat-label">消息总数:</span>
+                    <span class="stat-label">Total Messages:</span>
                     <span class="stat-value" id="totalMessages">0</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">最后更新:</span>
+                    <span class="stat-label">Last Updated:</span>
                     <span class="stat-value" id="lastUpdate">-</span>
                 </div>
             </div>
             
             <div class="messaging-tabs">
-                <button class="tab-btn active" onclick="switchTab('messages')">消息历史</button>
-                <button class="tab-btn" onclick="switchTab('send')">发送消息</button>
-                <button class="tab-btn" onclick="switchTab('webhook')">Webhook设置</button>
-                <button class="tab-btn" onclick="switchTab('api')">API文档</button>
+                <button class="tab-btn active" onclick="switchTab('messages')">Message History</button>
+                <button class="tab-btn" onclick="switchTab('send')">Send Message</button>
+                <button class="tab-btn" onclick="switchTab('webhook')">Webhook Settings</button>
+                <button class="tab-btn" onclick="switchTab('api')">API Documentation</button>
             </div>
             
-            <!-- 消息历史标签页 -->
+            <!-- Message History Tab -->
             <div class="tab-content active" id="tab-messages">
                 <div class="messages-container">
                     <div class="messages-list" id="messagesList">
-                        <!-- 消息列表将在这里动态生成 -->
+                        <!-- Message list will be dynamically generated here -->
                     </div>
                 </div>
             </div>
             
-            <!-- 发送消息标签页 -->
+            <!-- Send Message Tab -->
             <div class="tab-content" id="tab-send">
                 <div class="send-message-form">
                     <div class="form-group">
-                        <label for="sendChatId">聊天ID</label>
-                        <input type="text" id="sendChatId" placeholder="输入聊天ID或用户名（如：@username 或 123456789）">
+                        <label for="sendChatId">Chat ID</label>
+                        <input type="text" id="sendChatId" placeholder="Enter chat ID or username (e.g., @username or 123456789)">
                         <small style="color: var(--gray-500); font-size: 0.8rem;">
-                            💡 提示：可以直接点击消息历史中的"回复"按钮自动填充聊天ID，或手动输入@username、用户ID或群组ID
+                            💡 Tip: You can click the "Reply" button in message history to auto-fill chat ID, or manually enter @username, user ID, or group ID
                         </small>
                     </div>
                     <div class="form-group">
-                        <label for="sendMessageType">消息类型</label>
+                        <label for="sendMessageType">Message Type</label>
                         <select id="sendMessageType" onchange="updateSendForm()">
-                            <option value="text">文本消息</option>
-                            <option value="photo">图片</option>
-                            <option value="video">视频</option>
-                            <option value="voice">语音</option>
-                            <option value="document">文档</option>
+                            <option value="text">Text Message</option>
+                            <option value="photo">Photo</option>
+                            <option value="video">Video</option>
+                            <option value="voice">Voice</option>
+                            <option value="document">Document</option>
                         </select>
                     </div>
                     <div class="form-group" id="textMessageGroup">
-                        <label for="sendText">消息内容</label>
-                        <textarea id="sendText" rows="4" placeholder="输入消息内容"></textarea>
+                        <label for="sendText">Message Content</label>
+                        <textarea id="sendText" rows="4" placeholder="Enter message content"></textarea>
                     </div>
                     <div class="form-group hidden" id="mediaMessageGroup">
-                        <label for="sendMedia">媒体文件</label>
-                        <input type="text" id="sendMedia" placeholder="输入文件ID或URL">
+                        <label for="sendMedia">Media File</label>
+                        <input type="text" id="sendMedia" placeholder="Enter file ID or URL">
                     </div>
                     <div class="form-group">
-                        <label for="sendCaption">说明文字（可选）</label>
-                        <input type="text" id="sendCaption" placeholder="输入说明文字">
+                        <label for="sendCaption">Caption (Optional)</label>
+                        <input type="text" id="sendCaption" placeholder="Enter caption">
                     </div>
-                    <button class="btn btn-primary" onclick="sendTelegramMessage()">发送消息</button>
+                    <button class="btn btn-primary" onclick="sendTelegramMessage()">Send Message</button>
                 </div>
             </div>
             
-            <!-- Webhook设置标签页 -->
+            <!-- Webhook Settings Tab -->
             <div class="tab-content" id="tab-webhook">
                 <div class="webhook-settings">
                     <div class="form-group">
@@ -1157,35 +1683,35 @@
                         <input type="url" id="webhookUrl" placeholder="https://your-domain.com/webhook">
                     </div>
                     <div class="form-group">
-                        <label for="webhookSecret">密钥令牌（可选）</label>
-                        <input type="text" id="webhookSecret" placeholder="输入密钥令牌">
+                        <label for="webhookSecret">Secret Token (Optional)</label>
+                        <input type="text" id="webhookSecret" placeholder="Enter secret token">
                     </div>
                     <div class="webhook-actions">
-                        <button class="btn btn-success" onclick="setWebhook()">设置Webhook</button>
-                        <button class="btn btn-warning" onclick="removeWebhook()">移除Webhook</button>
-                        <button class="btn btn-primary" onclick="getWebhookInfo()">获取信息</button>
+                        <button class="btn btn-success" onclick="setWebhook()">Set Webhook</button>
+                        <button class="btn btn-warning" onclick="removeWebhook()">Remove Webhook</button>
+                        <button class="btn btn-primary" onclick="getWebhookInfo()">Get Info</button>
                     </div>
                     <div id="webhookStatus"></div>
                 </div>
             </div>
             
-            <!-- API文档标签页 -->
+            <!-- API Documentation Tab -->
             <div class="tab-content" id="tab-api">
                 <div class="api-documentation">
                     <div class="api-section">
-                        <h3>📚 API 文档</h3>
-                        <p>以下是所有可用的API端点，您可以直接复制使用或在前端应用中调用。</p>
+                        <h3>📚 API Documentation</h3>
+                        <p>Below are all available API endpoints that you can copy and use directly or call in frontend applications.</p>
                     </div>
                     
                     <div class="api-section">
-                        <h4>🔧 基础信息</h4>
+                        <h4>🔧 Basic Information</h4>
                         <div class="api-endpoint">
                             <div class="endpoint-header">
                                 <span class="method get">GET</span>
                                 <span class="url">/api/health</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/health')">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/health')">Test</button>
                             </div>
-                            <div class="endpoint-description">检查服务健康状态</div>
+                            <div class="endpoint-description">Check service health status</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/health</code></pre>
                             </div>
@@ -1195,9 +1721,9 @@
                             <div class="endpoint-header">
                                 <span class="method get">GET</span>
                                 <span class="url">/api/modules</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/modules')">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/modules')">Test</button>
                             </div>
-                            <div class="endpoint-description">获取所有模块列表</div>
+                            <div class="endpoint-description">Get all module list</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/modules</code></pre>
                             </div>
@@ -1205,15 +1731,15 @@
                     </div>
                     
                     <div class="api-section">
-                        <h4>📱 Telegram 消息管理</h4>
+                        <h4>📱 Telegram Message Management</h4>
                         
                         <div class="api-endpoint">
                             <div class="endpoint-header">
                                 <span class="method get">GET</span>
                                 <span class="url">/api/telegram/telegram/messages</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/telegram/telegram/messages')">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/telegram/telegram/messages')">Test</button>
                             </div>
-                            <div class="endpoint-description">获取消息历史</div>
+                            <div class="endpoint-description">Get message history</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/telegram/telegram/messages</code></pre>
                             </div>
@@ -1223,9 +1749,9 @@
                             <div class="endpoint-header">
                                 <span class="method post">POST</span>
                                 <span class="url">/api/telegram/telegram/polling/start</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/telegram/telegram/polling/start')">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/telegram/telegram/polling/start')">Test</button>
                             </div>
-                            <div class="endpoint-description">开始消息轮询</div>
+                            <div class="endpoint-description">Start message polling</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/telegram/telegram/polling/start</code></pre>
                             </div>
@@ -1235,9 +1761,9 @@
                             <div class="endpoint-header">
                                 <span class="method post">POST</span>
                                 <span class="url">/api/telegram/telegram/polling/stop</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/telegram/telegram/polling/stop')">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/telegram/telegram/polling/stop')">Test</button>
                             </div>
-                            <div class="endpoint-description">停止消息轮询</div>
+                            <div class="endpoint-description">Stop message polling</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/telegram/telegram/polling/stop</code></pre>
                             </div>
@@ -1247,9 +1773,9 @@
                             <div class="endpoint-header">
                                 <span class="method post">POST</span>
                                 <span class="url">/api/telegram/telegram/send/message</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/telegram/telegram/send/message', {chat_id: '123456789', text: 'Hello World'})">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/telegram/telegram/send/message', {chat_id: '123456789', text: 'Hello World'})">Test</button>
                             </div>
-                            <div class="endpoint-description">发送文本消息</div>
+                            <div class="endpoint-description">Send text message</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/telegram/telegram/send/message \\
   -H "Content-Type: application/json" \\
@@ -1261,9 +1787,9 @@
                             <div class="endpoint-header">
                                 <span class="method post">POST</span>
                                 <span class="url">/api/telegram/telegram/send/photo</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/telegram/telegram/send/photo', {chat_id: '123456789', photo: 'https://example.com/image.jpg', caption: 'Photo caption'})">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/telegram/telegram/send/photo', {chat_id: '123456789', photo: 'https://example.com/image.jpg', caption: 'Photo caption'})">Test</button>
                             </div>
-                            <div class="endpoint-description">发送图片消息</div>
+                            <div class="endpoint-description">Send photo message</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/telegram/telegram/send/photo \\
   -H "Content-Type: application/json" \\
@@ -1273,15 +1799,15 @@
                     </div>
                     
                     <div class="api-section">
-                        <h4>📁 文件操作</h4>
+                        <h4>📁 File Operations</h4>
                         
                         <div class="api-endpoint">
                             <div class="endpoint-header">
                                 <span class="method get">GET</span>
                                 <span class="url">/api/telegram/telegram/file-url/:fileId</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/telegram/telegram/file-url/BAADBAADrwADBREAAYag8mS4AAH0Ag')">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/telegram/telegram/file-url/BAADBAADrwADBREAAYag8mS4AAH0Ag')">Test</button>
                             </div>
-                            <div class="endpoint-description">获取文件直接URL</div>
+                            <div class="endpoint-description">Get file direct URL</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/telegram/telegram/file-url/BAADBAADrwADBREAAYag8mS4AAH0Ag</code></pre>
                             </div>
@@ -1291,9 +1817,9 @@
                             <div class="endpoint-header">
                                 <span class="method get">GET</span>
                                 <span class="url">/api/telegram/telegram/file/:fileId</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/telegram/telegram/file/BAADBAADrwADBREAAYag8mS4AAH0Ag')">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/telegram/telegram/file/BAADBAADrwADBREAAYag8mS4AAH0Ag')">Test</button>
                             </div>
-                            <div class="endpoint-description">获取文件信息</div>
+                            <div class="endpoint-description">Get file information</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/telegram/telegram/file/BAADBAADrwADBREAAYag8mS4AAH0Ag</code></pre>
                             </div>
@@ -1301,15 +1827,15 @@
                     </div>
                     
                     <div class="api-section">
-                        <h4>🔗 Webhook 管理</h4>
+                        <h4>🔗 Webhook Management</h4>
                         
                         <div class="api-endpoint">
                             <div class="endpoint-header">
                                 <span class="method post">POST</span>
                                 <span class="url">/api/telegram/telegram/webhook/set</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/telegram/telegram/webhook/set', {url: 'https://your-domain.com/webhook'})">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/telegram/telegram/webhook/set', {url: 'https://your-domain.com/webhook'})">Test</button>
                             </div>
-                            <div class="endpoint-description">设置Webhook URL</div>
+                            <div class="endpoint-description">Set Webhook URL</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/telegram/telegram/webhook/set \\
   -H "Content-Type: application/json" \\
@@ -1321,9 +1847,9 @@
                             <div class="endpoint-header">
                                 <span class="method delete">DELETE</span>
                                 <span class="url">/api/telegram/telegram/webhook</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('DELETE', '/api/telegram/telegram/webhook')">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('DELETE', '/api/telegram/telegram/webhook')">Test</button>
                             </div>
-                            <div class="endpoint-description">删除Webhook</div>
+                            <div class="endpoint-description">Delete Webhook</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X DELETE http://localhost:3000/api/telegram/telegram/webhook</code></pre>
                             </div>
@@ -1333,9 +1859,9 @@
                             <div class="endpoint-header">
                                 <span class="method get">GET</span>
                                 <span class="url">/api/telegram/telegram/webhook</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/telegram/telegram/webhook')">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/telegram/telegram/webhook')">Test</button>
                             </div>
-                            <div class="endpoint-description">获取Webhook信息</div>
+                            <div class="endpoint-description">Get Webhook information</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/telegram/telegram/webhook</code></pre>
                             </div>
@@ -1349,9 +1875,9 @@
                             <div class="endpoint-header">
                                 <span class="method get">GET</span>
                                 <span class="url">/api/home_assistant/home_assistant/states</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/states')">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/states')">Test</button>
                             </div>
-                            <div class="endpoint-description">获取所有实体状态</div>
+                            <div class="endpoint-description">Get all entity states</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/home_assistant/home_assistant/states</code></pre>
                             </div>
@@ -1361,9 +1887,9 @@
                             <div class="endpoint-header">
                                 <span class="method get">GET</span>
                                 <span class="url">/api/home_assistant/home_assistant/config</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/config')">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/config')">Test</button>
                             </div>
-                            <div class="endpoint-description">获取Home Assistant配置信息</div>
+                            <div class="endpoint-description">Get Home Assistant configuration information</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/home_assistant/home_assistant/config</code></pre>
                             </div>
@@ -1373,9 +1899,9 @@
                             <div class="endpoint-header">
                                 <span class="method post">POST</span>
                                 <span class="url">/api/home_assistant/home_assistant/test-connection</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/home_assistant/home_assistant/test-connection')">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/home_assistant/home_assistant/test-connection')">Test</button>
                             </div>
-                            <div class="endpoint-description">测试Home Assistant连接</div>
+                            <div class="endpoint-description">Test Home Assistant connection</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/home_assistant/home_assistant/test-connection</code></pre>
                             </div>
@@ -1385,9 +1911,9 @@
                             <div class="endpoint-header">
                                 <span class="method get">GET</span>
                                 <span class="url">/api/home_assistant/home_assistant/entities</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/entities')">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/entities')">Test</button>
                             </div>
-                            <div class="endpoint-description">获取所有实体列表</div>
+                            <div class="endpoint-description">Get all entity list</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/home_assistant/home_assistant/entities</code></pre>
                             </div>
@@ -1397,9 +1923,9 @@
                             <div class="endpoint-header">
                                 <span class="method get">GET</span>
                                 <span class="url">/api/home_assistant/home_assistant/entity/:entityId</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/entity/light.living_room')">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('GET', '/api/home_assistant/home_assistant/entity/light.living_room')">Test</button>
                             </div>
-                            <div class="endpoint-description">获取特定实体信息</div>
+                            <div class="endpoint-description">Get specific entity information</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X GET http://localhost:3000/api/home_assistant/home_assistant/entity/light.living_room</code></pre>
                             </div>
@@ -1409,9 +1935,9 @@
                             <div class="endpoint-header">
                                 <span class="method post">POST</span>
                                 <span class="url">/api/home_assistant/home_assistant/call-service</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/home_assistant/home_assistant/call-service', {domain: 'light', service: 'turn_on', entity_id: 'light.living_room'})">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/home_assistant/home_assistant/call-service', {domain: 'light', service: 'turn_on', entity_id: 'light.living_room'})">Test</button>
                             </div>
-                            <div class="endpoint-description">调用Home Assistant服务</div>
+                            <div class="endpoint-description">Call Home Assistant service</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/home_assistant/home_assistant/call-service \\
   -H "Content-Type: application/json" \\
@@ -1423,9 +1949,9 @@
                             <div class="endpoint-header">
                                 <span class="method post">POST</span>
                                 <span class="url">/api/home_assistant/home_assistant/entity/:entityId/turn_on</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/home_assistant/home_assistant/entity/light.living_room/turn_on')">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/home_assistant/home_assistant/entity/light.living_room/turn_on')">Test</button>
                             </div>
-                            <div class="endpoint-description">打开实体</div>
+                            <div class="endpoint-description">Turn on entity</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/home_assistant/home_assistant/entity/light.living_room/turn_on</code></pre>
                             </div>
@@ -1435,9 +1961,9 @@
                             <div class="endpoint-header">
                                 <span class="method post">POST</span>
                                 <span class="url">/api/home_assistant/home_assistant/entity/:entityId/turn_off</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/home_assistant/home_assistant/entity/light.living_room/turn_off')">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/home_assistant/home_assistant/entity/light.living_room/turn_off')">Test</button>
                             </div>
-                            <div class="endpoint-description">关闭实体</div>
+                            <div class="endpoint-description">Turn off entity</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/home_assistant/home_assistant/entity/light.living_room/turn_off</code></pre>
                             </div>
@@ -1447,9 +1973,9 @@
                             <div class="endpoint-header">
                                 <span class="method post">POST</span>
                                 <span class="url">/api/home_assistant/home_assistant/entity/:entityId/set_state</span>
-                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/home_assistant/home_assistant/entity/light.living_room/set_state', {state: 'on', attributes: {brightness: 255}})"">测试</button>
+                                <button class="btn btn-sm btn-primary" onclick="testApi('POST', '/api/home_assistant/home_assistant/entity/light.living_room/set_state', {state: 'on', attributes: {brightness: 255}})"">Test</button>
                             </div>
-                            <div class="endpoint-description">设置实体状态</div>
+                            <div class="endpoint-description">Set entity state</div>
                             <div class="endpoint-example">
                                 <pre><code>curl -X POST http://localhost:3000/api/home_assistant/home_assistant/entity/light.living_room/set_state \\
   -H "Content-Type: application/json" \\
@@ -1459,66 +1985,84 @@
                     </div>
                     
                     <div class="api-section">
-                        <h4>🧪 API 测试结果</h4>
+                        <h4>🧪 API Test Results</h4>
                         <div id="apiTestResults" class="api-test-results">
-                            <p>点击上方的"测试"按钮来测试API端点</p>
+                            <p>Click the "Test" buttons above to test API endpoints</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 模块管理 -->
+        <!-- Module Management -->
         <div class="modules-grid" id="modulesGrid">
-            <!-- 动态生成模块卡片 -->
+            <!-- Dynamically generated module cards -->
         </div>
     </div>
 
-    <!-- Toast通知 -->
+    <!-- QR Code Modal -->
+    <div class="qr-modal hidden" id="qrModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📱 Mobile Access QR Code</h3>
+                <button class="modal-close" onclick="closeQRCode()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="qr-container">
+                    <div id="qrCode"></div>
+                    <div class="qr-info">
+                        <p><strong>Scan with your phone to access:</strong></p>
+                        <p id="qrUrl" class="qr-url"></p>
+                        <p class="qr-instructions">
+                            📱 Open your phone's camera or QR code scanner<br>
+                            📷 Point it at the QR code above<br>
+                            🔗 Tap the notification to open the page
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
     <div class="toast" id="toast">
         <span id="toastMessage"></span>
     </div>
 
+    <!-- QR Code Library - Using QR.js -->
+    <script src="https://cdn.jsdelivr.net/npm/qrjs@0.1.2/qr.min.js"></script>
+
     <script>
-        // 全局状态
-        let apiKey = '';
+        // Global state
         let modules = {};
         let isConnected = false;
         let telegramPollingStatus = false;
+        let healthCheckInterval = null;
+        let currentFlowData = null;
 
-        // 初始化
+        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            // Directly show statistics without API key requirement
+            document.getElementById('statistics').classList.remove('hidden');
             checkConnection();
             loadModules();
-            setInterval(refreshData, 30000); // 每30秒刷新数据
+            loadStatistics();
+            loadNodeRedInfo(); // Load Node-RED service info
+            setInterval(refreshData, 30000); // Refresh data every 30 seconds
             
-            // 如果Telegram模块可用，设置消息自动刷新
+            // If Telegram module is available, set up automatic message refresh
             setInterval(() => {
                 if (modules.telegram && modules.telegram.data && modules.telegram.data.messaging && modules.telegram.data.messaging.isPolling) {
                     refreshMessages();
                 }
-            }, 5000); // 每5秒刷新消息
+            }, 5000); // Refresh messages every 5 seconds
         });
 
-        // 设置API密钥
-        function setApiKey() {
-            const keyInput = document.getElementById('apiKey');
-            apiKey = keyInput.value.trim();
-            
-            if (!apiKey) {
-                showToast('请输入API密钥', 'error');
-                return;
-            }
-            
-            checkConnection();
-        }
 
-        // 检查连接状态
+        // Check connection status
         async function checkConnection() {
             try {
-                const response = await fetch('/api/health', {
-                    headers: apiKey ? { 'X-API-Key': apiKey } : {}
-                });
+                const response = await fetch('/api/health');
                 
                 const data = await response.json();
                 isConnected = response.ok;
@@ -1526,20 +2070,23 @@
                 updateConnectionStatus(isConnected);
                 
                 if (isConnected) {
+                    showToast('✅ Connected successfully!', 'success');
                     document.getElementById('statistics').classList.remove('hidden');
                     loadModules();
                     loadStatistics();
                 } else {
+                    showToast('❌ Connection failed', 'error');
                     document.getElementById('statistics').classList.add('hidden');
                     document.getElementById('telegramMessaging').classList.add('hidden');
                 }
             } catch (error) {
                 console.error('Connection check failed:', error);
+                showToast('❌ Connection failed: Network error', 'error');
                 updateConnectionStatus(false);
             }
         }
 
-        // 更新连接状态显示
+        // Update connection status display
         function updateConnectionStatus(connected) {
             const statusEl = document.getElementById('connectionStatus');
             const dot = statusEl.querySelector('.status-dot');
@@ -1548,44 +2095,43 @@
             if (connected) {
                 statusEl.className = 'connection-status status-connected';
                 dot.className = 'status-dot status-enabled';
-                text.textContent = '已连接';
+                text.textContent = 'Connected';
             } else {
                 statusEl.className = 'connection-status status-disconnected';
                 dot.className = 'status-dot status-disabled';
-                text.textContent = '未连接';
+                text.textContent = 'Disconnected';
             }
         }
 
-        // 加载模块列表
+        // API Key (可选，用于需要认证的API)
+        const apiKey = '';
+
+        // Load module list
         async function loadModules() {
             if (!isConnected) return;
             
             try {
-                const response = await fetch('/api/modules', {
-                    headers: { 'X-API-Key': apiKey }
-                });
+                const response = await fetch('/api/modules');
                 
                 if (response.ok) {
                     const data = await response.json();
                     modules = data.data;
                     renderModules();
                 } else {
-                    showToast('加载模块失败', 'error');
+                    showToast('Failed to load modules', 'error');
                 }
             } catch (error) {
                 console.error('Failed to load modules:', error);
-                showToast('加载模块失败', 'error');
+                showToast('Failed to load modules', 'error');
             }
         }
 
-        // 加载统计信息
+        // Load statistics
         async function loadStatistics() {
             if (!isConnected) return;
             
             try {
-                const response = await fetch('/api/statistics', {
-                    headers: { 'X-API-Key': apiKey }
-                });
+                const response = await fetch('/api/statistics');
                 
                 if (response.ok) {
                     const data = await response.json();
@@ -1596,47 +2142,50 @@
             }
         }
 
-        // 渲染统计信息
+        // Render statistics
         function renderStatistics(stats) {
             const grid = document.getElementById('statsGrid');
             grid.innerHTML = `
                 <div class="stat-card">
                     <div class="stat-value">${stats.totalModules}</div>
-                    <div class="stat-label">总模块数</div>
+                    <div class="stat-label">Total Modules</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${stats.enabledModules}</div>
-                    <div class="stat-label">已启用</div>
+                    <div class="stat-label">Enabled</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${stats.initializedModules}</div>
-                    <div class="stat-label">已初始化</div>
+                    <div class="stat-label">Initialized</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${stats.disabledModules}</div>
-                    <div class="stat-label">已禁用</div>
+                    <div class="stat-label">Disabled</div>
                 </div>
             `;
         }
 
-        // 渲染模块卡片
+        // Render module cards
         function renderModules() {
             const grid = document.getElementById('modulesGrid');
             grid.innerHTML = '';
             
             Object.entries(modules).forEach(([name, moduleData]) => {
+                // Skip agent module - it's not displayed in the UI
+                if (name === 'agent') return;
+                
                 const data = moduleData.data || {};
                 const card = createModuleCard(name, data);
                 grid.appendChild(card);
             });
             
-            // 渲染完成后检查Telegram模块
+            // Check Telegram module after rendering
             setTimeout(() => {
                 checkTelegramModule();
             }, 100);
         }
 
-        // 创建模块卡片
+        // Create module card
         function createModuleCard(name, data) {
             const card = document.createElement('div');
             card.className = 'module-card fade-in';
@@ -1655,44 +2204,59 @@
                     <div class="module-status">
                         <div class="status-indicator">
                             <span class="status-dot ${isEnabled ? 'status-enabled' : 'status-disabled'}"></span>
-                            <span>${isEnabled ? '已启用' : '已禁用'}</span>
+                            <span>${isEnabled ? 'Enabled' : 'Disabled'}</span>
                         </div>
                         <div class="status-indicator">
-                            <span>初始化: ${isInitialized ? '✓' : '✗'}</span>
+                            <span>Initialized: ${isInitialized ? '✓' : '✗'}</span>
                         </div>
                     </div>
                 </div>
                 <div class="module-content">
                     <div id="credentials-${name}">
-                        <!-- 凭据表单将在这里动态生成 -->
+                        <!-- Credential form will be dynamically generated here -->
                     </div>
+                    ${name === 'nodered' ? `
+                    <div id="nodered-flows-list" style="margin-top: 1rem; padding: 1rem; background: var(--gray-50); border-radius: 0.5rem; border: 1px solid var(--gray-200);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <h4 style="margin: 0; color: var(--gray-700);">📋 Running Flows</h4>
+                            <button class="btn btn-sm btn-info" onclick="loadNodeRedFlowsForCard()" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;">🔄 Refresh</button>
+                        </div>
+                        <div id="nodered-flows-content" style="font-size: 0.9rem; color: var(--gray-600);">
+                            Loading flows...
+                        </div>
+                    </div>
+                    ` : ''}
                     <div class="module-actions">
                         <button class="btn ${isEnabled ? 'btn-warning' : 'btn-success'}" 
                                 onclick="toggleModule('${name}', ${!isEnabled})">
-                            ${isEnabled ? '禁用' : '启用'}
+                            ${isEnabled ? 'Disable' : 'Enable'}
                         </button>
-                        <button class="btn btn-primary" onclick="validateModule('${name}')">验证</button>
-                        <button class="btn btn-primary" onclick="testConnection('${name}')">测试连接</button>
-                        <button class="btn btn-warning" onclick="reloadModule('${name}')">重载</button>
-                        <button class="btn btn-danger" onclick="clearCache('${name}')">清除缓存</button>
-                        ${name === 'telegram' ? '<button class="btn btn-success" onclick="showTelegramMessaging()">消息管理</button>' : ''}
+                        <button class="btn btn-primary" onclick="validateModule('${name}')">Validate</button>
+                        <button class="btn btn-primary" onclick="testConnection('${name}')">Test Connection</button>
+                        <button class="btn btn-warning" onclick="reloadModule('${name}')">Reload</button>
+                        <button class="btn btn-danger" onclick="clearCache('${name}')">Clear Cache</button>
+                        ${name === 'telegram' ? '<button class="btn btn-success" onclick="showTelegramMessaging()">Message Management</button>' : ''}
                     </div>
                     <div id="result-${name}"></div>
                 </div>
             `;
             
-            // 加载凭据表单
+            // Load credential form
             loadCredentialForm(name);
+            
+            // For Node-RED, also load flows list
+            if (name === 'nodered') {
+                setTimeout(() => loadNodeRedFlowsForCard(), 500);
+            }
             
             return card;
         }
 
-        // 加载凭据表单
+        // Load credential form
         async function loadCredentialForm(moduleName) {
             try {
-                // 获取schema
+                // Get schema
                 const schemaResponse = await fetch(`/api/schema/${moduleName}`, {
-                    headers: { 'X-API-Key': apiKey }
                 });
                 
                 if (!schemaResponse.ok) return;
@@ -1700,14 +2264,13 @@
                 const schemaData = await schemaResponse.json();
                 const schema = schemaData.data;
                 
-                // 获取现有凭据
+                // Get existing credentials
                 const credsResponse = await fetch(`/api/credentials/${moduleName}`, {
-                    headers: { 'X-API-Key': apiKey }
                 });
                 
                 const existingCreds = credsResponse.ok ? (await credsResponse.json()).data : {};
                 
-                // 生成表单
+                // Generate form
                 const formContainer = document.getElementById(`credentials-${moduleName}`);
                 formContainer.innerHTML = generateCredentialForm(moduleName, schema, existingCreds);
                 
@@ -1716,9 +2279,9 @@
             }
         }
 
-        // 生成凭据表单
+        // Generate credential form
         function generateCredentialForm(moduleName, schema, existingCreds) {
-            if (!schema.properties) return '<p>无凭据配置</p>';
+            if (!schema.properties) return '<p>No credential configuration</p>';
             
             let formHTML = '';
             
@@ -1749,14 +2312,14 @@
             
             formHTML += `
                 <button type="button" class="btn btn-primary" onclick="saveCredentials('${moduleName}')">
-                    保存凭据
+                    Save Credentials
                 </button>
             `;
             
             return formHTML;
         }
 
-        // 保存凭据
+        // Save credentials
         async function saveCredentials(moduleName) {
             const formContainer = document.getElementById(`credentials-${moduleName}`);
             const inputs = formContainer.querySelectorAll('input[name]');
@@ -1770,8 +2333,7 @@
                 const response = await fetch(`/api/credentials/${moduleName}`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-API-Key': apiKey
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(credentials)
                 });
@@ -1779,24 +2341,23 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast(`${capitalizeFirst(moduleName)} 凭据已保存`, 'success');
+                    showToast(`${capitalizeFirst(moduleName)} credentials saved`, 'success');
                 } else {
-                    showToast(`保存失败: ${data.error}`, 'error');
+                    showToast(`Save failed: ${data.error}`, 'error');
                 }
             } catch (error) {
                 console.error('Failed to save credentials:', error);
-                showToast('保存失败', 'error');
+                showToast('Save failed', 'error');
             }
         }
 
-        // 切换模块状态
+        // Toggle module status
         async function toggleModule(moduleName, enabled) {
             try {
                 const response = await fetch(`/api/modules/${moduleName}/enabled`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-API-Key': apiKey
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ enabled })
                 });
@@ -1804,23 +2365,25 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast(`${capitalizeFirst(moduleName)} 已${enabled ? '启用' : '禁用'}`, 'success');
-                    loadModules(); // 刷新模块状态
+                    showToast(`${capitalizeFirst(moduleName)} ${enabled ? 'enabled' : 'disabled'}`, 'success');
+                    loadModules(); // Refresh module status
                 } else {
-                    showToast(`操作失败: ${data.error}`, 'error');
+                    showToast(`Operation failed: ${data.error}`, 'error');
                 }
             } catch (error) {
                 console.error('Failed to toggle module:', error);
-                showToast('操作失败', 'error');
+                showToast('Operation failed', 'error');
             }
         }
 
-        // 验证模块
+        // Validate module
         async function validateModule(moduleName) {
             const resultContainer = document.getElementById(`result-${moduleName}`);
-            resultContainer.innerHTML = '<div class="loading"><div class="spinner"></div>验证中...</div>';
+            resultContainer.innerHTML = '<div class="loading"><div class="spinner"></div>Validating...</div>';
             
             try {
+                console.log(`[Validate] Starting validation for ${moduleName}`);
+                
                 const response = await fetch(`/api/validate/${moduleName}`, {
                     method: 'POST',
                     headers: {
@@ -1829,21 +2392,39 @@
                     }
                 });
                 
+                console.log(`[Validate] Response status: ${response.status} ${response.statusText}`);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`[Validate] HTTP error: ${errorText}`);
+                    displayValidationResult(moduleName, { 
+                        success: false, 
+                        error: `HTTP ${response.status}: ${response.statusText}` 
+                    });
+                    return;
+                }
+                
                 const data = await response.json();
+                console.log(`[Validate] Response data:`, data);
                 displayValidationResult(moduleName, data);
                 
             } catch (error) {
-                console.error('Validation failed:', error);
-                displayValidationResult(moduleName, { success: false, error: '验证失败' });
+                console.error('[Validate] Exception:', error);
+                displayValidationResult(moduleName, { 
+                    success: false, 
+                    error: `Validation error: ${error.message}` 
+                });
             }
         }
 
-        // 测试连接
+        // Test connection
         async function testConnection(moduleName) {
             const resultContainer = document.getElementById(`result-${moduleName}`);
-            resultContainer.innerHTML = '<div class="loading"><div class="spinner"></div>测试连接中...</div>';
+            resultContainer.innerHTML = '<div class="loading"><div class="spinner"></div>Testing connection...</div>';
             
             try {
+                console.log(`[TestConnection] Starting test for ${moduleName}`);
+                
                 const response = await fetch(`/api/test-connection/${moduleName}`, {
                     method: 'POST',
                     headers: {
@@ -1852,59 +2433,73 @@
                     }
                 });
                 
+                console.log(`[TestConnection] Response status: ${response.status} ${response.statusText}`);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`[TestConnection] HTTP error: ${errorText}`);
+                    displayValidationResult(moduleName, { 
+                        success: false, 
+                        error: `HTTP ${response.status}: ${response.statusText}` 
+                    });
+                    return;
+                }
+                
                 const data = await response.json();
+                console.log(`[TestConnection] Response data:`, data);
                 displayValidationResult(moduleName, data);
                 
             } catch (error) {
-                console.error('Connection test failed:', error);
-                displayValidationResult(moduleName, { success: false, error: '连接测试失败' });
+                console.error('[TestConnection] Exception:', error);
+                displayValidationResult(moduleName, { 
+                    success: false, 
+                    error: `Test failed: ${error.message}` 
+                });
             }
         }
 
-        // 重载模块
+        // Reload module
         async function reloadModule(moduleName) {
             try {
                 const response = await fetch(`/api/modules/${moduleName}/reload`, {
                     method: 'POST',
-                    headers: { 'X-API-Key': apiKey }
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast(`${capitalizeFirst(moduleName)} 模块已重载`, 'success');
+                    showToast(`${capitalizeFirst(moduleName)} module reloaded`, 'success');
                     loadModules();
                 } else {
-                    showToast(`重载失败: ${data.error}`, 'error');
+                    showToast(`Reload failed: ${data.error}`, 'error');
                 }
             } catch (error) {
                 console.error('Failed to reload module:', error);
-                showToast('重载失败', 'error');
+                showToast('Reload failed', 'error');
             }
         }
 
-        // 清除缓存
+        // Clear cache
         async function clearCache(moduleName) {
             try {
                 const response = await fetch(`/api/cache/${moduleName}`, {
                     method: 'DELETE',
-                    headers: { 'X-API-Key': apiKey }
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast(`${capitalizeFirst(moduleName)} 缓存已清除`, 'success');
+                    showToast(`${capitalizeFirst(moduleName)} cache cleared`, 'success');
                 } else {
-                    showToast(`清除失败: ${data.error}`, 'error');
+                    showToast(`Clear failed: ${data.error}`, 'error');
                 }
             } catch (error) {
                 console.error('Failed to clear cache:', error);
-                showToast('清除失败', 'error');
+                showToast('Clear failed', 'error');
             }
         }
 
-        // 显示验证结果
+        // Display validation result
         function displayValidationResult(moduleName, result) {
             const resultContainer = document.getElementById(`result-${moduleName}`);
             const isSuccess = result.success;
@@ -1912,16 +2507,16 @@
             
             let content = `
                 <div class="validation-result ${className}">
-                    <strong>${isSuccess ? '✓ 验证成功' : '✗ 验证失败'}</strong>
+                    <strong>${isSuccess ? '✓ Validation successful' : '✗ Validation failed'}</strong>
                     <div>${result.message || result.error || ''}</div>
             `;
             
-            // 显示详细信息
+            // Display detailed information
             if (result.data && Object.keys(result.data).length > 0) {
                 content += `
                     <div class="collapsible-details">
                         <button class="collapsible-toggle" onclick="toggleDetails('${moduleName}')">
-                            显示详情
+                            Show Details
                         </button>
                         <div class="collapsible-content hidden" id="details-${moduleName}">
                             <pre>${JSON.stringify(result.data, null, 2)}</pre>
@@ -1934,21 +2529,21 @@
             resultContainer.innerHTML = content;
         }
 
-        // 切换详情显示
+        // Toggle details display
         function toggleDetails(moduleName) {
             const details = document.getElementById(`details-${moduleName}`);
             const toggle = details.previousElementSibling;
             
             if (details.classList.contains('hidden')) {
                 details.classList.remove('hidden');
-                toggle.textContent = '隐藏详情';
+                toggle.textContent = 'Hide Details';
             } else {
                 details.classList.add('hidden');
-                toggle.textContent = '显示详情';
+                toggle.textContent = 'Show Details';
             }
         }
 
-        // 显示Toast通知
+        // Show Toast notification
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             const messageEl = document.getElementById('toastMessage');
@@ -1963,7 +2558,7 @@
             }, 3000);
         }
 
-        // 刷新数据
+        // Refresh data
         function refreshData() {
             if (isConnected) {
                 loadModules();
@@ -1971,53 +2566,258 @@
             }
         }
 
-        // 首字母大写
+        // Capitalize first letter
         function capitalizeFirst(str) {
+            // Special handling for certain module names
+            if (str === 'nodered') return 'Node-RED';
+            if (str === 'home_assistant') return 'Home Assistant';
+            if (str === 'openai') return 'OpenAI';
+            if (str === 'deepseek') return 'DeepSeek';
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
+        
+        // Format file size
+        function formatFileSize(bytes) {
+            if (!bytes) return '';
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // 语音转文字功能
+        async function transcribeVoice(fileId, messageId, event) {
+            console.log('=== Transcribe Voice Started ===');
+            console.log('fileId:', fileId);
+            console.log('messageId:', messageId);
+            
+            const transcriptionSection = document.getElementById(`transcription-${messageId}`);
+            console.log('transcriptionSection found:', !!transcriptionSection);
+            
+            if (!transcriptionSection) {
+                console.error('Transcription section not found!');
+                alert('错误: 找不到转换区域，请刷新页面重试');
+                return;
+            }
+            
+            const bodyDiv = transcriptionSection.querySelector('.transcription-body');
+            const button = event ? event.target : null;
+            
+            console.log('bodyDiv found:', !!bodyDiv);
+            console.log('button found:', !!button);
+            
+            // 调试：检查元素的父元素链
+            let parent = transcriptionSection.parentElement;
+            let parentChain = [];
+            while (parent) {
+                const styles = window.getComputedStyle(parent);
+                parentChain.push({
+                    tag: parent.tagName,
+                    class: parent.className,
+                    display: styles.display,
+                    visibility: styles.visibility,
+                    overflow: styles.overflow
+                });
+                parent = parent.parentElement;
+                if (parentChain.length > 5) break; // 只检查5层
+            }
+            console.log('Parent chain:', parentChain);
+
+            // 显示转换区域
+            transcriptionSection.classList.add('show');
+            transcriptionSection.style.display = 'block';
+            transcriptionSection.style.visibility = 'visible';
+            transcriptionSection.style.position = 'relative';
+            transcriptionSection.style.zIndex = '1000';
+            
+            console.log('Section classList:', transcriptionSection.classList.toString());
+            console.log('Section display style:', transcriptionSection.style.display);
+            console.log('Section offsetHeight:', transcriptionSection.offsetHeight);
+            console.log('Section offsetWidth:', transcriptionSection.offsetWidth);
+            
+            bodyDiv.innerHTML = '<div class="transcription-loading">⏳ 正在转换语音为文字，请稍候...</div>';
+            
+            if (button) {
+                button.disabled = true;
+                button.textContent = '⏳ 转换中...';
+            }
+
+            try {
+                console.log('Calling API...');
+                const response = await fetch('/api/telegram/telegram/transcribe-voice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        file_id: fileId,
+                        options: {
+                            language: 'zh'
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                console.log('API Response:', result);
+
+                if (result.success && result.text) {
+                    // 构建元信息
+                    const metaInfo = [];
+                    if (result.language) metaInfo.push(`语言: ${result.language}`);
+                    if (result.duration) metaInfo.push(`时长: ${Math.round(result.duration)}秒`);
+                    if (result.file_size) metaInfo.push(`大小: ${formatFileSize(result.file_size)}`);
+
+                    // 显示结果
+                    bodyDiv.innerHTML = `
+                        <div class="transcription-text-content">${result.text}</div>
+                        ${metaInfo.length > 0 ? `<div class="transcription-meta">${metaInfo.join(' • ')}</div>` : ''}
+                    `;
+                    
+                    // 确保一直显示
+                    transcriptionSection.classList.add('show');
+                    transcriptionSection.style.display = 'block';
+                    console.log('Result displayed, section should stay visible');
+                    
+                    // 滚动到转换结果
+                    setTimeout(() => {
+                        transcriptionSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 100);
+                    
+                    if (button) {
+                        button.textContent = '✅ 已转换';
+                        button.style.background = '#28a745';
+                    }
+                    
+                    console.log('=== Transcription Success ===');
+                } else {
+                    const errorMsg = result.error || '转换失败，未返回文字内容';
+                    bodyDiv.innerHTML = `<div class="transcription-error">❌ ${errorMsg}</div>`;
+                    
+                    // 确保错误信息也显示
+                    transcriptionSection.classList.add('show');
+                    transcriptionSection.style.display = 'block';
+                    
+                    if (button) {
+                        button.disabled = false;
+                        button.textContent = '📝 重试';
+                    }
+                    console.error('Transcription failed:', errorMsg);
+                }
+            } catch (error) {
+                console.error('Exception:', error);
+                bodyDiv.innerHTML = `<div class="transcription-error">❌ 网络错误: ${error.message}</div>`;
+                
+                // 确保错误信息也显示
+                transcriptionSection.classList.add('show');
+                transcriptionSection.style.display = 'block';
+                
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = '📝 重试';
+                }
+            }
+        }
+        
+        // Open media modal
+        function openMediaModal(src, type, photos = null) {
+            const modal = document.createElement('div');
+            modal.className = 'media-modal';
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    closeMediaModal();
+                }
+            };
+            
+            let content = '';
+            if (type === 'image') {
+                content = `<img src="${src}" style="max-width: 90vw; max-height: 90vh; border-radius: 0.5rem;">`;
+            } else if (type === 'video') {
+                content = `<video controls style="max-width: 90vw; max-height: 90vh; border-radius: 0.5rem;">
+                    <source src="${src}" type="video/mp4">
+                    Your browser does not support video playback
+                </video>`;
+            }
+            
+            modal.innerHTML = `
+                <div class="modal-content" style="position: relative; display: flex; align-items: center; justify-content: center;">
+                    ${content}
+                    <button onclick="closeMediaModal()" style="
+                        position: absolute; 
+                        top: 20px; 
+                        right: 20px; 
+                        background: rgba(0,0,0,0.5); 
+                        color: white; 
+                        border: none; 
+                        border-radius: 50%; 
+                        width: 40px; 
+                        height: 40px; 
+                        cursor: pointer;
+                        font-size: 20px;
+                    ">×</button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Close media modal
+        function closeMediaModal() {
+            const modal = document.querySelector('.media-modal');
+            if (modal) {
+                modal.remove();
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // ESC key closes modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMediaModal();
+            }
+        });
 
         // =================
         // Telegram Messaging Functions
         // =================
 
-        // 手动显示Telegram消息管理界面
+        // Manually show Telegram message management interface
         function showTelegramMessaging() {
             console.log('Manually showing Telegram messaging interface');
             
-            // 强制显示消息管理界面
+            // Force show message management interface
             document.getElementById('telegramMessaging').classList.remove('hidden');
             
-            // 滚动到消息管理界面
+            // Scroll to message management interface
             document.getElementById('telegramMessaging').scrollIntoView({ 
                 behavior: 'smooth', 
                 block: 'start' 
             });
             
-            // 更新状态和消息
+            // Update status and messages
             setTimeout(() => {
                 updatePollingStatus();
                 refreshMessages();
             }, 300);
             
-            showToast('Telegram消息管理界面已显示', 'success');
+            showToast('Telegram message management interface displayed', 'success');
         }
 
-        // 检查Telegram模块是否可用
+        // Check if Telegram module is available
         function checkTelegramModule() {
             console.log('Checking Telegram module...', modules.telegram);
             
-            // 只要Telegram模块存在且已初始化就显示界面
+            // Show interface as long as Telegram module exists and is initialized
             if (modules.telegram && modules.telegram.data && modules.telegram.data.initialized) {
                 console.log('Telegram module found and initialized, showing messaging interface');
                 document.getElementById('telegramMessaging').classList.remove('hidden');
                 
-                // 延迟执行以确保DOM已更新
+                // Delay execution to ensure DOM is updated
                 setTimeout(() => {
                     updatePollingStatus();
                     refreshMessages();
                 }, 200);
                 
-                // 检查是否有凭据
+                // Check if credentials exist
                 const hasCredentials = modules.telegram.data.hasCredentials && 
                                       Object.keys(modules.telegram.data.hasCredentials).length > 0;
                 
@@ -2036,7 +2836,7 @@
             }
         }
 
-        // 更新轮询状态显示
+        // Update polling status display
         function updatePollingStatus() {
             const header = document.querySelector('.messaging-header h2');
             if (!header) {
@@ -2050,7 +2850,7 @@
                 existingStatus.remove();
             }
             
-            // 从模块数据获取实际轮询状态
+            // Get actual polling status from module data
             const actualPollingStatus = modules.telegram && 
                                        modules.telegram.data && 
                                        modules.telegram.data.messaging && 
@@ -2060,77 +2860,138 @@
             
             const statusEl = document.createElement('div');
             statusEl.className = `polling-status ${actualPollingStatus ? 'polling-active' : 'polling-inactive'}`;
+            
+            // More detailed status display
+            const statusText = actualPollingStatus ? 'Connected' : 'Disconnected';
+            const statusIcon = actualPollingStatus ? '🟢' : '🔴';
+            
             statusEl.innerHTML = `
                 <span class="status-dot ${actualPollingStatus ? 'status-enabled' : 'status-disabled'}"></span>
-                <span>轮询: ${actualPollingStatus ? '活跃' : '停止'}</span>
+                <span>${statusIcon} ${statusText}</span>
+                <span class="status-detail">${actualPollingStatus ? '(Polling active)' : '(Polling stopped)'}</span>
             `;
             
             header.appendChild(statusEl);
             
-            // 更新全局状态
+            // Update global state
             telegramPollingStatus = actualPollingStatus;
+            
+            // Update button status
+            updatePollingButtons(actualPollingStatus);
+        }
+        
+        // Update polling button status
+        function updatePollingButtons(isPolling) {
+            const startBtn = document.querySelector('button[onclick="startTelegramPolling()"]');
+            const stopBtn = document.querySelector('button[onclick="stopTelegramPolling()"]');
+            
+            if (startBtn && stopBtn) {
+                if (isPolling) {
+                    startBtn.disabled = true;
+                    startBtn.textContent = 'Polling Active';
+                    stopBtn.disabled = false;
+                    stopBtn.textContent = 'Stop Polling';
+                } else {
+                    startBtn.disabled = false;
+                    startBtn.textContent = 'Start Polling';
+                    stopBtn.disabled = true;
+                    stopBtn.textContent = 'Polling Stopped';
+                }
+            }
         }
 
-        // 开始Telegram轮询
+        // Start Telegram polling
         async function startTelegramPolling() {
             try {
+                // Show start status
+                showToast('Starting Telegram polling...', 'info');
+                
                 const response = await fetch('/api/telegram/telegram/polling/start', {
                     method: 'POST',
-                    headers: apiKey ? { 'X-API-Key': apiKey } : {}
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
                     telegramPollingStatus = true;
-                    showToast('Telegram轮询已开始', 'success');
-                    // 刷新模块状态以获取最新轮询状态
+                    showToast('🟢 Telegram polling started, system connected', 'success');
+                    
+                    // Immediately update status display
+                    updatePollingButtons(true);
+                    
+                    // Refresh module status to get latest polling status
                     loadModules();
+                    
+                    // Delay update status and refresh messages
                     setTimeout(() => {
                         updatePollingStatus();
                         refreshMessages();
-                    }, 500);
+                    }, 1000);
+                    
+                    // Regularly check connection status
+                    startConnectionMonitoring();
                 } else {
-                    showToast(`启动轮询失败: ${data.error}`, 'error');
+                    showToast(`❌ Failed to start polling: ${data.error}`, 'error');
                 }
             } catch (error) {
                 console.error('Failed to start polling:', error);
-                showToast('启动轮询失败', 'error');
+                showToast('❌ Failed to start polling: Network error', 'error');
+            }
+        }
+        
+        // Connection monitoring disabled - no auto refresh
+        let connectionMonitorInterval = null;
+        function startConnectionMonitoring() {
+            // Auto refresh disabled as requested
+            return;
+        }
+        
+        function stopConnectionMonitoring() {
+            if (connectionMonitorInterval) {
+                clearInterval(connectionMonitorInterval);
+                connectionMonitorInterval = null;
             }
         }
 
-        // 停止Telegram轮询
+        // Stop Telegram polling
         async function stopTelegramPolling() {
             try {
+                showToast('Stopping Telegram polling...', 'info');
+                
                 const response = await fetch('/api/telegram/telegram/polling/stop', {
                     method: 'POST',
-                    headers: apiKey ? { 'X-API-Key': apiKey } : {}
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
                     telegramPollingStatus = false;
-                    showToast('Telegram轮询已停止', 'success');
-                    // 刷新模块状态以获取最新轮询状态
+                    showToast('🔴 Telegram polling stopped, connection disconnected', 'success');
+                    
+                    // Immediately update status display
+                    updatePollingButtons(false);
+                    
+                    // Stop connection monitoring
+                    stopConnectionMonitoring();
+                    
+                    // Refresh module status to get latest polling status
                     loadModules();
                     setTimeout(() => {
                         updatePollingStatus();
                     }, 500);
                 } else {
-                    showToast(`停止轮询失败: ${data.error}`, 'error');
+                    showToast(`❌ Failed to stop polling: ${data.error}`, 'error');
                 }
             } catch (error) {
                 console.error('Failed to stop polling:', error);
-                showToast('停止轮询失败', 'error');
+                showToast('❌ Failed to stop polling: Network error', 'error');
             }
         }
 
-        // 刷新消息列表
+        // Refresh message list
         async function refreshMessages() {
             try {
                 const response = await fetch('/api/telegram/telegram/messages?limit=50', {
-                    headers: apiKey ? { 'X-API-Key': apiKey } : {}
                 });
                 
                 if (response.ok) {
@@ -2139,22 +3000,22 @@
                     renderMessages(data.data.messages || []);
                 } else {
                     console.error('Failed to load messages, status:', response.status);
-                    // 如果没有API密钥，显示提示信息
+                    // If no API key, show prompt information
                     if (response.status === 401) {
-                        renderMessages([], '请先配置API密钥');
+                        renderMessages([], 'Please configure API key first');
                     }
                 }
             } catch (error) {
                 console.error('Failed to refresh messages:', error);
-                renderMessages([], '加载消息失败');
+                renderMessages([], 'Failed to load messages');
             }
         }
 
-        // 渲染消息列表
+        // Render message list
         function renderMessages(messages, errorMsg = null) {
             const messagesList = document.getElementById('messagesList');
             
-            // 更新统计信息
+            // Update statistics
             updateMessageStats(messages, errorMsg);
             
             if (errorMsg) {
@@ -2163,11 +3024,11 @@
             }
             
             if (messages.length === 0) {
-                messagesList.innerHTML = '<p style="text-align: center; color: var(--gray-500); padding: 2rem;">暂无消息 - 请先启动轮询以接收消息</p>';
+                messagesList.innerHTML = '<p style="text-align: center; color: var(--gray-500); padding: 2rem;">No messages - Please start polling to receive messages</p>';
                 return;
             }
             
-            // 按时间倒序排列消息
+            // Sort messages by time in descending order
             const sortedMessages = messages.sort((a, b) => new Date(b.date) - new Date(a.date));
             
             messagesList.innerHTML = sortedMessages.map(message => `
@@ -2179,7 +3040,7 @@
                         </div>
                         <div class="message-actions">
                             <button class="btn btn-sm btn-primary" onclick="replyToMessage('${message.chat_id}', '${message.from?.username ? `@${message.from.username}` : message.from?.first_name || 'Unknown'}')">
-                                回复
+                                Reply
                             </button>
                             <div class="message-time">
                                 ${new Date(message.date).toLocaleString()}
@@ -2199,7 +3060,7 @@
                                     
                                     switch(type) {
                                         case 'photo':
-                                            // 获取最高质量的图片
+                                            // Get highest quality image
                                             const photos = Array.isArray(mediaData) ? mediaData : [mediaData];
                                             const bestPhoto = photos.reduce((best, current) => {
                                                 const bestSize = (best.width || 0) * (best.height || 0);
@@ -2209,38 +3070,151 @@
                                             
                                             return `<div class="media-item">
                                                 <img src="/api/telegram/telegram/file-url/${bestPhoto.file_id}" 
-                                                     alt="图片" 
+                                                     alt="Image" 
                                                      class="media-image"
                                                      onclick="openMediaModal('/api/telegram/telegram/file-url/${bestPhoto.file_id}', 'image', ${JSON.stringify(photos).replace(/"/g, '&quot;')})"
                                                      loading="lazy"
                                                      data-photos='${JSON.stringify(photos).replace(/"/g, '&quot;')}'>
                                                 <div class="media-info">
-                                                    📷 图片 ${bestPhoto.width ? `${bestPhoto.width}×${bestPhoto.height}` : ''}
-                                                    ${photos.length > 1 ? ` (${photos.length}个尺寸)` : ''}
+                                                    📷 Image ${bestPhoto.width ? `${bestPhoto.width}×${bestPhoto.height}` : ''}
+                                                    ${photos.length > 1 ? ` (${photos.length} sizes)` : ''}
                                                 </div>
                                             </div>`;
                                         case 'video':
+                                            const videoWidth = mediaData.width || 320;
+                                            const videoHeight = mediaData.height || 240;
+                                            const videoDuration = mediaData.duration ? `${Math.floor(mediaData.duration / 60)}:${String(mediaData.duration % 60).padStart(2, '0')}` : '';
+                                            const videoSize = mediaData.file_size ? formatFileSize(mediaData.file_size) : '';
+                                            
                                             return `<div class="media-item">
-                                                <video controls class="media-video" preload="metadata">
+                                                <video controls class="media-video" preload="metadata" 
+                                                       width="${Math.min(videoWidth, 400)}" 
+                                                       onclick="openMediaModal('/api/telegram/telegram/file-url/${fileId}', 'video')">
                                                     <source src="/api/telegram/telegram/file-url/${fileId}" type="video/mp4">
-                                                    您的浏览器不支持视频播放
+                                                    Your browser does not support video playback
                                                 </video>
-                                                <div class="media-info">🎥 视频</div>
+                                                <div class="media-info">
+                                                    🎥 Video ${videoWidth}×${videoHeight} ${videoDuration} ${videoSize}
+                                                </div>
+                                            </div>`;
+                                        case 'video_note':
+                                            const noteDuration = mediaData.duration ? `${mediaData.duration}s` : '';
+                                            const noteSize = mediaData.file_size ? formatFileSize(mediaData.file_size) : '';
+                                            
+                                            return `<div class="media-item">
+                                                <video controls class="media-video media-video-note" preload="metadata"
+                                                       style="border-radius: 50%; width: 240px; height: 240px; object-fit: cover;"
+                                                       onclick="openMediaModal('/api/telegram/telegram/file-url/${fileId}', 'video')">
+                                                    <source src="/api/telegram/telegram/file-url/${fileId}" type="video/mp4">
+                                                    Your browser does not support video playback
+                                                </video>
+                                                <div class="media-info">
+                                                    🎬 Video message ${noteDuration} ${noteSize}
+                                                </div>
                                             </div>`;
                                         case 'voice':
+                                            const voiceDuration = mediaData.duration ? `${Math.floor(mediaData.duration / 60)}:${String(mediaData.duration % 60).padStart(2, '0')}` : '';
+                                            const voiceSize = mediaData.file_size ? formatFileSize(mediaData.file_size) : '';
+                                            const voiceFileId = mediaData.file_id;
+                                            
+                                            return `<div class="voice-container">
+                                                <div class="voice-player-section">
+                                                    <audio controls class="media-audio" preload="metadata">
+                                                        <source src="/api/telegram/telegram/file-url/${fileId}" type="audio/ogg">
+                                                        <source src="/api/telegram/telegram/file-url/${fileId}" type="audio/mpeg">
+                                                        Your browser does not support audio playback
+                                                    </audio>
+                                                    <div class="voice-meta">
+                                                        <span class="voice-info">🎵 ${voiceDuration} ${voiceSize}</span>
+                                                        <button class="transcribe-btn" onclick="transcribeVoice('${voiceFileId}', ${message.id}, event)">
+                                                            📝 转文字
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="transcription-section" id="transcription-${message.id}">
+                                                    <div class="transcription-header">转换结果：</div>
+                                                    <div class="transcription-body"></div>
+                                                </div>
+                                            </div>`;
+                                        case 'audio':
+                                            const audioDuration = mediaData.duration ? `${Math.floor(mediaData.duration / 60)}:${String(mediaData.duration % 60).padStart(2, '0')}` : '';
+                                            const audioTitle = mediaData.title || mediaData.file_name || 'Audio file';
+                                            const audioPerformer = mediaData.performer ? ` - ${mediaData.performer}` : '';
+                                            const audioSize = mediaData.file_size ? formatFileSize(mediaData.file_size) : '';
+                                            
                                             return `<div class="media-item">
-                                                <audio controls class="media-audio">
+                                                <audio controls class="media-audio" preload="metadata">
+                                                    <source src="/api/telegram/telegram/file-url/${fileId}" type="audio/mpeg">
                                                     <source src="/api/telegram/telegram/file-url/${fileId}" type="audio/ogg">
-                                                    您的浏览器不支持音频播放
+                                                    Your browser does not support audio playback
                                                 </audio>
-                                                <div class="media-info">🎵 语音消息</div>
+                                                <div class="media-info">🎵 ${audioTitle}${audioPerformer} ${audioDuration} ${audioSize}</div>
                                             </div>`;
                                         case 'document':
+                                            const docName = mediaData.file_name || 'Document file';
+                                            const docSize = mediaData.file_size ? formatFileSize(mediaData.file_size) : '';
+                                            const mimeType = mediaData.mime_type || '';
+                                            
+                                            // Determine if it's an image or video document
+                                            if (mimeType.startsWith('image/')) {
+                                                return `<div class="media-item">
+                                                    <img src="/api/telegram/telegram/file-url/${fileId}" 
+                                                         alt="${docName}" 
+                                                         class="media-image"
+                                                         onclick="openMediaModal('/api/telegram/telegram/file-url/${fileId}', 'image')"
+                                                         loading="lazy">
+                                                    <div class="media-info">📷 ${docName} ${docSize}</div>
+                                                </div>`;
+                                            } else if (mimeType.startsWith('video/')) {
+                                                return `<div class="media-item">
+                                                    <video controls class="media-video" preload="metadata"
+                                                           onclick="openMediaModal('/api/telegram/telegram/file-url/${fileId}', 'video')">
+                                                        <source src="/api/telegram/telegram/file-url/${fileId}" type="${mimeType}">
+                                                        Your browser does not support video playback
+                                                    </video>
+                                                    <div class="media-info">🎥 ${docName} ${docSize}</div>
+                                                </div>`;
+                                            } else if (mimeType.startsWith('audio/')) {
+                                                return `<div class="media-item">
+                                                    <audio controls class="media-audio" preload="metadata">
+                                                        <source src="/api/telegram/telegram/file-url/${fileId}" type="${mimeType}">
+                                                        Your browser does not support audio playback
+                                                    </audio>
+                                                    <div class="media-info">🎵 ${docName} ${docSize}</div>
+                                                </div>`;
+                                            } else {
                                             return `<div class="media-item">
                                                 <div class="media-document" onclick="downloadFile('${fileId}')">
-                                                    📄 文档文件
+                                                        📄 ${docName}
                                                 </div>
-                                                <div class="media-info">点击下载</div>
+                                                    <div class="media-info">${docSize} - Click to download</div>
+                                                </div>`;
+                                            }
+                                        case 'sticker':
+                                            const stickerEmoji = mediaData.emoji || '🎭';
+                                            const stickerSize = mediaData.file_size ? formatFileSize(mediaData.file_size) : '';
+                                            
+                                            return `<div class="media-item">
+                                                <img src="/api/telegram/telegram/file-url/${fileId}" 
+                                                     alt="Sticker ${stickerEmoji}" 
+                                                     class="media-image media-sticker"
+                                                     style="max-width: 200px; max-height: 200px;"
+                                                     onclick="openMediaModal('/api/telegram/telegram/file-url/${fileId}', 'image')"
+                                                     loading="lazy">
+                                                <div class="media-info">${stickerEmoji} Sticker ${stickerSize}</div>
+                                            </div>`;
+                                        case 'animation':
+                                            const animationName = mediaData.file_name || 'GIF animation';
+                                            const animationSize = mediaData.file_size ? formatFileSize(mediaData.file_size) : '';
+                                            const animationDuration = mediaData.duration ? `${mediaData.duration}s` : '';
+                                            
+                                            return `<div class="media-item">
+                                                <video controls class="media-video" preload="metadata" autoplay loop muted
+                                                       onclick="openMediaModal('/api/telegram/telegram/file-url/${fileId}', 'video')">
+                                                    <source src="/api/telegram/telegram/file-url/${fileId}" type="${mediaData.mime_type || 'video/mp4'}">
+                                                    Your browser does not support animation playback
+                                                </video>
+                                                <div class="media-info">🎬 ${animationName} ${animationDuration} ${animationSize}</div>
                                             </div>`;
                                         default:
                                             return `<div class="media-item">
@@ -2255,28 +3229,28 @@
             `).join('');
         }
 
-        // 回复消息
+        // Reply to message
         function replyToMessage(chatId, fromName) {
-            // 自动填充聊天ID
+            // Auto-fill chat ID
             document.getElementById('sendChatId').value = chatId;
             
-            // 切换到发送消息标签页
+            // Switch to send message tab
             switchTab('send');
             
-            // 显示提示信息
-            showToast(`已选择回复给: ${fromName} (${chatId})`, 'success');
+            // Show prompt information
+            showToast(`Selected reply to: ${fromName} (${chatId})`, 'success');
             
-            // 滚动到发送表单
+            // Scroll to send form
             document.getElementById('tab-send').scrollIntoView({ 
                 behavior: 'smooth', 
                 block: 'start' 
             });
         }
 
-        // 打开媒体模态框
+        // Open media modal
         function openMediaModal(src, type, photos = null) {
             if (type === 'image') {
-                // 创建图片模态框
+                // Create image modal
                 const modal = document.createElement('div');
                 modal.className = 'media-modal';
                 
@@ -2284,7 +3258,7 @@
                 if (photos && photos.length > 1) {
                     photoSelector = `
                         <div class="photo-selector">
-                            <label>选择尺寸:</label>
+                            <label>Select size:</label>
                             <select id="photoSizeSelect" onchange="changePhotoSize(this.value)">
                                 ${photos.map((photo, index) => `
                                     <option value="${photo.file_id}" ${photo.file_id === src.split('/').pop() ? 'selected' : ''}>
@@ -2300,16 +3274,16 @@
                     <div class="modal-content">
                         <span class="modal-close" onclick="closeMediaModal()">&times;</span>
                         ${photoSelector}
-                        <img src="${src}" alt="图片" class="modal-image" id="modalImage">
+                        <img src="${src}" alt="Image" class="modal-image" id="modalImage">
                         <div class="image-info" id="imageInfo"></div>
                     </div>
                 `;
                 document.body.appendChild(modal);
                 
-                // 更新图片信息
+                // Update image information
                 updateImageInfo(src, photos);
                 
-                // 点击背景关闭
+                // Click background to close
                 modal.onclick = function(e) {
                     if (e.target === modal) {
                         closeMediaModal();
@@ -2318,35 +3292,35 @@
             }
         }
 
-        // 切换图片尺寸
+        // Switch image size
         function changePhotoSize(fileId) {
             const modalImage = document.getElementById('modalImage');
             const newSrc = `/api/telegram/telegram/file-url/${fileId}`;
             modalImage.src = newSrc;
             
-            // 更新图片信息
+            // Update image information
             const select = document.getElementById('photoSizeSelect');
             const selectedOption = select.options[select.selectedIndex];
             const dimensions = selectedOption.text.split(' ')[0];
-            document.getElementById('imageInfo').textContent = `尺寸: ${dimensions}`;
+            document.getElementById('imageInfo').textContent = `Size: ${dimensions}`;
         }
 
-        // 更新图片信息
+        // Update image information
         function updateImageInfo(src, photos) {
             if (photos && photos.length > 0) {
                 const currentFileId = src.split('/').pop();
                 const currentPhoto = photos.find(p => p.file_id === currentFileId);
                 if (currentPhoto) {
-                    const info = `尺寸: ${currentPhoto.width}×${currentPhoto.height}`;
+                    const info = `Size: ${currentPhoto.width}×${currentPhoto.height}`;
                     if (currentPhoto.file_size) {
-                        info += ` | 大小: ${Math.round(currentPhoto.file_size/1024)}KB`;
+                        info += ` | Size: ${Math.round(currentPhoto.file_size/1024)}KB`;
                     }
                     document.getElementById('imageInfo').textContent = info;
                 }
             }
         }
 
-        // 关闭媒体模态框
+        // Close media modal
         function closeMediaModal() {
             const modal = document.querySelector('.media-modal');
             if (modal) {
@@ -2354,13 +3328,12 @@
             }
         }
 
-        // 下载文件
+        // Download file
         async function downloadFile(fileId) {
             try {
-                showToast('正在获取文件...', 'info');
+                showToast('Getting file...', 'info');
                 
                 const response = await fetch(`/api/telegram/telegram/file-url/${fileId}`, {
-                    headers: { 'X-API-Key': apiKey }
                 });
                 
                 if (!response.ok) {
@@ -2370,7 +3343,7 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    // 创建下载链接
+                    // Create download link
                     const link = document.createElement('a');
                     link.href = result.data.file_url;
                     link.download = `telegram_file_${fileId}`;
@@ -2379,28 +3352,28 @@
                     link.click();
                     document.body.removeChild(link);
                     
-                    showToast('文件下载已开始', 'success');
+                    showToast('File download started', 'success');
                 } else {
-                    showToast(`下载失败: ${result.error}`, 'error');
+                    showToast(`Download failed: ${result.error}`, 'error');
                 }
             } catch (error) {
                 console.error('Download error:', error);
-                showToast('下载失败: 网络错误', 'error');
+                showToast('Download failed: Network error', 'error');
             }
         }
 
-        // 测试API端点
+        // Test API endpoint
         async function testApi(method, url, data = null) {
             const resultsContainer = document.getElementById('apiTestResults');
             const timestamp = new Date().toLocaleTimeString();
             
-            // 显示测试开始信息
+            // Show test start information
             const testId = `test-${Date.now()}`;
             resultsContainer.innerHTML = `
                 <div class="test-result info" id="${testId}">
-                    <strong>🧪 测试 ${method} ${url}</strong>
-                    <div>时间: ${timestamp}</div>
-                    <div>状态: 正在测试...</div>
+                    <strong>🧪 Test ${method} ${url}</strong>
+                    <div>Time: ${timestamp}</div>
+                    <div>Status: Testing...</div>
                 </div>
             `;
             
@@ -2412,12 +3385,8 @@
                     }
                 };
                 
-                // 添加API密钥（如果有）
-                if (apiKey) {
-                    options.headers['X-API-Key'] = apiKey;
-                }
                 
-                // 添加请求体（如果是POST/PUT请求）
+                // Add request body (if POST/PUT request)
                 if (data && (method === 'POST' || method === 'PUT')) {
                     options.body = JSON.stringify(data);
                 }
@@ -2433,36 +3402,36 @@
                 }
                 
                 const resultClass = response.ok ? 'success' : 'error';
-                const statusText = response.ok ? '✅ 成功' : '❌ 失败';
+                const statusText = response.ok ? '✅ Success' : '❌ Failed';
                 
                 document.getElementById(testId).innerHTML = `
-                    <strong>🧪 测试 ${method} ${url}</strong>
-                    <div>时间: ${timestamp}</div>
-                    <div>状态: ${statusText} (HTTP ${response.status})</div>
-                    <div>响应时间: ${Date.now() - parseInt(testId.split('-')[1])}ms</div>
+                    <strong>🧪 Test ${method} ${url}</strong>
+                    <div>Time: ${timestamp}</div>
+                    <div>Status: ${statusText} (HTTP ${response.status})</div>
+                    <div>Response time: ${Date.now() - parseInt(testId.split('-')[1])}ms</div>
                     <pre>${JSON.stringify(parsedData, null, 2)}</pre>
                 `;
                 document.getElementById(testId).className = `test-result ${resultClass}`;
                 
             } catch (error) {
                 document.getElementById(testId).innerHTML = `
-                    <strong>🧪 测试 ${method} ${url}</strong>
-                    <div>时间: ${timestamp}</div>
-                    <div>状态: ❌ 网络错误</div>
-                    <div>错误: ${error.message}</div>
+                    <strong>🧪 Test ${method} ${url}</strong>
+                    <div>Time: ${timestamp}</div>
+                    <div>Status: ❌ Network error</div>
+                    <div>Error: ${error.message}</div>
                 `;
                 document.getElementById(testId).className = 'test-result error';
             }
         }
 
-        // 更新消息统计信息
+        // Update message statistics
         function updateMessageStats(messages, errorMsg = null) {
             const totalMessagesEl = document.getElementById('totalMessages');
             const lastUpdateEl = document.getElementById('lastUpdate');
             
             if (errorMsg) {
                 totalMessagesEl.textContent = '-';
-                lastUpdateEl.textContent = '错误';
+                lastUpdateEl.textContent = 'Error';
                 return;
             }
             
@@ -2478,52 +3447,79 @@
             }
         }
 
-        // 清除消息历史
+        // Clear message history
         async function clearMessages() {
-            if (!confirm('确定要清除所有消息历史吗？')) {
+            if (!confirm('Are you sure you want to clear all message history?')) {
                 return;
             }
             
             try {
                 const response = await fetch('/api/telegram/telegram/messages', {
                     method: 'DELETE',
-                    headers: { 'X-API-Key': apiKey }
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast('消息历史已清除', 'success');
+                    showToast('Message history cleared', 'success');
                     refreshMessages();
                 } else {
-                    showToast(`清除失败: ${data.error}`, 'error');
+                    showToast(`Clear failed: ${data.error}`, 'error');
                 }
             } catch (error) {
                 console.error('Failed to clear messages:', error);
-                showToast('清除失败', 'error');
+                showToast('Clear failed', 'error');
+            }
+        }
+        
+        // Reprocess message media data
+        async function reprocessMessages() {
+            try {
+                showToast('Reprocessing message media data...', 'info');
+                
+                const response = await fetch('/api/telegram/telegram/reprocess-messages', {
+                    method: 'POST',
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const { reprocessed, total } = data.data;
+                    showToast(`✅ Reprocessing completed: ${reprocessed}/${total} messages updated with media data`, 'success');
+                    
+                    // Refresh message display
+                    setTimeout(() => {
+                        refreshMessages();
+                    }, 1000);
+                } else {
+                    showToast(`❌ Reprocessing failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Failed to reprocess messages:', error);
+                showToast('❌ Reprocessing failed: Network error', 'error');
             }
         }
 
-        // 切换标签页
+        // Switch tab
         function switchTab(tabName) {
-            // 隐藏所有标签内容
+            // Hide all tab content
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
             
-            // 移除所有标签按钮的活跃状态
+            // Remove active state from all tab buttons
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             
-            // 显示选中的标签内容
+            // Show selected tab content
             document.getElementById(`tab-${tabName}`).classList.add('active');
             
-            // 激活选中的标签按钮
+            // Activate selected tab button
             event.target.classList.add('active');
         }
 
-        // 更新发送表单
+        // Update send form
         function updateSendForm() {
             const messageType = document.getElementById('sendMessageType').value;
             const textGroup = document.getElementById('textMessageGroup');
@@ -2538,7 +3534,7 @@
             }
         }
 
-        // 发送Telegram消息
+        // Send Telegram message
         async function sendTelegramMessage() {
             const chatId = document.getElementById('sendChatId').value.trim();
             const messageType = document.getElementById('sendMessageType').value;
@@ -2547,24 +3543,24 @@
             const caption = document.getElementById('sendCaption').value.trim();
             
             if (!chatId) {
-                showToast('请输入聊天ID', 'error');
+                showToast('Please enter chat ID', 'error');
                 return;
             }
             
             if (messageType === 'text' && !text) {
-                showToast('请输入消息内容', 'error');
+                showToast('Please enter message content', 'error');
                 return;
             }
             
             if (messageType !== 'text' && !media) {
-                showToast('请输入媒体文件ID或URL', 'error');
+                showToast('Please enter media file ID or URL', 'error');
                 return;
             }
             
-            // 显示发送状态
+            // Show send status
             const sendButton = event.target;
             const originalText = sendButton.textContent;
-            sendButton.textContent = '发送中...';
+            sendButton.textContent = 'Sending...';
             sendButton.disabled = true;
             
             try {
@@ -2605,7 +3601,6 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        ...(apiKey ? { 'X-API-Key': apiKey } : {})
                     },
                     body: JSON.stringify(payload)
                 });
@@ -2613,47 +3608,47 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast('消息发送成功', 'success');
-                    // 清空表单
+                    showToast('Message sent successfully', 'success');
+                    // Clear form
                     document.getElementById('sendChatId').value = '';
                     document.getElementById('sendText').value = '';
                     document.getElementById('sendMedia').value = '';
                     document.getElementById('sendCaption').value = '';
                 } else {
-                    showToast(`发送失败: ${data.error}`, 'error');
+                    showToast(`Send failed: ${data.error}`, 'error');
                     console.error('Send message error:', data);
                 }
             } catch (error) {
                 console.error('Failed to send message:', error);
-                showToast('发送失败: 网络错误', 'error');
+                showToast('Send failed: Network error', 'error');
             } finally {
-                // 恢复按钮状态
+                // Restore button status
                 sendButton.textContent = originalText;
                 sendButton.disabled = false;
             }
         }
 
-        // 设置Webhook
+        // Set Webhook
         async function setWebhook() {
             const webhookUrl = document.getElementById('webhookUrl').value.trim();
             const webhookSecret = document.getElementById('webhookSecret').value.trim();
             
             if (!webhookUrl) {
-                showToast('请输入Webhook URL', 'error');
+                showToast('Please enter Webhook URL', 'error');
                 return;
             }
             
-            // 验证URL格式
+            // Validate URL format
             try {
                 new URL(webhookUrl);
             } catch (e) {
-                showToast('请输入有效的URL', 'error');
+                showToast('Please enter a valid URL', 'error');
                 return;
             }
             
             const setButton = event.target;
             const originalText = setButton.textContent;
-            setButton.textContent = '设置中...';
+            setButton.textContent = 'Setting...';
             setButton.disabled = true;
             
             try {
@@ -2670,7 +3665,6 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        ...(apiKey ? { 'X-API-Key': apiKey } : {})
                     },
                     body: JSON.stringify(payload)
                 });
@@ -2679,168 +3673,1110 @@
                 displayWebhookStatus(data, data.success ? 'success' : 'error');
                 
                 if (data.success) {
-                    showToast('Webhook设置成功', 'success');
+                    showToast('Webhook settings saved', 'success');
                 }
             } catch (error) {
                 console.error('Failed to set webhook:', error);
-                displayWebhookStatus({ success: false, error: '设置失败: 网络错误' }, 'error');
+                displayWebhookStatus({ success: false, error: 'Setting failed: Network error' }, 'error');
             } finally {
                 setButton.textContent = originalText;
                 setButton.disabled = false;
             }
         }
 
-        // 移除Webhook
+        // Remove Webhook
         async function removeWebhook() {
-            if (!confirm('确定要移除当前的Webhook设置吗？')) {
+            if (!confirm('Are you sure you want to remove the current Webhook settings?')) {
                 return;
             }
             
             const removeButton = event.target;
             const originalText = removeButton.textContent;
-            removeButton.textContent = '移除中...';
+            removeButton.textContent = 'Removing...';
             removeButton.disabled = true;
             
             try {
                 const response = await fetch('/api/telegram/telegram/webhook', {
                     method: 'DELETE',
-                    headers: apiKey ? { 'X-API-Key': apiKey } : {}
                 });
                 
                 const data = await response.json();
                 displayWebhookStatus(data, data.success ? 'success' : 'error');
                 
                 if (data.success) {
-                    showToast('Webhook已移除', 'success');
-                    // 清空表单
+                    showToast('Webhook removed', 'success');
+                    // Clear form
                     document.getElementById('webhookUrl').value = '';
                     document.getElementById('webhookSecret').value = '';
                 }
             } catch (error) {
                 console.error('Failed to remove webhook:', error);
-                displayWebhookStatus({ success: false, error: '移除失败: 网络错误' }, 'error');
+                displayWebhookStatus({ success: false, error: 'Removal failed: Network error' }, 'error');
             } finally {
                 removeButton.textContent = originalText;
                 removeButton.disabled = false;
             }
         }
 
-        // 获取Webhook信息
+        // Get Webhook information
         async function getWebhookInfo() {
             const infoButton = event.target;
             const originalText = infoButton.textContent;
-            infoButton.textContent = '获取中...';
+            infoButton.textContent = 'Getting...';
             infoButton.disabled = true;
             
             try {
                 const response = await fetch('/api/telegram/telegram/webhook', {
-                    headers: apiKey ? { 'X-API-Key': apiKey } : {}
                 });
                 
                 const data = await response.json();
                 displayWebhookStatus(data, 'info');
                 
                 if (data.success && data.data) {
-                    // 如果webhook已设置，填充表单
+                    // If webhook is set, fill the form
                     if (data.data.url) {
                         document.getElementById('webhookUrl').value = data.data.url;
                     }
                 }
             } catch (error) {
                 console.error('Failed to get webhook info:', error);
-                displayWebhookStatus({ success: false, error: '获取信息失败: 网络错误' }, 'error');
+                displayWebhookStatus({ success: false, error: 'Failed to get information: Network error' }, 'error');
             } finally {
                 infoButton.textContent = originalText;
                 infoButton.disabled = false;
             }
         }
 
-        // 显示Webhook状态
+        // Display Webhook status
         function displayWebhookStatus(data, type) {
             const statusEl = document.getElementById('webhookStatus');
             const className = `webhook-status ${type}`;
             
             let content = '';
             if (data.success) {
-                content = `<strong>✓ ${data.message || '操作成功'}</strong>`;
+                content = `<strong>✓ ${data.message || 'Operation successful'}</strong>`;
                 if (data.data) {
                     content += `<pre style="margin-top: 0.5rem; font-size: 0.8rem;">${JSON.stringify(data.data, null, 2)}</pre>`;
                 }
             } else {
-                content = `<strong>✗ ${data.error || '操作失败'}</strong>`;
+                content = `<strong>✗ ${data.error || 'Operation failed'}</strong>`;
             }
             
             statusEl.innerHTML = `<div class="${className}">${content}</div>`;
         }
 
         // =================
-        // API文档管理函数
+        // API documentation management functions
         // =================
 
-        // 显示API文档
+        // Show API documentation
         function showApiDocumentation() {
             document.getElementById('apiDocumentation').classList.remove('hidden');
             document.getElementById('apiDocumentation').scrollIntoView({ 
                 behavior: 'smooth', 
                 block: 'start' 
             });
-            showToast('API文档已显示', 'success');
+            showToast('API documentation displayed', 'success');
         }
+        
+        // Show QR code
+        async function showQRCode() {
+            console.log('showQRCode function called');
+            
+            const modal = document.getElementById('qrModal');
+            const qrCodeContainer = document.getElementById('qrCode');
+            const qrUrlElement = document.getElementById('qrUrl');
+            
+            if (!modal || !qrCodeContainer || !qrUrlElement) {
+                console.error('QR Code elements not found');
+                showToast('QR Code elements not found', 'error');
+                return;
+            }
+            
+            // Show loading status
+            qrCodeContainer.innerHTML = '<div style="text-align: center; padding: 2rem;"><div class="spinner"></div><p>Loading...</p></div>';
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            try {
+                // Get server information (including LAN IP)
+                const response = await fetch('/api/server-info');
+                const serverInfo = await response.json();
+                
+                const lanUrl = serverInfo.url;
+                qrUrlElement.textContent = lanUrl;
+                
+                // Clear loading status
+                qrCodeContainer.innerHTML = '';
+                
+                // Check if QR library is loaded, if not use online QR code generation service
+                if (typeof QR === 'undefined') {
+                    console.log('QR library not loaded, using online QR service');
+                    // Use online QR code generation service
+                    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(lanUrl)}`;
+                    qrCodeContainer.innerHTML = `
+                        <img src="${qrImageUrl}" 
+                             alt="QR Code for ${lanUrl}" 
+                             style="border: 1px solid #ddd; border-radius: 0.5rem; max-width: 200px; max-height: 200px;"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <div style="display: none; border: 2px dashed #ccc; padding: 2rem; border-radius: 0.5rem; background: #f9f9f9; text-align: center;">
+                            <div style="font-size: 3rem; margin-bottom: 0.5rem;">📱</div>
+                            <p style="color: #666; margin: 0;">QR Code generation failed</p>
+                            <p style="color: #999; font-size: 0.9rem; margin: 0.5rem 0 0 0;">Please copy the URL below:</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                try {
+                    // Generate QR code
+                    const qr = new QR({
+                        text: lanUrl,
+                        width: 200,
+                        height: 200,
+                        colorDark: '#000000',
+                        colorLight: '#FFFFFF'
+                    });
+                    
+                    // Create canvas element
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 200;
+                    canvas.height = 200;
+                    canvas.style.border = '1px solid #ddd';
+                    canvas.style.borderRadius = '0.5rem';
+                    
+                    // Draw QR code
+                    qr.draw(canvas);
+                    
+                    // Add to container
+                    qrCodeContainer.appendChild(canvas);
+                    
+                    console.log('QR Code generated successfully');
+                } catch (error) {
+                    console.error('QR Code generation failed:', error);
+                    qrCodeContainer.innerHTML = `
+                        <div style="border: 2px dashed #ccc; padding: 2rem; border-radius: 0.5rem; background: #f9f9f9; text-align: center;">
+                            <div style="font-size: 3rem; margin-bottom: 0.5rem;">📱</div>
+                            <p style="color: #666; margin: 0;">Failed to generate QR code</p>
+                            <p style="color: #999; font-size: 0.9rem; margin: 0.5rem 0 0 0;">Please copy the URL below:</p>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Failed to get server info:', error);
+                // Use current URL as fallback
+                const currentUrl = window.location.href;
+                qrUrlElement.textContent = currentUrl;
+                
+                qrCodeContainer.innerHTML = `
+                    <div style="border: 2px dashed #ccc; padding: 2rem; border-radius: 0.5rem; background: #f9f9f9; text-align: center;">
+                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">📱</div>
+                        <p style="color: #666; margin: 0;">Failed to get LAN IP</p>
+                        <p style="color: #999; font-size: 0.9rem; margin: 0.5rem 0 0 0;">Using current URL:</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Close QR code
+        function closeQRCode() {
+            const modal = document.getElementById('qrModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        
+        // ESC key closes QR code
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeQRCode();
+            }
+        });
+        
 
-        // 显示所有API文档
+        // Show all API documentation
         function showAllApiDocs() {
             showApiDocumentation();
             switchApiTab('overview');
         }
 
-        // 显示Telegram API文档
+        // Show Telegram API documentation
         function showTelegramApiDocs() {
             showApiDocumentation();
             switchApiTab('telegram');
         }
 
-        // 显示Home Assistant API文档
+        // Show Home Assistant API documentation
         function showHomeAssistantApiDocs() {
             showApiDocumentation();
             switchApiTab('home_assistant');
         }
 
-        // 切换API标签页
+        // Switch API tab
         function switchApiTab(tabName) {
-            // 隐藏所有API标签内容
+            // Hide all API tab content
             document.querySelectorAll('#apiDocumentation .tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
             
-            // 移除所有API标签按钮的活跃状态
+            // Remove active state from all API tab buttons
             document.querySelectorAll('#apiDocumentation .tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             
-            // 显示选中的标签内容
+            // Show selected tab content
             document.getElementById(`api-tab-${tabName}`).classList.add('active');
             
-            // 激活选中的标签按钮
+            // Activate selected tab button
             event.target.classList.add('active');
         }
 
-        // 键盘快捷键
+        // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
-            // Ctrl/Cmd + R 刷新数据
+            // Ctrl/Cmd + R refresh data
             if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
                 e.preventDefault();
                 refreshData();
-                showToast('数据已刷新', 'success');
+                showToast('Data refreshed', 'success');
             }
             
-            // Escape 键关闭详情
+            // Escape key closes details
             if (e.key === 'Escape') {
                 document.querySelectorAll('.collapsible-content:not(.hidden)').forEach(el => {
                     el.classList.add('hidden');
-                    el.previousElementSibling.textContent = '显示详情';
+                    el.previousElementSibling.textContent = 'Show Details';
                 });
             }
         });
+
+        // Health Check Functions
+        async function runHealthCheck() {
+            const resultsContainer = document.getElementById('healthResults');
+            resultsContainer.innerHTML = '<div class="health-item"><div class="health-item-info">🔄 Running health check...</div></div>';
+            
+            const healthResults = [];
+            
+            // Check each module
+            for (const [moduleName, moduleData] of Object.entries(modules)) {
+                // Skip agent module
+                if (moduleName === 'agent') continue;
+                
+                const healthResult = await checkModuleHealth(moduleName, moduleData);
+                healthResults.push(healthResult);
+            }
+            
+            // Render results
+            renderHealthResults(healthResults);
+        }
+
+        async function checkModuleHealth(moduleName, moduleData) {
+            const result = {
+                name: moduleName,
+                status: 'unknown',
+                message: '',
+                details: {}
+            };
+
+            try {
+                const isInitialized = moduleData.data && moduleData.data.initialized;
+                
+                if (!isInitialized) {
+                    result.status = 'warning';
+                    result.message = 'Module not initialized';
+                    return result;
+                }
+
+                // Try to fetch credentials to verify they exist
+                let hasValidCredentials = false;
+                try {
+                    const credsResponse = await fetch(`/api/credentials/${moduleName}`);
+                    if (credsResponse.ok) {
+                        const credsData = await credsResponse.json();
+                        if (credsData.success && credsData.data && Object.keys(credsData.data).length > 0) {
+                            hasValidCredentials = true;
+                        }
+                    }
+                } catch (error) {
+                    // Ignore credential fetch errors, will be caught by module-specific health check
+                }
+
+                if (!hasValidCredentials) {
+                    result.status = 'warning';
+                    result.message = 'No credentials configured';
+                    return result;
+                }
+
+                // Module-specific health checks
+                switch (moduleName) {
+                    case 'telegram':
+                        result.details = await checkTelegramHealth(moduleData);
+                        break;
+                    case 'home_assistant':
+                        result.details = await checkHomeAssistantHealth(moduleData);
+                        break;
+                    case 'claude':
+                    case 'gemini':
+                    case 'openai':
+                    case 'deepseek':
+                        result.details = await checkAIHealth(moduleName, moduleData);
+                        break;
+                    case 'nodered':
+                        result.details = await checkNodeRedHealth(moduleData);
+                        break;
+                    default:
+                        result.details = await checkGenericHealth(moduleName, moduleData);
+                }
+
+                // Determine overall status
+                if (result.details && result.details.valid) {
+                    result.status = 'healthy';
+                    result.message = result.details.message || 'Service is healthy';
+                } else if (result.details && result.details.error) {
+                    result.status = 'error';
+                    result.message = result.details.error || 'Service validation failed';
+                } else {
+                    result.status = 'warning';
+                    result.message = 'Unable to verify service health';
+                }
+
+            } catch (error) {
+                result.status = 'error';
+                result.message = `Health check failed: ${error.message}`;
+            }
+
+            return result;
+        }
+
+        async function checkTelegramHealth(moduleData) {
+            try {
+                // Check if polling is active
+                const isPolling = moduleData.data?.messaging?.isPolling;
+                const messageCount = moduleData.data?.stats?.messageCount || 0;
+                
+                // If polling is active, consider it healthy
+                if (isPolling) {
+                    return {
+                        valid: true,
+                        message: `Bot is polling (${messageCount} messages)`,
+                        polling: true,
+                        messageCount: messageCount
+                    };
+                }
+                
+                // If not polling, try to validate token
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
+                
+                try {
+                    const response = await fetch('/api/telegram/telegram/bot-info', {
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        return {
+                            valid: true,
+                            message: 'Bot token is valid (not polling)',
+                            botInfo: data.data,
+                            polling: false
+                        };
+                    } else {
+                        return {
+                            valid: false,
+                            error: data.error || 'Token validation failed'
+                        };
+                    }
+                } catch (fetchError) {
+                    clearTimeout(timeoutId);
+                    if (fetchError.name === 'AbortError') {
+                        // Timeout, but if we have credentials, assume it's OK
+                        return {
+                            valid: true,
+                            message: 'Bot configured (API timeout)',
+                            polling: false,
+                            warning: 'API validation timed out'
+                        };
+                    }
+                    throw fetchError;
+                }
+            } catch (error) {
+                return {
+                    valid: false,
+                    error: `Telegram health check error: ${error.message}`
+                };
+            }
+        }
+
+        async function checkHomeAssistantHealth(moduleData) {
+            try {
+                // Test Home Assistant connection with timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
+                
+                const response = await fetch('/api/home_assistant/home_assistant/config', {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                const data = await response.json();
+                
+                if (data.success) {
+                    return {
+                        valid: true,
+                        message: 'Home Assistant connection successful',
+                        version: data.data?.version
+                    };
+                } else {
+                    return {
+                        valid: false,
+                        error: data.error || 'Home Assistant connection failed'
+                    };
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    return {
+                        valid: false,
+                        error: 'Home Assistant connection timeout'
+                    };
+                }
+                return {
+                    valid: false,
+                    error: `Home Assistant error: ${error.message}`
+                };
+            }
+        }
+
+        async function checkAIHealth(moduleName, moduleData) {
+            try {
+                // Test AI service connection
+                const response = await fetch(`/api/${moduleName}/${moduleName}/models`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    return {
+                        valid: true,
+                        message: `${moduleName} API is accessible`,
+                        models: data.data?.length || 0
+                    };
+                } else {
+                    return {
+                        valid: false,
+                        error: `${moduleName} API validation failed`
+                    };
+                }
+            } catch (error) {
+                return {
+                    valid: false,
+                    error: `${moduleName} API error: ${error.message}`
+                };
+            }
+        }
+
+        async function checkNodeRedHealth(moduleData) {
+            try {
+                // Test Node-RED connection
+                const response = await fetch('/api/nodered/nodered/flows');
+                const data = await response.json();
+                
+                if (data.success) {
+                    return {
+                        valid: true,
+                        message: 'Node-RED is accessible',
+                        flowCount: data.data?.length || 0
+                    };
+                } else {
+                    return {
+                        valid: false,
+                        error: 'Node-RED connection failed'
+                    };
+                }
+            } catch (error) {
+                return {
+                    valid: false,
+                    error: `Node-RED error: ${error.message}`
+                };
+            }
+        }
+
+        async function checkGenericHealth(moduleName, moduleData) {
+            try {
+                // Generic validation check
+                const response = await fetch(`/api/validate/${moduleName}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    return {
+                        valid: true,
+                        message: 'Service is accessible'
+                    };
+                } else {
+                    return {
+                        valid: false,
+                        error: 'Service validation failed'
+                    };
+                }
+            } catch (error) {
+                return {
+                    valid: false,
+                    error: `Service error: ${error.message}`
+                };
+            }
+        }
+
+        function renderHealthResults(results) {
+            const container = document.getElementById('healthResults');
+            
+            if (results.length === 0) {
+                container.innerHTML = '<div class="health-item"><div class="health-item-info">No modules found</div></div>';
+                return;
+            }
+
+            // Module icons mapping
+            const moduleIcons = {
+                'telegram': '📱',
+                'home_assistant': '🏠',
+                'openai': '🤖',
+                'gemini': '💎',
+                'claude': '🎯',
+                'nodered': '🔴',
+                'whatsapp': '💬'
+            };
+
+            const html = results.map(result => {
+                const statusClass = result.status;
+                let statusText = result.status.charAt(0).toUpperCase() + result.status.slice(1);
+                let statusIcon = '';
+                
+                // Status icons
+                switch(result.status) {
+                    case 'healthy':
+                        statusIcon = '✅';
+                        break;
+                    case 'warning':
+                        statusIcon = '⚠️';
+                        break;
+                    case 'error':
+                        statusIcon = '❌';
+                        break;
+                    case 'info':
+                        statusIcon = 'ℹ️';
+                        break;
+                    default:
+                        statusIcon = '❓';
+                }
+                
+                const moduleIcon = moduleIcons[result.name] || '🔧';
+                const moduleName = capitalizeFirst(result.name);
+                
+                return `
+                    <div class="health-item ${statusClass}">
+                        <div class="health-item-info">
+                            <span style="font-size: 1.5rem;">${moduleIcon}</span>
+                            <div>
+                                <div><strong>${moduleName}</strong></div>
+                                <div style="font-size: 0.875rem; color: var(--gray-600);">${result.message}</div>
+                            </div>
+                        </div>
+                        <div class="health-status ${statusClass}">${statusIcon} ${statusText}</div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html;
+        }
+
+        function startPeriodicHealthCheck() {
+            if (healthCheckInterval) {
+                showToast('Periodic health check is already running', 'warning');
+                return;
+            }
+
+            showToast('Starting periodic health check (every 5 minutes)', 'success');
+            runHealthCheck(); // Run immediately
+            
+            healthCheckInterval = setInterval(() => {
+                runHealthCheck();
+            }, 5 * 60 * 1000); // Every 5 minutes
+        }
+
+        function stopPeriodicHealthCheck() {
+            if (healthCheckInterval) {
+                clearInterval(healthCheckInterval);
+                healthCheckInterval = null;
+                showToast('Periodic health check stopped', 'info');
+            } else {
+                showToast('No periodic health check is running', 'warning');
+            }
+        }
+
+        // Node-RED Management Functions
+        function showFlowUpload() {
+            document.getElementById('flowUploadModal').style.display = 'block';
+            setupFileUpload();
+        }
+
+        function closeFlowUpload() {
+            document.getElementById('flowUploadModal').style.display = 'none';
+            document.getElementById('uploadPreview').style.display = 'none';
+            currentFlowData = null;
+        }
+
+        function setupFileUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('flowFileInput');
+
+            // Click to select file
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // File input change
+            fileInput.addEventListener('change', handleFileSelect);
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                }
+            });
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            if (!file.name.endsWith('.json')) {
+                showToast('Please select a JSON file', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const flowData = JSON.parse(e.target.result);
+                    currentFlowData = flowData;
+                    
+                    // Show preview
+                    document.getElementById('flowPreview').textContent = JSON.stringify(flowData, null, 2);
+                    document.getElementById('uploadPreview').style.display = 'block';
+                    
+                    showToast('Flow file loaded successfully', 'success');
+                } catch (error) {
+                    showToast('Invalid JSON file', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        async function deployFlow() {
+            if (!currentFlowData) {
+                showToast('No flow data to deploy', 'error');
+                return;
+            }
+
+            try {
+                showToast('Deploying flow...', 'info');
+                
+                const response = await fetch('/api/nodered/nodered/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        flowData: currentFlowData,
+                        filename: 'uploaded_flow.json'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('Flow deployed successfully!', 'success');
+                    closeFlowUpload();
+                    loadNodeRedFlows();
+                } else {
+                    showToast(`Deployment failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showToast(`Deployment error: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadNodeRedFlows() {
+            try {
+                showToast('Loading current flows...', 'info');
+                
+                const response = await fetch('/api/nodered/nodered/flows');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const flows = result.data || [];
+                    const flowTabs = flows.filter(f => f.type === 'tab');
+                    
+                    // Update flow count in info box
+                    document.getElementById('noderedFlowCount').textContent = flowTabs.length;
+                    
+                    // Display flows with details
+                    const container = document.getElementById('noderedResults');
+                    let flowsHTML = `
+                        <div class="health-item healthy">
+                            <div class="health-item-info">
+                                <span>📋</span>
+                                <div>
+                                    <div><strong>Current Flows</strong></div>
+                                    <div style="font-size: 0.875rem; color: var(--gray-600);">
+                                        ${flowTabs.length} flows loaded, ${flows.length} total nodes
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="health-status healthy">Loaded</div>
+                        </div>
+                    `;
+                    
+                    // List each flow
+                    if (flowTabs.length > 0) {
+                        flowsHTML += '<div style="margin-top: 1rem; background: white; border-radius: 0.5rem; padding: 1rem;">';
+                        flowsHTML += '<h3 style="margin-bottom: 1rem; color: var(--gray-700);">📁 Available Flows:</h3>';
+                        flowsHTML += '<div style="display: grid; gap: 0.5rem;">';
+                        
+                        flowTabs.forEach((flow, index) => {
+                            const nodeCount = flows.filter(n => n.z === flow.id).length;
+                            const isDisabled = flow.disabled ? '(Disabled)' : '';
+                            flowsHTML += `
+                                <div style="padding: 0.75rem; background: var(--gray-50); border-radius: 0.375rem; border-left: 3px solid var(--primary-color);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div style="flex: 1;">
+                                            <strong style="color: var(--gray-800);">${index + 1}. ${flow.label || flow.id}</strong>
+                                            ${isDisabled ? '<span style="color: var(--danger-color); margin-left: 0.5rem; font-size: 0.85rem;">⚠️ Disabled</span>' : ''}
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                            <span style="color: var(--gray-600); font-size: 0.875rem;">${nodeCount} nodes</span>
+                                            <button class="btn btn-sm btn-danger" onclick="deleteNodeRedFlow('${flow.id}', '${(flow.label || flow.id).replace(/'/g, "\\'")}')">🗑️ Delete</button>
+                                        </div>
+                                    </div>
+                                    ${flow.info ? `<div style="margin-top: 0.25rem; font-size: 0.875rem; color: var(--gray-600);">${flow.info.substring(0, 100)}${flow.info.length > 100 ? '...' : ''}</div>` : ''}
+                                </div>
+                            `;
+                        });
+                        
+                        flowsHTML += '</div></div>';
+                    }
+                    
+                    container.innerHTML = flowsHTML;
+                    showToast('Flows loaded successfully', 'success');
+                } else {
+                    showToast(`Failed to load flows: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showToast(`Error loading flows: ${error.message}`, 'error');
+            }
+        }
+
+        // Load Node-RED service info
+        async function loadNodeRedInfo() {
+            try {
+                // Get Node-RED credentials to fetch service URL
+                const credsResponse = await fetch('/api/credentials/nodered');
+                if (credsResponse.ok) {
+                    const credsData = await credsResponse.json();
+                    const serviceUrl = credsData.data?.base_url || 'Not configured';
+                    document.getElementById('noderedServiceUrl').textContent = serviceUrl;
+                }
+                
+                // Load flows to get count
+                const flowsResponse = await fetch('/api/nodered/nodered/flows');
+                if (flowsResponse.ok) {
+                    const flowsData = await flowsResponse.json();
+                    if (flowsData.success) {
+                        const flows = flowsData.data || [];
+                        const flowTabs = flows.filter(f => f.type === 'tab');
+                        document.getElementById('noderedFlowCount').textContent = flowTabs.length;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load Node-RED info:', error);
+            }
+        }
+        
+        // Load Node-RED flows for card display
+        async function loadNodeRedFlowsForCard() {
+            const contentDiv = document.getElementById('nodered-flows-content');
+            if (!contentDiv) return;
+            
+            try {
+                contentDiv.innerHTML = '<div style="text-align: center; color: var(--gray-500);">⏳ Loading...</div>';
+                
+                const response = await fetch('/api/nodered/nodered/flows');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const flows = result.data || [];
+                    const flowTabs = flows.filter(f => f.type === 'tab' && !f.disabled);
+                    
+                    if (flowTabs.length === 0) {
+                        contentDiv.innerHTML = '<div style="color: var(--gray-500); text-align: center;">No active flows found</div>';
+                        return;
+                    }
+                    
+                    let html = '<div style="display: flex; flex-direction: column; gap: 0.5rem;">';
+                    flowTabs.forEach((flow, index) => {
+                        const nodeCount = flows.filter(n => n.z === flow.id).length;
+                        html += `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: white; border-radius: 0.375rem; border-left: 3px solid var(--primary-color);">
+                                <div style="flex: 1;">
+                                    <strong style="color: var(--gray-800); font-size: 0.95rem;">${flow.label || flow.id}</strong>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <span style="color: var(--gray-600); font-size: 0.85rem; white-space: nowrap;">${nodeCount} nodes</span>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteNodeRedFlow('${flow.id}', '${(flow.label || flow.id).replace(/'/g, "\\'")}')">🗑️ Delete</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    html += `<div style="margin-top: 0.75rem; text-align: center; color: var(--gray-600); font-size: 0.85rem;">Total: ${flowTabs.length} flows</div>`;
+                    
+                    contentDiv.innerHTML = html;
+                } else {
+                    contentDiv.innerHTML = '<div style="color: var(--danger-color); text-align: center;">⚠️ ' + (result.error || 'Failed to load flows') + '</div>';
+                }
+            } catch (error) {
+                console.error('Failed to load Node-RED flows:', error);
+                contentDiv.innerHTML = '<div style="color: var(--danger-color); text-align: center;">❌ Error loading flows</div>';
+            }
+        }
+        
+        // Delete a Node-RED flow
+        async function deleteNodeRedFlow(flowId, flowLabel) {
+            if (!confirm(`Are you sure you want to delete flow "${flowLabel}"?\n\nThis action cannot be undone.`)) {
+                return;
+            }
+            
+            try {
+                showToast('Deleting flow...', 'info');
+                
+                // First, get all current flows
+                const getResponse = await fetch('/api/nodered/nodered/flows');
+                const getResult = await getResponse.json();
+                
+                if (!getResult.success) {
+                    throw new Error(getResult.error || 'Failed to get current flows');
+                }
+                
+                const allFlows = getResult.data || [];
+                
+                // Filter out the flow tab and all its nodes
+                const updatedFlows = allFlows.filter(node => {
+                    // Remove the flow tab itself
+                    if (node.id === flowId) return false;
+                    // Remove all nodes that belong to this flow
+                    if (node.z === flowId) return false;
+                    return true;
+                });
+                
+                // Deploy the updated flows
+                const deployResponse = await fetch('/api/nodered/nodered/flows', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ flows: updatedFlows })
+                });
+                
+                const deployResult = await deployResponse.json();
+                
+                if (deployResult.success) {
+                    showToast(`Flow "${flowLabel}" deleted successfully`, 'success');
+                    // Refresh the flow list
+                    loadNodeRedFlowsForCard();
+                    // Also refresh the main Node-RED section if visible
+                    const noderedResults = document.getElementById('noderedResults');
+                    if (noderedResults && noderedResults.innerHTML.trim() !== '') {
+                        loadNodeRedFlows();
+                    }
+                } else {
+                    throw new Error(deployResult.error || 'Failed to deploy updated flows');
+                }
+            } catch (error) {
+                console.error('Failed to delete flow:', error);
+                showToast(`Failed to delete flow: ${error.message}`, 'error');
+            }
+        }
+        
+        // Open Node-RED service in new tab
+        function openNodeRedService() {
+            const serviceUrl = document.getElementById('noderedServiceUrl').textContent;
+            if (serviceUrl && serviceUrl !== 'Loading...' && serviceUrl !== 'Not configured') {
+                window.open(serviceUrl, '_blank');
+            } else {
+                showToast('Node-RED service URL not configured', 'warning');
+            }
+        }
+
+        async function validateCurrentFlows() {
+            try {
+                showToast('Validating flows...', 'info');
+                
+                const response = await fetch('/api/nodered/nodered/validate');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const container = document.getElementById('noderedResults');
+                    container.innerHTML = `
+                        <div class="health-item healthy">
+                            <div class="health-item-info">
+                                <span>✅</span>
+                                <div>
+                                    <div><strong>Flow Validation</strong></div>
+                                    <div style="font-size: 0.875rem; color: var(--gray-600);">
+                                        ${result.data.node_count} nodes validated
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="health-status healthy">Valid</div>
+                        </div>
+                    `;
+                    showToast('Flows validation passed', 'success');
+                } else {
+                    showToast(`Validation failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showToast(`Validation error: ${error.message}`, 'error');
+            }
+        }
+
+        function showBackupManager() {
+            document.getElementById('backupModal').style.display = 'block';
+            refreshBackups();
+        }
+
+        function closeBackupManager() {
+            document.getElementById('backupModal').style.display = 'none';
+        }
+
+        async function refreshBackups() {
+            try {
+                const response = await fetch('/api/nodered/nodered/backups');
+                const result = await response.json();
+                
+                if (result.success) {
+                    renderBackupList(result.data);
+                } else {
+                    showToast(`Failed to load backups: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showToast(`Error loading backups: ${error.message}`, 'error');
+            }
+        }
+
+        function renderBackupList(backups) {
+            const container = document.getElementById('backupList');
+            
+            if (backups.length === 0) {
+                container.innerHTML = '<p>No backups found</p>';
+                return;
+            }
+
+            const html = backups.map(backup => `
+                <div class="backup-item">
+                    <div class="backup-info">
+                        <h4>Backup ${backup.id}</h4>
+                        <p>Created: ${new Date(backup.timestamp).toLocaleString()}</p>
+                        <p>Flows: ${backup.flow_count}</p>
+                    </div>
+                    <div class="backup-actions">
+                        <button class="btn btn-primary" onclick="restoreBackup('${backup.id}')">🔄 Restore</button>
+                        <button class="btn btn-danger" onclick="deleteBackup('${backup.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        async function createBackup() {
+            try {
+                showToast('Creating backup...', 'info');
+                
+                const response = await fetch('/api/nodered/nodered/backup', {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('Backup created successfully', 'success');
+                    refreshBackups();
+                } else {
+                    showToast(`Backup failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showToast(`Backup error: ${error.message}`, 'error');
+            }
+        }
+
+        async function restoreBackup(backupId) {
+            if (!confirm('Are you sure you want to restore this backup? This will replace your current flows.')) {
+                return;
+            }
+
+            try {
+                showToast('Restoring backup...', 'info');
+                
+                const response = await fetch(`/api/nodered/nodered/restore/${backupId}`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('Backup restored successfully', 'success');
+                    loadNodeRedFlows();
+                } else {
+                    showToast(`Restore failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showToast(`Restore error: ${error.message}`, 'error');
+            }
+        }
+
+        async function deleteBackup(backupId) {
+            if (!confirm('Are you sure you want to delete this backup?')) {
+                return;
+            }
+
+            try {
+                showToast('Deleting backup...', 'info');
+                
+                const response = await fetch(`/api/nodered/nodered/backup/${backupId}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('Backup deleted successfully', 'success');
+                    refreshBackups();
+                } else {
+                    showToast(`Delete failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showToast(`Delete error: ${error.message}`, 'error');
+            }
+        }
     </script>
 </body>
 </html>

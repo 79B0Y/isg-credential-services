@@ -4,8 +4,11 @@
   "description": "Modular credential management service for Node-RED integration with support for multiple API services",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "NODE_ENV=development node server.js",
+    "start": "node --expose-gc --max-old-space-size=1024 server.js",
+    "dev": "NODE_ENV=development node --expose-gc --max-old-space-size=1024 server.js",
+    "start:safe": "./auto-restart.sh start",
+    "monitor": "./auto-restart.sh monitor",
+    "process-monitor": "node process-monitor.js",
     "test": "node tests/TestRunner.js",
     "test:telegram": "node tests/TelegramModuleTest.js",
     "test:quick": "node tests/TestRunner.js --skip-integration",
@@ -13,6 +16,14 @@
     "test:module": "node tests/TestRunner.js --modules=",
     "lint": "echo 'No linter configured. Consider adding eslint.'",
     "health": "node -e 'require(\"http\").get(\"http://localhost:3000/health\", (res) => { console.log(res.statusCode === 200 ? \"Healthy\" : \"Unhealthy\"); process.exit(res.statusCode === 200 ? 0 : 1); }).on(\"error\", () => { console.log(\"Unhealthy\"); process.exit(1); });'",
+    "status": "./auto-restart.sh status",
+    "stop": "./auto-restart.sh stop",
+    "restart": "./auto-restart.sh restart",
+    "cli": "node cli.js",
+    "cli:modules": "node cli.js modules",
+    "cli:status": "node cli.js status",
+    "cli:health": "node cli.js health",
+    "cli:version": "node cli.js version",
     "postinstall": "node -e 'console.log(\"🔐 Credential Service installed successfully!\"); console.log(\"Run \\\"npm start\\\" to start the service.\");'"
   },
   "keywords": [

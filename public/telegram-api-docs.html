@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📱 Telegram Bot API 测试文档</title>
+    <style>
+        :root {
+            --primary: #0088cc;
+            --primary-dark: #006699;
+            --secondary: #3273dc;
+            --success: #48c78e;
+            --danger: #f14668;
+            --warning: #ffe08a;
+            --info: #3e8ed0;
+            --light: #f5f5f5;
+            --dark: #363636;
+            --white: #ffffff;
+            --telegram-blue: #0088cc;
+            --telegram-dark: #006699;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0088cc 0%, #006699 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .api-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .api-section h2 {
+            color: var(--telegram-blue);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--telegram-blue);
+            font-size: 1.75rem;
+        }
+
+        .api-card {
+            background: var(--light);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--telegram-blue);
+        }
+
+        .api-card h3 {
+            color: var(--telegram-dark);
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .api-endpoint {
+            background: var(--dark);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Monaco', 'Courier New', monospace;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .method-badge {
+            background: var(--success);
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-weight: bold;
+            font-size: 0.875rem;
+        }
+
+        .method-badge.post {
+            background: var(--info);
+        }
+
+        .method-badge.delete {
+            background: var(--danger);
+        }
+
+        .test-area {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            border: 2px solid var(--telegram-blue);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--telegram-blue);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--telegram-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--telegram-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,136,204,0.4);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #2563c7;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            border-left: 4px solid var(--info);
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+        }
+
+        .result-box.success {
+            border-left-color: var(--success);
+            background: #f0fdf4;
+        }
+
+        .result-box.error {
+            border-left-color: var(--danger);
+            background: #fef2f2;
+        }
+
+        .result-box h4 {
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .result-content {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .voice-test-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        @media (max-width: 968px) {
+            .voice-test-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .voice-input-section,
+        .voice-result-section {
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+        }
+
+        .voice-result-section h4 {
+            color: var(--telegram-dark);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .transcription-display {
+            background: white;
+            border: 2px solid var(--telegram-blue);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            min-height: 150px;
+            margin-top: 1rem;
+        }
+
+        .transcription-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--dark);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .transcription-meta {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid #e5e7eb;
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,136,204,0.3);
+            border-radius: 50%;
+            border-top-color: var(--telegram-blue);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .placeholder-text {
+            color: #9ca3af;
+            font-style: italic;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .nav-links {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 0.5rem;
+            margin: 0 0.5rem;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .audio-player {
+            width: 100%;
+            margin: 1rem 0;
+        }
+
+        .info-box {
+            background: #e0f2fe;
+            border-left: 4px solid var(--info);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .info-box strong {
+            color: var(--info);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📱 Telegram Bot API 测试文档</h1>
+            <p>测试和调试 Telegram Bot 所有功能</p>
+        </div>
+
+        <!-- 智能获取最后消息文字 API -->
+        <div class="api-section">
+            <h2>🤖 智能获取最后消息文字</h2>
+            
+            <div class="api-card">
+                <h3>自动判断并返回文字内容</h3>
+                <div class="api-endpoint">
+                    <span class="method-badge">GET</span>
+                    <code>/api/telegram/:module/get-last-message-text</code>
+                </div>
+                
+                <div class="info-box">
+                    <strong>🎯 智能特性:</strong>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li>如果最后一条消息是<strong>文字</strong>，直接返回文字内容</li>
+                        <li>如果最后一条消息是<strong>语音</strong>，自动调用 Whisper 转换成文字后返回</li>
+                        <li>自动处理，无需手动判断消息类型</li>
+                    </ul>
+                </div>
+
+                <div class="test-area">
+                    <h4 style="margin-bottom: 1.5rem;">🧪 测试智能获取</h4>
+                    
+                    <div class="form-group">
+                        <label for="smartLanguage">语言提示 (仅对语音有效，可选)</label>
+                        <select id="smartLanguage">
+                            <option value="">自动识别</option>
+                            <option value="zh">中文 (zh)</option>
+                            <option value="en">英语 (en)</option>
+                            <option value="ja">日语 (ja)</option>
+                            <option value="ko">韩语 (ko)</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="getLastMessageText()" style="font-size: 1.1rem; padding: 1rem 2rem;">
+                        🚀 智能获取文字
+                    </button>
+
+                    <div class="result-box" id="smartResult" style="margin-top: 1.5rem;">
+                        <h4>📋 结果</h4>
+                        <div class="result-content" id="smartResultContent"></div>
+                    </div>
+                    
+                    <div class="transcription-display" id="smartTextDisplay" style="margin-top: 1.5rem; display: none;">
+                        <div class="transcription-text" id="smartTextContent"></div>
+                        <div class="transcription-meta" id="smartTextMeta"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 语音转文字 API -->
+        <div class="api-section">
+            <h2>🎤 语音转文字 (Whisper)</h2>
+            
+            <div class="api-card">
+                <h3>转换 Telegram 语音消息</h3>
+                <div class="api-endpoint">
+                    <span class="method-badge post">POST</span>
+                    <code>/api/telegram/:module/transcribe-voice</code>
+                </div>
+                
+                <div class="info-box">
+                    <strong>📌 说明:</strong> 使用 OpenAI Whisper 模型将 Telegram 语音消息转换为文字。支持多种语言，自动识别或手动指定。
+                </div>
+
+                <div class="test-area">
+                    <h4 style="margin-bottom: 1.5rem;">🧪 测试转换</h4>
+                    
+                    <div class="voice-test-container">
+                        <div class="voice-input-section">
+                            <div class="form-group">
+                                <label for="voiceFileId">语音文件 ID *</label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <input type="text" 
+                                           id="voiceFileId" 
+                                           placeholder="从 Telegram 消息中获取的 file_id"
+                                           value=""
+                                           style="flex: 1;">
+                                    <button class="btn btn-success" onclick="getLastVoiceMessage()" title="自动获取最后一条语音消息">
+                                        🎙️ 获取
+                                    </button>
+                                </div>
+                                <small style="color: #6b7280; margin-top: 0.25rem; display: block;">
+                                    点击"🎙️ 获取"按钮自动获取最后一条语音消息的 file_id
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="voiceLanguage">语言 (可选)</label>
+                                <select id="voiceLanguage">
+                                    <option value="">自动识别</option>
+                                    <option value="zh">中文 (zh)</option>
+                                    <option value="en">英语 (en)</option>
+                                    <option value="ja">日语 (ja)</option>
+                                    <option value="ko">韩语 (ko)</option>
+                                    <option value="es">西班牙语 (es)</option>
+                                    <option value="fr">法语 (fr)</option>
+                                    <option value="de">德语 (de)</option>
+                                    <option value="ru">俄语 (ru)</option>
+                                </select>
+                            </div>
+
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <button class="btn btn-primary" onclick="transcribeVoice()">
+                                    🎙️ 开始转换
+                                </button>
+                                
+                                <button class="btn btn-success" onclick="getAndTranscribeLastVoice()" title="自动获取最后一条语音并转换">
+                                    ⚡ 一键转换
+                                </button>
+                                
+                                <button class="btn btn-secondary" onclick="clearVoiceResult()">
+                                    🗑️ 清空
+                                </button>
+                            </div>
+                            
+                            <small style="color: #6b7280; margin-top: 0.5rem; display: block;">
+                                💡 提示：点击"⚡ 一键转换"可自动获取并转换最后一条语音消息
+                            </small>
+                        </div>
+
+                        <div class="voice-result-section">
+                            <h4>📝 转换结果</h4>
+                            <div class="transcription-display" id="transcriptionDisplay">
+                                <div class="placeholder-text">
+                                    输入语音文件 ID 后点击"开始转换"
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 转换消息中的语音 -->
+            <div class="api-card">
+                <h3>转换消息对象中的语音</h3>
+                <div class="api-endpoint">
+                    <span class="method-badge post">POST</span>
+                    <code>/api/telegram/:module/transcribe-message</code>
+                </div>
+                
+                <div class="info-box">
+                    <strong>📌 说明:</strong> 直接传入 Telegram 消息对象，自动提取语音文件 ID 并转换。
+                </div>
+
+                <div class="test-area">
+                    <div class="form-group">
+                        <label for="messageObject">消息对象 (JSON)</label>
+                        <textarea id="messageObject" 
+                                  placeholder='{"message_id": 123, "voice": {"file_id": "...", "duration": 3}}'></textarea>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="transcribeMessage()">
+                        🎙️ 转换
+                    </button>
+
+                    <div class="result-box" id="messageResult">
+                        <h4>结果</h4>
+                        <div class="result-content" id="messageResultContent"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 快速回复 API -->
+        <div class="api-section">
+            <h2>💬 快速回复</h2>
+            
+            <div class="api-card">
+                <h3>回复最后一条消息</h3>
+                <div class="api-endpoint">
+                    <span class="method-badge post">POST</span>
+                    <code>/api/telegram/:module/reply/last</code>
+                </div>
+                
+                <div class="info-box">
+                    <strong>📌 说明:</strong> 向最后收到消息的聊天发送回复。适用于 Node-RED 等自动化场景。
+                </div>
+
+                <div class="test-area">
+                    <div class="form-group">
+                        <label for="replyText">回复内容 *</label>
+                        <textarea id="replyText" placeholder="输入要回复的文字内容..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="parseMode">解析模式</label>
+                        <select id="parseMode">
+                            <option value="">无</option>
+                            <option value="Markdown">Markdown</option>
+                            <option value="HTML">HTML</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="replyToLast()">
+                        📤 发送回复
+                    </button>
+
+                    <div class="result-box" id="replyResult">
+                        <h4>结果</h4>
+                        <div class="result-content" id="replyResultContent"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="api-card">
+                <h3>获取最后聊天信息</h3>
+                <div class="api-endpoint">
+                    <span class="method-badge">GET</span>
+                    <code>/api/telegram/:module/last-chat-info</code>
+                </div>
+
+                <button class="btn btn-secondary" onclick="getLastChatInfo()">
+                    📊 获取信息
+                </button>
+
+                <div class="result-box" id="chatInfoResult">
+                    <h4>结果</h4>
+                    <div class="result-content" id="chatInfoResultContent"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 返回主页 -->
+        <div class="nav-links">
+            <a href="/public/index.html">🏠 返回主页</a>
+            <a href="/public/api-docs.html">📚 API 文档总览</a>
+        </div>
+    </div>
+
+    <script>
+        const MODULE_NAME = 'telegram';
+
+        // 智能获取最后一条消息的文字内容
+        async function getLastMessageText() {
+            const language = document.getElementById('smartLanguage').value;
+            const resultBox = document.getElementById('smartResult');
+            const resultContent = document.getElementById('smartResultContent');
+            const textDisplay = document.getElementById('smartTextDisplay');
+            const textContent = document.getElementById('smartTextContent');
+            const textMeta = document.getElementById('smartTextMeta');
+
+            resultBox.classList.add('show');
+            resultContent.textContent = '正在获取最后一条消息...';
+            textDisplay.style.display = 'none';
+
+            try {
+                const url = language 
+                    ? `/api/telegram/${MODULE_NAME}/get-last-message-text?language=${language}`
+                    : `/api/telegram/${MODULE_NAME}/get-last-message-text`;
+                    
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (result.success && result.text) {
+                    // 显示完整 JSON
+                    resultBox.className = 'result-box show success';
+                    resultContent.textContent = JSON.stringify(result, null, 2);
+                    
+                    // 显示友好的文字内容
+                    textDisplay.style.display = 'block';
+                    textContent.textContent = result.text;
+                    
+                    // 构建元信息
+                    const metaItems = [];
+                    metaItems.push(`<div class="meta-item">📋 <strong>类型:</strong> ${result.message_type}</div>`);
+                    metaItems.push(`<div class="meta-item">🆔 <strong>消息ID:</strong> ${result.message_id}</div>`);
+                    metaItems.push(`<div class="meta-item">📅 <strong>时间:</strong> ${new Date(result.date).toLocaleString()}</div>`);
+                    
+                    if (result.is_transcribed) {
+                        metaItems.push(`<div class="meta-item">🎙️ <strong>转换:</strong> 语音已转换为文字</div>`);
+                        if (result.transcription) {
+                            if (result.transcription.language) {
+                                metaItems.push(`<div class="meta-item">🌐 <strong>语言:</strong> ${result.transcription.language}</div>`);
+                            }
+                            if (result.transcription.duration) {
+                                metaItems.push(`<div class="meta-item">⏱️ <strong>时长:</strong> ${Math.round(result.transcription.duration)}秒</div>`);
+                            }
+                        }
+                    } else {
+                        metaItems.push(`<div class="meta-item">✍️ <strong>来源:</strong> 直接文字消息</div>`);
+                    }
+                    
+                    textMeta.innerHTML = metaItems.join('');
+                    
+                } else {
+                    resultBox.className = 'result-box show error';
+                    resultContent.textContent = JSON.stringify(result, null, 2);
+                    textDisplay.style.display = 'none';
+                }
+            } catch (error) {
+                resultBox.className = 'result-box show error';
+                resultContent.textContent = '错误: ' + error.message;
+                textDisplay.style.display = 'none';
+            }
+        }
+
+        // 获取最后一条语音消息
+        async function getLastVoiceMessage() {
+            const fileIdInput = document.getElementById('voiceFileId');
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span>';
+
+            try {
+                // 获取消息列表
+                const response = await fetch(`/api/telegram/${MODULE_NAME}/messages?limit=50`);
+                const result = await response.json();
+
+                // 兼容两种返回格式
+                const messages = result.data?.messages || result.messages || [];
+
+                if (result.success && messages.length > 0) {
+                    // 从最新消息开始查找语音消息
+                    const voiceMessage = messages.find(msg => 
+                        msg.message_type === 'voice' && msg.media && msg.media.voice
+                    );
+
+                    if (voiceMessage) {
+                        const fileId = voiceMessage.media.voice.file_id;
+                        fileIdInput.value = fileId;
+                        
+                        // 显示提示
+                        const displayDiv = document.getElementById('transcriptionDisplay');
+                        displayDiv.innerHTML = `
+                            <div style="color: var(--success); text-align: center; padding: 1rem;">
+                                ✅ 已获取最后一条语音消息 (ID: ${voiceMessage.id})<br>
+                                <small style="color: #6b7280; margin-top: 0.5rem; display: block;">
+                                    ${new Date(voiceMessage.date).toLocaleString()}
+                                </small>
+                            </div>
+                        `;
+                        
+                        // 高亮输入框
+                        fileIdInput.focus();
+                        fileIdInput.select();
+                    } else {
+                        alert('❌ 未找到语音消息\n\n最近50条消息中没有语音消息，请先发送一条语音消息到 Bot。');
+                    }
+                } else {
+                    alert('❌ 获取消息失败: ' + (result.error || '未知错误'));
+                }
+            } catch (error) {
+                alert('❌ 网络错误: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        // 一键获取并转换最后一条语音消息
+        async function getAndTranscribeLastVoice() {
+            const displayDiv = document.getElementById('transcriptionDisplay');
+            
+            // 显示获取状态
+            displayDiv.innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <div class="loading-spinner" style="margin: 0 auto 1rem;"></div>
+                    <div style="color: #6b7280;">正在获取最后一条语音消息...</div>
+                </div>
+            `;
+
+            try {
+                // 获取消息列表
+                const response = await fetch(`/api/telegram/${MODULE_NAME}/messages?limit=50`);
+                const result = await response.json();
+
+                // 兼容两种返回格式
+                const messages = result.data?.messages || result.messages || [];
+
+                if (result.success && messages.length > 0) {
+                    // 从最新消息开始查找语音消息
+                    const voiceMessage = messages.find(msg => 
+                        msg.message_type === 'voice' && msg.media && msg.media.voice
+                    );
+
+                    if (voiceMessage) {
+                        const fileId = voiceMessage.media.voice.file_id;
+                        const fileIdInput = document.getElementById('voiceFileId');
+                        fileIdInput.value = fileId;
+                        
+                        // 显示正在转换状态
+                        displayDiv.innerHTML = `
+                            <div style="text-align: center; padding: 2rem;">
+                                <div class="loading-spinner" style="margin: 0 auto 1rem;"></div>
+                                <div style="color: #6b7280;">正在转换语音为文字...</div>
+                                <small style="color: #9ca3af; display: block; margin-top: 0.5rem;">
+                                    消息时间: ${new Date(voiceMessage.date).toLocaleString()}
+                                </small>
+                            </div>
+                        `;
+                        
+                        // 自动转换
+                        const language = document.getElementById('voiceLanguage').value;
+                        const transcribeResponse = await fetch(`/api/telegram/${MODULE_NAME}/transcribe-voice`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                file_id: fileId,
+                                options: language ? { language } : {}
+                            })
+                        });
+
+                        const transcribeResult = await transcribeResponse.json();
+
+                        if (transcribeResult.success && transcribeResult.text) {
+                            // 构建元信息
+                            const metaItems = [];
+                            metaItems.push(`<div class="meta-item">📅 <strong>时间:</strong> ${new Date(voiceMessage.date).toLocaleString()}</div>`);
+                            if (transcribeResult.language) {
+                                metaItems.push(`<div class="meta-item">🌐 <strong>语言:</strong> ${transcribeResult.language}</div>`);
+                            }
+                            if (transcribeResult.duration) {
+                                metaItems.push(`<div class="meta-item">⏱️ <strong>时长:</strong> ${Math.round(transcribeResult.duration)}秒</div>`);
+                            }
+                            if (transcribeResult.file_size) {
+                                metaItems.push(`<div class="meta-item">📦 <strong>大小:</strong> ${formatFileSize(transcribeResult.file_size)}</div>`);
+                            }
+
+                            displayDiv.innerHTML = `
+                                <div class="transcription-text">${transcribeResult.text}</div>
+                                ${metaItems.length > 0 ? `<div class="transcription-meta">${metaItems.join('')}</div>` : ''}
+                            `;
+                        } else {
+                            displayDiv.innerHTML = `
+                                <div style="color: var(--danger); text-align: center; padding: 2rem;">
+                                    ❌ 转换失败: ${transcribeResult.error || '未返回文字内容'}
+                                </div>
+                            `;
+                        }
+                    } else {
+                        displayDiv.innerHTML = `
+                            <div style="color: var(--warning); text-align: center; padding: 2rem;">
+                                ⚠️ 未找到语音消息<br>
+                                <small style="color: #6b7280; margin-top: 0.5rem; display: block;">
+                                    最近50条消息中没有语音消息，请先发送一条语音消息到 Bot
+                                </small>
+                            </div>
+                        `;
+                    }
+                } else {
+                    displayDiv.innerHTML = `
+                        <div style="color: var(--danger); text-align: center; padding: 2rem;">
+                            ❌ 获取消息失败: ${result.error || '未知错误'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                displayDiv.innerHTML = `
+                    <div style="color: var(--danger); text-align: center; padding: 2rem;">
+                        ❌ 网络错误: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // 语音转文字
+        async function transcribeVoice() {
+            const fileId = document.getElementById('voiceFileId').value.trim();
+            const language = document.getElementById('voiceLanguage').value;
+            const displayDiv = document.getElementById('transcriptionDisplay');
+
+            if (!fileId) {
+                alert('请输入语音文件 ID');
+                return;
+            }
+
+            // 显示加载状态
+            displayDiv.innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <div class="loading-spinner" style="margin: 0 auto 1rem;"></div>
+                    <div style="color: #6b7280;">正在转换语音为文字...</div>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`/api/telegram/${MODULE_NAME}/transcribe-voice`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        file_id: fileId,
+                        options: language ? { language } : {}
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.text) {
+                    // 构建元信息
+                    const metaItems = [];
+                    if (result.language) {
+                        metaItems.push(`<div class="meta-item">🌐 <strong>语言:</strong> ${result.language}</div>`);
+                    }
+                    if (result.duration) {
+                        metaItems.push(`<div class="meta-item">⏱️ <strong>时长:</strong> ${Math.round(result.duration)}秒</div>`);
+                    }
+                    if (result.file_size) {
+                        metaItems.push(`<div class="meta-item">📦 <strong>大小:</strong> ${formatFileSize(result.file_size)}</div>`);
+                    }
+
+                    displayDiv.innerHTML = `
+                        <div class="transcription-text">${result.text}</div>
+                        ${metaItems.length > 0 ? `<div class="transcription-meta">${metaItems.join('')}</div>` : ''}
+                    `;
+                } else {
+                    displayDiv.innerHTML = `
+                        <div style="color: var(--danger); text-align: center; padding: 2rem;">
+                            ❌ 转换失败: ${result.error || '未返回文字内容'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                displayDiv.innerHTML = `
+                    <div style="color: var(--danger); text-align: center; padding: 2rem;">
+                        ❌ 网络错误: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function clearVoiceResult() {
+            document.getElementById('voiceFileId').value = '';
+            document.getElementById('voiceLanguage').value = '';
+            document.getElementById('transcriptionDisplay').innerHTML = `
+                <div class="placeholder-text">
+                    输入语音文件 ID 后点击"开始转换"
+                </div>
+            `;
+        }
+
+        // 转换消息对象
+        async function transcribeMessage() {
+            const messageText = document.getElementById('messageObject').value.trim();
+            const resultBox = document.getElementById('messageResult');
+            const resultContent = document.getElementById('messageResultContent');
+
+            if (!messageText) {
+                alert('请输入消息对象 JSON');
+                return;
+            }
+
+            let messageObj;
+            try {
+                messageObj = JSON.parse(messageText);
+            } catch (e) {
+                alert('JSON 格式错误: ' + e.message);
+                return;
+            }
+
+            resultBox.classList.add('show');
+            resultContent.textContent = '正在转换...';
+
+            try {
+                const response = await fetch(`/api/telegram/${MODULE_NAME}/transcribe-message`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: messageObj })
+                });
+
+                const result = await response.json();
+                resultBox.className = result.success ? 'result-box show success' : 'result-box show error';
+                resultContent.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultBox.className = 'result-box show error';
+                resultContent.textContent = '错误: ' + error.message;
+            }
+        }
+
+        // 快速回复
+        async function replyToLast() {
+            const text = document.getElementById('replyText').value.trim();
+            const parseMode = document.getElementById('parseMode').value;
+            const resultBox = document.getElementById('replyResult');
+            const resultContent = document.getElementById('replyResultContent');
+
+            if (!text) {
+                alert('请输入回复内容');
+                return;
+            }
+
+            const payload = { text };
+            if (parseMode) {
+                payload.options = { parse_mode: parseMode };
+            }
+
+            resultBox.classList.add('show');
+            resultContent.textContent = '正在发送...';
+
+            try {
+                const response = await fetch(`/api/telegram/${MODULE_NAME}/reply/last`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                resultBox.className = result.success ? 'result-box show success' : 'result-box show error';
+                resultContent.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultBox.className = 'result-box show error';
+                resultContent.textContent = '错误: ' + error.message;
+            }
+        }
+
+        // 获取最后聊天信息
+        async function getLastChatInfo() {
+            const resultBox = document.getElementById('chatInfoResult');
+            const resultContent = document.getElementById('chatInfoResultContent');
+
+            resultBox.classList.add('show');
+            resultContent.textContent = '正在获取...';
+
+            try {
+                const response = await fetch(`/api/telegram/${MODULE_NAME}/last-chat-info`);
+                const result = await response.json();
+                resultBox.className = result.success ? 'result-box show success' : 'result-box show error';
+                resultContent.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultBox.className = 'result-box show error';
+                resultContent.textContent = '错误: ' + error.message;
+            }
+        }
+
+        // 工具函数
+        function formatFileSize(bytes) {
+            if (!bytes) return '';
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html>
+

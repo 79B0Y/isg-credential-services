@@ -43,65 +43,20 @@ if [ ! -f "config/global.json" ]; then
     echo '{"service_name": "credential-service", "version": "1.0.0"}' > config/global.json
 fi
 
-# Create example credential files
-echo "🔐 Creating example credential files..."
+# Create example credential files (empty templates)
+echo "🔐 Creating credential file templates..."
 
-# OpenAI example
-if [ ! -f "data/openai/credentials.json" ]; then
-    cat > data/openai/credentials.json << EOF
+# Create empty credential files with comments
+for service in openai gemini claude home_assistant telegram whatsapp; do
+    if [ ! -f "data/$service/credentials.json" ]; then
+        cat > "data/$service/credentials.json" << EOF
 {
-  "api_key": "sk-your-openai-api-key-here"
+  "_comment": "Add your $service credentials here",
+  "_example": "See README.md for configuration examples"
 }
 EOF
-fi
-
-# Home Assistant example
-if [ ! -f "data/home_assistant/credentials.json" ]; then
-    cat > data/home_assistant/credentials.json << EOF
-{
-  "access_token": "your-home-assistant-long-lived-token",
-  "base_url": "http://your-ha-instance:8123"
-}
-EOF
-fi
-
-# Telegram example
-if [ ! -f "data/telegram/credentials.json" ]; then
-    cat > data/telegram/credentials.json << EOF
-{
-  "bot_token": "your-telegram-bot-token",
-  "chat_id": "your-chat-id"
-}
-EOF
-fi
-
-# Gemini example
-if [ ! -f "data/gemini/credentials.json" ]; then
-    cat > data/gemini/credentials.json << EOF
-{
-  "api_key": "your-gemini-api-key"
-}
-EOF
-fi
-
-# Claude example
-if [ ! -f "data/claude/credentials.json" ]; then
-    cat > data/claude/credentials.json << EOF
-{
-  "api_key": "your-claude-api-key"
-}
-EOF
-fi
-
-# WhatsApp example
-if [ ! -f "data/whatsapp/credentials.json" ]; then
-    cat > data/whatsapp/credentials.json << EOF
-{
-  "api_key": "your-whatsapp-api-key",
-  "base_url": "https://your-whatsapp-api-endpoint"
-}
-EOF
-fi
+    fi
+done
 
 # Make scripts executable
 chmod +x manage-service.sh
