@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Form Generation Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .test-result { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Form Generation Test</h1>
+    
+    <div id="test-deepseek"></div>
+    <div id="test-nodered"></div>
+    
+    <script>
+        // Test data from API
+        const deepseekSchema = {
+            "properties": {
+                "api_key": {
+                    "type": "string",
+                    "title": "API Key",
+                    "description": "DeepSeek API key from your account dashboard",
+                    "required": true,
+                    "sensitive": true,
+                    "minLength": 32,
+                    "maxLength": 200,
+                    "pattern": "^sk-[A-Za-z0-9-]+$",
+                    "example": "sk-abcdef1234567890abcdef1234567890abcdef12",
+                    "ui": {
+                        "widget": "password",
+                        "placeholder": "Enter your DeepSeek API key",
+                        "help": "Get your API key from https://platform.deepseek.com/api-keys"
+                    }
+                }
+            },
+            "required": ["api_key"]
+        };
+        
+        const noderedSchema = {
+            "type": "object",
+            "properties": {
+                "base_url": {
+                    "type": "string",
+                    "title": "Node-RED Service URL",
+                    "description": "The base URL of your Node-RED instance",
+                    "default": "http://localhost:1880",
+                    "minLength": 1,
+                    "required": true,
+                    "ui": {
+                        "placeholder": "http://localhost:1880",
+                        "help": "Enter your Node-RED service address"
+                    }
+                }
+            },
+            "required": ["base_url"]
+        };
+        
+        function capitalizeFirst(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+        
+        function generateCredentialForm(moduleName, schema, existingCreds) {
+            if (!schema.properties) {
+                console.error(`[GenerateForm] ${moduleName} has no properties in schema:`, schema);
+                return '<p>No credential configuration</p>';
+            }
+            
+            console.log(`[GenerateForm] ${moduleName} generating form for fields:`, Object.keys(schema.properties));
+            
+            let formHTML = '';
+            const requiredFields = schema.required || [];
+            
+            Object.entries(schema.properties).forEach(([field, definition]) => {
+                const value = existingCreds[field] || '';
+                const isRequired = requiredFields.includes(field) || definition.required;
+                const inputType = definition.sensitive ? 'password' : 
+                                 definition.ui?.widget === 'url' ? 'url' : 
+                                 definition.ui?.widget === 'password' ? 'password' : 'text';
+                const placeholder = definition.ui?.placeholder || definition.example || '';
+                const help = definition.ui?.help || definition.description || '';
+                
+                console.log(`[GenerateForm] ${moduleName}.${field}: type=${inputType}, required=${isRequired}, placeholder=${placeholder}`);
+                
+                formHTML += `
+                    <div class="form-group">
+                        <label for="${moduleName}-${field}">
+                            ${definition.title || capitalizeFirst(field)}
+                            ${isRequired ? '*' : ''}
+                        </label>
+                        <input type="${inputType}" 
+                               id="${moduleName}-${field}" 
+                               name="${field}"
+                               value="${value}" 
+                               placeholder="${placeholder}"
+                               ${isRequired ? 'required' : ''}
+                               title="${help}"
+                               style="width: 100%; padding: 8px; margin: 5px 0;">
+                        ${help ? `<small style="color: #666; font-size: 0.8rem;">${help}</small>` : ''}
+                    </div>
+                `;
+            });
+            
+            formHTML += `
+                <button type="button" style="padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer;">
+                    Save Credentials
+                </button>
+            `;
+            
+            console.log(`[GenerateForm] ${moduleName} form HTML generated, length=${formHTML.length}`);
+            return formHTML;
+        }
+        
+        // Test DeepSeek
+        try {
+            const deepseekForm = generateCredentialForm('deepseek', deepseekSchema, {});
+            document.getElementById('test-deepseek').innerHTML = `
+                <div class="test-result success">
+                    <h2>✅ DeepSeek Form Generated</h2>
+                    ${deepseekForm}
+                </div>
+            `;
+        } catch (error) {
+            document.getElementById('test-deepseek').innerHTML = `
+                <div class="test-result error">
+                    <h2>❌ DeepSeek Form Generation Failed</h2>
+                    <pre>${error.stack}</pre>
+                </div>
+            `;
+        }
+        
+        // Test Node-RED
+        try {
+            const noderedForm = generateCredentialForm('nodered', noderedSchema, {});
+            document.getElementById('test-nodered').innerHTML = `
+                <div class="test-result success">
+                    <h2>✅ Node-RED Form Generated</h2>
+                    ${noderedForm}
+                </div>
+            `;
+        } catch (error) {
+            document.getElementById('test-nodered').innerHTML = `
+                <div class="test-result error">
+                    <h2>❌ Node-RED Form Generation Failed</h2>
+                    <pre>${error.stack}</pre>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

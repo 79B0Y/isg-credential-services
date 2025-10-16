@@ -2259,20 +2259,39 @@
                 const schemaResponse = await fetch(`/api/schema/${moduleName}`, {
                 });
                 
-                if (!schemaResponse.ok) return;
+                if (!schemaResponse.ok) {
+                    console.error(`[LoadForm] Failed to load schema for ${moduleName}:`, schemaResponse.status);
+                    const formContainer = document.getElementById(`credentials-${moduleName}`);
+                    if (formContainer) {
+                        formContainer.innerHTML = `<p style="color: var(--red-500);">⚠️ Failed to load schema (${schemaResponse.status})</p>`;
+                    }
+                    return;
+                }
                 
                 const schemaData = await schemaResponse.json();
                 const schema = schemaData.data;
+                console.log(`[LoadForm] ${moduleName} schema:`, schema.properties ? Object.keys(schema.properties) : 'no properties');
                 
                 // Get existing credentials
                 const credsResponse = await fetch(`/api/credentials/${moduleName}`, {
                 });
                 
-                const existingCreds = credsResponse.ok ? (await credsResponse.json()).data : {};
+                let existingCreds = {};
+                if (credsResponse.ok) {
+                    const credsData = await credsResponse.json();
+                    existingCreds = credsData.data || {};
+                }
+                console.log(`[LoadForm] ${moduleName} existing credentials:`, Object.keys(existingCreds));
                 
                 // Generate form
                 const formContainer = document.getElementById(`credentials-${moduleName}`);
+                if (!formContainer) {
+                    console.error(`[LoadForm] Container not found for ${moduleName}`);
+                    return;
+                }
+                
                 formContainer.innerHTML = generateCredentialForm(moduleName, schema, existingCreds);
+                console.log(`[LoadForm] ${moduleName} form generated`);
                 
             } catch (error) {
                 console.error(`Failed to load credential form for ${moduleName}:`, error);
@@ -2280,30 +2299,41 @@
         }
 
         // Generate credential form
-        function generateCredentialForm(moduleName, schema, existingCreds) {
-            if (!schema.properties) return '<p>No credential configuration</p>';
+        function generateCredentialForm(moduleName, schema, existingCreds = {}) {
+            if (!schema.properties) {
+                console.error(`[GenerateForm] ${moduleName} has no properties in schema:`, schema);
+                return '<p>No credential configuration</p>';
+            }
+            
+            console.log(`[GenerateForm] ${moduleName} generating form for fields:`, Object.keys(schema.properties));
             
             let formHTML = '';
+            const requiredFields = schema.required || [];
+            const creds = existingCreds || {};
             
             Object.entries(schema.properties).forEach(([field, definition]) => {
-                const value = existingCreds[field] || '';
+                const value = creds[field] || '';
+                const isRequired = requiredFields.includes(field) || definition.required;
                 const inputType = definition.sensitive ? 'password' : 
-                                 definition.ui?.widget === 'url' ? 'url' : 'text';
+                                 definition.ui?.widget === 'url' ? 'url' : 
+                                 definition.ui?.widget === 'password' ? 'password' : 'text';
                 const placeholder = definition.ui?.placeholder || definition.example || '';
                 const help = definition.ui?.help || definition.description || '';
+                
+                console.log(`[GenerateForm] ${moduleName}.${field}: type=${inputType}, required=${isRequired}, placeholder=${placeholder}`);
                 
                 formHTML += `
                     <div class="form-group">
                         <label for="${moduleName}-${field}">
                             ${definition.title || capitalizeFirst(field)}
-                            ${definition.required ? '*' : ''}
+                            ${isRequired ? '*' : ''}
                         </label>
                         <input type="${inputType}" 
                                id="${moduleName}-${field}" 
                                name="${field}"
                                value="${value}" 
                                placeholder="${placeholder}"
-                               ${definition.required ? 'required' : ''}
+                               ${isRequired ? 'required' : ''}
                                title="${help}">
                         ${help ? `<small style="color: var(--gray-500); font-size: 0.8rem;">${help}</small>` : ''}
                     </div>
@@ -2316,6 +2346,7 @@
                 </button>
             `;
             
+            console.log(`[GenerateForm] ${moduleName} form HTML generated, length=${formHTML.length}`);
             return formHTML;
         }
 
