@@ -323,8 +323,10 @@ class TelegramModule extends BaseCredentialModule {
                     this.logger.warn(`Attempt ${attempt} failed: ${error.message}`);
                     
                     if (attempt < this.config.retries) {
-                        // 等待后重试
-                        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                        // 指数退避策略：2^attempt * 1000ms (1s, 2s, 4s, 8s, 16s)
+                        const delay = Math.min(Math.pow(2, attempt) * 1000, 30000); // 最多 30 秒
+                        this.logger.info(`等待 ${delay}ms 后重试...`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
                     }
                 }
             }
@@ -574,21 +576,25 @@ class TelegramModule extends BaseCredentialModule {
                 // 准备POST数据
                 const postData = JSON.stringify(params);
                 
+                // 基础配置
                 const options = {
                     hostname: urlObj.hostname,
                     port: urlObj.port || (isHttps ? 443 : 80),
                     path: urlObj.pathname,
                     method: Object.keys(params).length > 0 ? 'POST' : 'GET',
-                    family: 4, // 强制使用 IPv4
                     headers: {
                         'Content-Type': 'application/json',
                         'Content-Length': Buffer.byteLength(postData),
-                        'User-Agent': 'CredentialService/1.0',
-                        'Connection': 'close' // 避免连接复用导致的内存泄漏
+                        'User-Agent': 'CredentialService/1.0'
                     },
-                    timeout: this.config.timeout,
-                    agent: false // 禁用连接池
+                    timeout: this.config.timeout
                 };
+                
+                // HTTPS 特定配置
+                if (isHttps) {
+                    options.servername = urlObj.hostname; // SNI 支持
+                    options.rejectUnauthorized = true; // 严格证书验证
+                }
 
                 // 创建请求对象
                 req = httpModule.request(options, (res) => {
@@ -763,6 +769,11 @@ class TelegramModule extends BaseCredentialModule {
             'ETIMEDOUT',
             'ECONNABORTED',
             'ENOTFOUND',
+            'EPROTO', // TLS/SSL 协议错误
+            'UNABLE_TO_VERIFY_LEAF_SIGNATURE', // SSL 证书验证错误
+            'ERR_TLS_CERT_ALTNAME_INVALID', // SSL 主机名验证错误
+            'socket disconnected', // Socket 断开连接
+            'secure TLS connection', // TLS 连接失败（Termux 环境常见）
             'Request timeout'
         ];
         
