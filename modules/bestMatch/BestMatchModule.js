@@ -1550,7 +1550,7 @@ class BestMatchModule extends BaseCredentialModule {
             floor: 0.70,
             room: 0.70,
             type: 0.65,
-            name: 0.45  // 降低设备名称阈值以支持同义词匹配
+            name: 0.75  // 提高到 0.75
         };
         
         const W = { 
