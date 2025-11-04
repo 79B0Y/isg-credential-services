@@ -480,6 +480,8 @@ class IntentionModule extends BaseCredentialModule {
                 user_input: intentResult.user_input || content,
                 intent: intentResult.intent || "Other",
                 devices: intentResult.devices || [],
+                scene: intentResult.scene || {},
+                automation: intentResult.automation || {},
                 confidence: intentResult.confidence || 0,
                 user_responds: intentResult.user_responds || "",
                 ai_provider: aiRes.provider,

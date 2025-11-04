@@ -1,5 +1,140 @@
 [
   {
+    "timestamp": "2025-11-04T22:15:42.204Z",
+    "input": {
+      "type": "message",
+      "content": "将卧室的设备状态记录为睡觉模式\n",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "将卧室的设备状态记录为睡觉模式",
+      "intent": "Set Scene",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "light",
+          "device_name": "",
+          "device_name_en": "",
+          "service": "light.state",
+          "service_data": {}
+        },
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "climate",
+          "device_name": "",
+          "device_name_en": "",
+          "service": "climate.state",
+          "service_data": {}
+        },
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "fan",
+          "device_name": "",
+          "device_name_en": "",
+          "service": "fan.state",
+          "service_data": {}
+        },
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "cover",
+          "device_name": "",
+          "device_name_en": "",
+          "service": "cover.state",
+          "service_data": {}
+        },
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "switch",
+          "device_name": "",
+          "device_name_en": "",
+          "service": "switch.state",
+          "service_data": {}
+        },
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "media_player",
+          "device_name": "",
+          "device_name_en": "",
+          "service": "media_player.state",
+          "service_data": {}
+        }
+      ],
+      "scene": {
+        "scene_name": "睡觉模式",
+        "scene_name_en": "sleep_mode",
+        "operation": "add",
+        "operation_type": "setup",
+        "description": "记录卧室当前所有设备状态为睡觉模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，我将读取卧室所有设备的当前状态并保存为睡觉模式场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-11-04T22:14:58.988Z",
+    "input": {
+      "type": "message",
+      "content": "打开所有灯",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "打开所有灯",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "device_name": "",
+          "device_name_en": "",
+          "service": "light.turn_on",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.95,
+      "user_responds": "好的，即将为您打开所有灯"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
     "timestamp": "2025-10-31T09:30:20.446Z",
     "input": {
       "type": "message",
@@ -3020,103 +3155,6 @@
       "automation": {},
       "confidence": 0.9,
       "user_responds": "我将为您查询所有已保存的场景列表"
-    },
-    "ai_provider": "deepseek"
-  },
-  {
-    "timestamp": "2025-10-29T12:32:19.839Z",
-    "input": {
-      "type": "message",
-      "content": "删除test",
-      "metadata": {}
-    },
-    "output": {
-      "user_input": "删除test",
-      "intent": "Set Scene",
-      "devices": [],
-      "scene": {
-        "scene_name": "test",
-        "scene_name_en": "test",
-        "operation": "delete",
-        "operation_type": "setup",
-        "description": "删除名为test的场景"
-      },
-      "automation": {},
-      "confidence": 0.9,
-      "user_responds": "好的，我将删除名为test的场景"
-    },
-    "ai_provider": "deepseek"
-  },
-  {
-    "timestamp": "2025-10-29T12:29:45.177Z",
-    "input": {
-      "type": "message",
-      "content": "客厅设备当前状态设置为会客模式\n",
-      "metadata": {}
-    },
-    "output": {
-      "user_input": "客厅设备当前状态设置为会客模式",
-      "intent": "Set Scene",
-      "devices": [
-        {
-          "room_type": "living_room",
-          "room_name": "客厅",
-          "room_name_en": "living_room",
-          "device_type": "light",
-          "service": "light.state",
-          "service_data": {}
-        },
-        {
-          "room_type": "living_room",
-          "room_name": "客厅",
-          "room_name_en": "living_room",
-          "device_type": "climate",
-          "service": "climate.state",
-          "service_data": {}
-        },
-        {
-          "room_type": "living_room",
-          "room_name": "客厅",
-          "room_name_en": "living_room",
-          "device_type": "cover",
-          "service": "cover.state",
-          "service_data": {}
-        },
-        {
-          "room_type": "living_room",
-          "room_name": "客厅",
-          "room_name_en": "living_room",
-          "device_type": "media_player",
-          "service": "media_player.state",
-          "service_data": {}
-        },
-        {
-          "room_type": "living_room",
-          "room_name": "客厅",
-          "room_name_en": "living_room",
-          "device_type": "fan",
-          "service": "fan.state",
-          "service_data": {}
-        },
-        {
-          "room_type": "living_room",
-          "room_name": "客厅",
-          "room_name_en": "living_room",
-          "device_type": "switch",
-          "service": "switch.state",
-          "service_data": {}
-        }
-      ],
-      "scene": {
-        "scene_name": "会客模式",
-        "scene_name_en": "entertainment_mode",
-        "operation": "add",
-        "operation_type": "setup",
-        "description": "保存客厅当前设备状态为会客模式"
-      },
-      "automation": {},
-      "confidence": 0.9,
-      "user_responds": "好的，我将读取客厅所有设备的当前状态并保存为会客模式场景"
     },
     "ai_provider": "deepseek"
   }
