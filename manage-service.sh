@@ -56,7 +56,7 @@ start_service() {
     fi
     
     cd "$(dirname "$0")"
-    nohup ./start-with-telegram.sh > service.log 2>&1 &
+    nohup ./start.sh > service.log 2>&1 &
     local pid=$!
     
     echo -e "${GREEN}✅ 服务已启动，PID: $pid${NC}"

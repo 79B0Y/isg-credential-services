@@ -304,6 +304,25 @@ class IntentionModule extends BaseCredentialModule {
     }
 
     /**
+     * Normalize device object to ensure all required fields are present
+     */
+    normalizeDevice(device) {
+        return {
+            floor_name: device.floor_name || "",
+            floor_name_en: device.floor_name_en || "",
+            floor_type: device.floor_type || "",
+            room_type: device.room_type || "",
+            room_name: device.room_name || "",
+            room_name_en: device.room_name_en || "",
+            device_type: device.device_type || "",
+            device_name: device.device_name || "",
+            device_name_en: device.device_name_en || "",
+            service: device.service || "",
+            service_data: device.service_data || {}
+        };
+    }
+
+    /**
      * Process intention: receive user intent, combine with system prompt, send to AI, return result
      */
     async processIntention(intentionData) {
@@ -434,6 +453,19 @@ class IntentionModule extends BaseCredentialModule {
                 return { success: false, error: 'Failed to parse AI response: ' + e.message };
             }
 
+            // Ensure all device objects have complete field structure with guaranteed output
+            if (intentResult && Array.isArray(intentResult.devices)) {
+                intentResult.devices = intentResult.devices.map(device => this.normalizeDevice(device));
+            } else if (intentResult) {
+                // Ensure devices array exists even if empty
+                intentResult.devices = intentResult.devices || [];
+            }
+
+            // Log device information for debugging
+            if (intentResult && intentResult.devices) {
+                this.logger.info(`Processed ${intentResult.devices.length} device(s) with complete field structure`);
+            }
+
             // Save to history
             const historyEntry = {
                 timestamp: timestamp || new Date().toISOString(),
@@ -443,13 +475,20 @@ class IntentionModule extends BaseCredentialModule {
             };
             await this.saveToHistory(historyEntry);
 
+            // Prepare final response with guaranteed field structure
+            const responseData = {
+                user_input: intentResult.user_input || content,
+                intent: intentResult.intent || "Other",
+                devices: intentResult.devices || [],
+                confidence: intentResult.confidence || 0,
+                user_responds: intentResult.user_responds || "",
+                ai_provider: aiRes.provider,
+                processed_at: new Date().toISOString()
+            };
+
             return {
                 success: true,
-                data: {
-                    ...intentResult,
-                    ai_provider: aiRes.provider,
-                    processed_at: new Date().toISOString()
-                }
+                data: responseData
             };
         } catch (e) {
             this.logger.error('Error processing intention:', e.message);
@@ -670,15 +709,15 @@ X度 → X
   "intent": "Control Device|Query Device Status|Control Scene|Set Scene|Set Automation|Other",
   "devices": [
     {
-      "floor_name": "楼层名称（如：一楼、二楼）",
+      "floor_name": "楼层名称（本地语言，如：一楼、二楼、1階、1층）",
       "floor_name_en": "楼层英文名称（如：First Floor、Second Floor）",
-      "floor_type": "楼层英文名称（如：first_floor、second_floor）",
+      "floor_type": "楼层类型代码（如：first_floor、second_floor）",
       "room_type": "房间类型代码（如：living_room）",
-      "room_name": "房间中文名称",
-      "room_name_en": "房间英文名称",
+      "room_name": "房间名称（本地语言，如：客厅、リビング、거실）",
+      "room_name_en": "房间英文名称（如：living_room）",
       "device_type": "设备类型（HA域名）",
-      "device_name": "设备中文名称",
-      "device_name_en": "设备英文名称",
+      "device_name": "设备名称（本地语言，如：吊灯、シーリングライト、천장 조명）",
+      "device_name_en": "设备英文名称（如：ceiling_light）",
       "service": "HA服务名称（如：light.turn_on）",
       "service_data": "服务参数对象"
     }

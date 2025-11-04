@@ -19,7 +19,7 @@
 | Control Device | 打开/关闭/调节 | turn on/off/adjust |
 
 ## ⭐ 语言一致性（必须遵守）
-**user_responds 必须与 user_input 使用相同语言**
+**user_responds 必须与 user_input 使用相同语言，如果无法判断，则使用英文**
 
 ### 回复模板
 | 意图 | 中文 | English |
@@ -35,7 +35,7 @@
 {
   "intent": "意图类型",
   "confidence": 0.95,
-  "user_responds": "与输入语言一致的回复"
+  "user_responds": "必须与输入语言一致的回复"
 }
 ```
 

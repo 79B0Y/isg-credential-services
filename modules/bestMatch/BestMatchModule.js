@@ -254,8 +254,14 @@ class BestMatchModule extends BaseCredentialModule {
             const fastOut = this.tryFastMatch(intentDevices, entities);
             perfLog.fastPath = Date.now() - tFast;
             
-            // ⭐ 在 Termux/proot 环境或快速匹配成功时，直接使用快速匹配结果
-            const useOnlyFastMatch = this.isRestrictedEnv || (fastOut && fastOut.hasMatches && fastOut.coverAll);
+            // ⭐ 在以下情况直接使用快速匹配结果：
+            // 1. Termux/proot 环境
+            // 2. 快速匹配成功且覆盖所有设备
+            // 3. 配置禁用了 Python 匹配器
+            const usePythonMatcher = this.config.usePythonMatcher !== false;  // 默认为 true
+            const useOnlyFastMatch = this.isRestrictedEnv || 
+                                    !usePythonMatcher || 
+                                    (fastOut && fastOut.hasMatches && fastOut.coverAll);
             
             if (fastOut && useOnlyFastMatch) {
                 // 读取设备状态并直接返回
@@ -265,6 +271,8 @@ class BestMatchModule extends BaseCredentialModule {
                     perfLog.total = Date.now() - startTime;
                     if (this.isRestrictedEnv) {
                         this.logger.info(`⚡ Termux环境-仅快速匹配: 总耗时=${perfLog.total}ms | fast=${perfLog.fastPath}ms | 实体=${perfLog.getEntities}ms`);
+                    } else if (!usePythonMatcher) {
+                        this.logger.info(`⚡ Python匹配器已禁用-仅快速匹配: 总耗时=${perfLog.total}ms | fast=${perfLog.fastPath}ms | 实体=${perfLog.getEntities}ms`);
                     } else {
                         this.logger.info(`⚡ 快速路径命中: 总耗时=${perfLog.total}ms | fast=${perfLog.fastPath}ms | 实体=${perfLog.getEntities}ms`);
                     }
@@ -1695,8 +1703,12 @@ class BestMatchModule extends BaseCredentialModule {
                 const nameMatched = [];
                 
                 for (const e of step1Pool) {
+                    // ⭐ 优先匹配 device_name_en（英文翻译名称），其次 device_name（原语言名称）
+                    const eNameEn = e.device_name_en || '';
                     const eName = e.device_name || e.friendly_name || (e.attributes && e.attributes.friendly_name) || '';
-                    const nameSim = this.slotSim(nameQ, eName);
+                    
+                    // 同时尝试匹配英文名称和原语言名称，取最高分
+                    const nameSim = this.slotSim(nameQ, eNameEn, eName);
                     
                     if (nameSim.score >= TH.name) {
                         nameMatched.push({
@@ -1926,7 +1938,12 @@ class BestMatchModule extends BaseCredentialModule {
         
         // ===== 设备名称匹配 =====
         const nameQ = dev.device_name_en || dev.device_name || '';
-        const nameSim = this.slotSim(nameQ, e.device_name, e.attributes?.friendly_name);
+        // ⭐ 优先匹配 device_name_en（英文翻译名称），其次 device_name（原语言名称）
+        const eNameEn = e.device_name_en || '';
+        const eName = e.device_name || e.friendly_name || (e.attributes && e.attributes.friendly_name) || '';
+        
+        // 同时尝试匹配英文名称和原语言名称，取最高分
+        const nameSim = this.slotSim(nameQ, eNameEn, eName);
         
         ev.device_name = { 
             text: nameQ, 
