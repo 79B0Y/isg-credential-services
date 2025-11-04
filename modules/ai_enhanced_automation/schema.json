@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "properties": {
+    "aiProvider": {
+      "type": "string",
+      "title": "AI Provider",
+      "description": "AI提供商: auto | claude | openai | gemini | deepseek",
+      "default": "auto",
+      "enum": ["auto", "claude", "openai", "gemini", "deepseek"]
+    },
+    "defaultMode": {
+      "type": "string",
+      "title": "Default Mode",
+      "description": "默认自动化模式: single | restart | queued | parallel",
+      "default": "single",
+      "enum": ["single", "restart", "queued", "parallel"]
+    },
+    "enableConditions": {
+      "type": "boolean",
+      "title": "Enable Conditions",
+      "description": "是否启用条件判断",
+      "default": true
+    }
+  }
+}
+

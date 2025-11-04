@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Communication Module API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            color: #1f2937;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+            display: block;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-connected {
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
+        }
+
+        .status-disconnected {
+            background: #ef4444;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #4b5563;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            background: #e5e7eb;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+        }
+
+        .message-list {
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .message-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .message-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .message-list::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .message-list::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .message-item {
+            background: #f9fafb;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .message-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .message-item.outgoing {
+            border-left-color: #10b981;
+        }
+
+        .message-item.incoming {
+            border-left-color: #f59e0b;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .message-type {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .message-time {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .message-content {
+            color: #374151;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .message-direction {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .direction-outgoing {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .direction-incoming {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .code-block {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            white-space: pre;
+        }
+
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .success-box {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .error-box {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .api-endpoint {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .api-method {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+        }
+
+        .method-post {
+            background: #10b981;
+            color: white;
+        }
+
+        .method-get {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .method-delete {
+            background: #ef4444;
+            color: white;
+        }
+
+        .api-path {
+            font-family: 'Courier New', monospace;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .two-column-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .column {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .column h3 {
+            margin-bottom: 1.5rem;
+            color: #1f2937;
+            font-size: 1.25rem;
+        }
+
+        @media (max-width: 1024px) {
+            .two-column-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Communication Module API</h1>
+            <p class="subtitle">双向通信模块 - WebSocket & HTTP API</p>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="wsStatus">
+                        <span class="status-indicator status-disconnected"></span>
+                        未连接
+                    </span>
+                    <span class="stat-label">WebSocket 状态</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="messageCount">0</span>
+                    <span class="stat-label">消息总数</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="clientCount">0</span>
+                    <span class="stat-label">连接客户端</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('main')">消息收发</button>
+            <button class="tab" onclick="switchTab('messages')">消息历史</button>
+            <button class="tab" onclick="switchTab('docs')">API 文档</button>
+        </div>
+
+        <div id="mainTab" class="tab-content active">
+            <div class="two-column-layout">
+                <!-- 左侧：发送消息 -->
+                <div class="column">
+                    <h3>📤 发送消息</h3>
+
+                    <div class="form-group">
+                        <label class="form-label">消息类型</label>
+                        <input type="text" id="sendType" class="form-control" value="message" placeholder="message, notification, alert...">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">消息内容</label>
+                        <textarea id="sendContent" class="form-control" placeholder="输入消息内容... (按回车发送)" rows="6"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">元数据 (JSON, 可选)</label>
+                        <textarea id="sendMetadata" class="form-control" placeholder='{"key": "value"}' rows="3"></textarea>
+                    </div>
+
+                    <button class="btn" onclick="sendMessage()">📨 发送消息</button>
+
+                    <div id="sendResult" class="hidden" style="margin-top: 1rem;"></div>
+                </div>
+
+                <!-- 右侧：实时消息显示 -->
+                <div class="column">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3>📬 消息列表</h3>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-secondary" onclick="loadRealtimeMessages()" style="padding: 0.5rem 1rem; font-size: 0.875rem;">🔄 刷新</button>
+                            <button class="btn btn-danger" onclick="clearRealtimeMessages()" style="padding: 0.5rem 1rem; font-size: 0.875rem;">🗑️ 清空</button>
+                        </div>
+                    </div>
+
+                    <div class="info-box" style="margin-bottom: 1rem;">
+                        <strong>💡 提示：</strong> 显示最近的发送和接收消息，每3秒自动刷新
+                    </div>
+
+                    <div id="realtimeMessages" class="message-list" style="max-height: 550px; overflow-y: auto;">
+                        <p style="text-align: center; color: #6b7280; padding: 2rem;">加载中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="messagesTab" class="tab-content">
+            <h2 style="margin-bottom: 1.5rem;">消息历史</h2>
+
+            <div class="btn-group">
+                <button class="btn" onclick="loadMessages()">刷新</button>
+                <button class="btn btn-secondary" onclick="loadMessages('outgoing')">仅发送</button>
+                <button class="btn btn-secondary" onclick="loadMessages('incoming')">仅接收</button>
+                <button class="btn btn-danger" onclick="clearMessages()">清空历史</button>
+            </div>
+
+            <div id="messagesList" class="message-list" style="margin-top: 1.5rem;">
+                <p style="text-align: center; color: #6b7280;">加载中...</p>
+            </div>
+        </div>
+
+        <div id="docsTab" class="tab-content">
+            <h2 style="margin-bottom: 1.5rem;">API 文档</h2>
+
+            <div class="api-endpoint">
+                <div><span class="api-method method-post">POST</span><span class="api-path">/api/communication/communication/send</span></div>
+                <p style="margin-top: 0.5rem; color: #6b7280;">通过 WebSocket 发送消息到所有连接的客户端</p>
+                <div class="code-block">POST /api/communication/communication/send
+Content-Type: application/json
+
+{
+  "type": "message",
+  "content": "Hello World",
+  "metadata": {
+    "priority": "high"
+  }
+}
+
+// Response
+{
+  "success": true,
+  "message": "Message sent to 2 client(s)",
+  "data": {
+    "message_id": "1234567890_abc123",
+    "sent_to": 2,
+    "total_clients": 2
+  }
+}</div>
+            </div>
+
+            <div class="api-endpoint">
+                <div><span class="api-method method-post">POST</span><span class="api-path">/api/communication/communication/receive</span></div>
+                <p style="margin-top: 0.5rem; color: #6b7280;">接收外部消息（只保存到历史，默认不广播）</p>
+                <div class="code-block">POST /api/communication/communication/receive
+Content-Type: application/json
+
+{
+  "type": "notification",
+  "content": "New notification",
+  "source": "external_system",
+  "broadcast": true,  // 可选: 设置为 true 才会广播到 WebSocket 客户端
+  "metadata": {}
+}
+
+// Response
+{
+  "success": true,
+  "message": "Message received",
+  "data": {
+    "message_id": "1234567890_abc123",
+    "timestamp": "2025-10-25T12:00:00.000Z"
+  }
+}
+
+// 注意: 默认只保存消息，不广播。如需广播请设置 "broadcast": true</div>
+            </div>
+
+            <div class="api-endpoint">
+                <div><span class="api-method method-get">GET</span><span class="api-path">/api/communication/communication/messages</span></div>
+                <p style="margin-top: 0.5rem; color: #6b7280;">获取消息历史</p>
+                <div class="code-block">GET /api/communication/communication/messages?direction=outgoing&limit=50
+
+// Query Parameters:
+// - direction: "outgoing" | "incoming" (可选)
+// - type: 消息类型 (可选)
+// - limit: 返回数量，默认 50 (可选)
+
+// Response
+{
+  "success": true,
+  "data": {
+    "messages": [...],
+    "total": 100,
+    "returned": 50
+  }
+}</div>
+            </div>
+
+            <div class="api-endpoint">
+                <div><span class="api-method method-delete">DELETE</span><span class="api-path">/api/communication/communication/messages</span></div>
+                <p style="margin-top: 0.5rem; color: #6b7280;">清空消息历史</p>
+                <div class="code-block">DELETE /api/communication/communication/messages
+
+// Response
+{
+  "success": true,
+  "message": "Message history cleared"
+}</div>
+            </div>
+
+            <div class="api-endpoint">
+                <div><span class="api-method method-get">GET</span><span class="api-path">/api/communication/communication/websocket/status</span></div>
+                <p style="margin-top: 0.5rem; color: #6b7280;">获取 WebSocket 服务器状态</p>
+                <div class="code-block">GET /api/communication/communication/websocket/status
+
+// Response
+{
+  "success": true,
+  "data": {
+    "running": true,
+    "port": 8082,
+    "url": "ws://localhost:8082",
+    "connected_clients": 2,
+    "auto_start": true
+  }
+}</div>
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem;">WebSocket 连接</h3>
+            <div class="code-block">// JavaScript 示例
+const ws = new WebSocket('ws://localhost:8082');
+
+ws.onopen = () => {
+  console.log('Connected to Communication Module');
+};
+
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log('Received:', data);
+};
+
+ws.onclose = () => {
+  console.log('Disconnected');
+};
+
+ws.onerror = (error) => {
+  console.error('WebSocket error:', error);
+};</div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api/communication/communication';
+        let ws = null;
+        let autoRefreshInterval = null;
+
+        // Initialize
+        async function init() {
+            await loadStatus();
+            await loadMessages();
+            await loadRealtimeMessages();
+            connectWebSocket();
+            
+            // Auto-refresh realtime messages every 3 seconds
+            autoRefreshInterval = setInterval(loadRealtimeMessages, 3000);
+            
+            // Add Enter key listener to send message
+            const sendContentEl = document.getElementById('sendContent');
+            sendContentEl.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        // Load WebSocket status
+        async function loadStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/websocket/status`);
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    const d = data.data;
+                    document.getElementById('clientCount').textContent = d.connected_clients || 0;
+
+                    const statusEl = document.getElementById('wsStatus');
+                    if (d.running) {
+                        statusEl.innerHTML = `<span class="status-indicator status-connected"></span>运行中`;
+                    } else {
+                        statusEl.innerHTML = `<span class="status-indicator status-disconnected"></span>未运行`;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load status:', error);
+            }
+        }
+
+        // Connect to WebSocket
+        function connectWebSocket() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                return;
+            }
+
+            ws = new WebSocket('ws://localhost:8082');
+
+            ws.onopen = () => {
+                console.log('WebSocket connected');
+                const statusEl = document.getElementById('wsStatus');
+                statusEl.innerHTML = `<span class="status-indicator status-connected"></span>已连接`;
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('Received WebSocket message:', data);
+                    // Immediately reload messages when receiving WebSocket message
+                    setTimeout(loadRealtimeMessages, 100);
+                } catch (error) {
+                    console.error('Failed to parse message:', error);
+                }
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket disconnected');
+                const statusEl = document.getElementById('wsStatus');
+                statusEl.innerHTML = `<span class="status-indicator status-disconnected"></span>未连接`;
+
+                // Reconnect after 5 seconds
+                setTimeout(connectWebSocket, 5000);
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+        }
+
+        // Load realtime messages via HTTP API
+        async function loadRealtimeMessages() {
+            try {
+                const response = await fetch(`${API_BASE}/messages?limit=30`);
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    const messages = data.data.messages || [];
+                    displayRealtimeMessages(messages);
+                }
+            } catch (error) {
+                console.error('Failed to load realtime messages:', error);
+            }
+        }
+
+        // Display realtime messages
+        function displayRealtimeMessages(messages) {
+            const container = document.getElementById('realtimeMessages');
+            
+            if (messages.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 2rem;">暂无消息</p>';
+                return;
+            }
+
+            const html = messages.map(msg => {
+                const time = msg.timestamp ? new Date(msg.timestamp).toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                }) : '未知时间';
+                
+                const directionClass = msg.direction === 'outgoing' ? 'outgoing' : 'incoming';
+                const directionIcon = msg.direction === 'outgoing' ? '📤' : '📥';
+                const directionLabel = msg.direction === 'outgoing' ? '发送' : '接收';
+                const directionBadgeClass = msg.direction === 'outgoing' ? 'direction-outgoing' : 'direction-incoming';
+                const type = msg.type || 'message';
+                const content = typeof msg.content === 'object' ? JSON.stringify(msg.content, null, 2) : msg.content;
+                const source = msg.source ? `<span style="font-size: 0.75rem; color: #6b7280; margin-left: 0.5rem;">来源: ${msg.source}</span>` : '';
+
+                return `
+                    <div class="message-item ${directionClass}">
+                        <div class="message-header">
+                            <div>
+                                <span class="message-direction ${directionBadgeClass}">${directionIcon} ${directionLabel}</span>
+                                <span class="message-type">${type}</span>
+                                ${source}
+                            </div>
+                            <span class="message-time">${time}</span>
+                        </div>
+                        <div class="message-content">${content}</div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html;
+        }
+
+        // Send message
+        async function sendMessage() {
+            const type = document.getElementById('sendType').value;
+            const content = document.getElementById('sendContent').value;
+            const metadataStr = document.getElementById('sendMetadata').value;
+            const resultDiv = document.getElementById('sendResult');
+
+            if (!content) {
+                resultDiv.className = 'error-box';
+                resultDiv.textContent = '请输入消息内容';
+                resultDiv.classList.remove('hidden');
+                return;
+            }
+
+            let metadata = {};
+            if (metadataStr) {
+                try {
+                    metadata = JSON.parse(metadataStr);
+                } catch (e) {
+                    resultDiv.className = 'error-box';
+                    resultDiv.textContent = 'Metadata 格式错误，必须是有效的 JSON';
+                    resultDiv.classList.remove('hidden');
+                    return;
+                }
+            }
+
+            resultDiv.className = 'info-box';
+            resultDiv.innerHTML = '<div class="loading"></div> 发送中...';
+            resultDiv.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE}/send`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, content, metadata })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.className = 'success-box';
+                    resultDiv.innerHTML = `
+                        <strong>✅ 消息发送成功！</strong>
+                        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                            <li>消息 ID: ${data.data.message_id}</li>
+                            <li>发送到: ${data.data.sent_to} 个客户端</li>
+                        </ul>
+                    `;
+
+                    // Clear form
+                    document.getElementById('sendContent').value = '';
+                    
+                    // Immediately refresh realtime messages
+                    setTimeout(loadRealtimeMessages, 100);
+                    await loadMessages();
+                    await loadStatus();
+                } else {
+                    resultDiv.className = 'error-box';
+                    resultDiv.textContent = '❌ ' + (data.error || '发送失败');
+                }
+            } catch (error) {
+                resultDiv.className = 'error-box';
+                resultDiv.textContent = '❌ 网络错误: ' + error.message;
+            }
+        }
+
+        // Load messages
+        async function loadMessages(direction = null) {
+            try {
+                let url = `${API_BASE}/messages?limit=100`;
+                if (direction) {
+                    url += `&direction=${direction}`;
+                }
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    const messages = data.data.messages || [];
+                    document.getElementById('messageCount').textContent = data.data.total || 0;
+
+                    const container = document.getElementById('messagesList');
+                    if (messages.length === 0) {
+                        container.innerHTML = '<p style="text-align: center; color: #6b7280;">暂无消息</p>';
+                        return;
+                    }
+
+                    const html = messages.map(msg => {
+                        const time = msg.timestamp ? new Date(msg.timestamp).toLocaleString('zh-CN') : '未知时间';
+                        const directionClass = msg.direction === 'outgoing' ? 'outgoing' : 'incoming';
+                        const directionLabel = msg.direction === 'outgoing' ? '发送' : '接收';
+                        const directionBadgeClass = msg.direction === 'outgoing' ? 'direction-outgoing' : 'direction-incoming';
+                        const type = msg.type || 'message';
+                        const content = typeof msg.content === 'object' ? JSON.stringify(msg.content, null, 2) : msg.content;
+
+                        return `
+                            <div class="message-item ${directionClass}">
+                                <div class="message-header">
+                                    <div>
+                                        <span class="message-direction ${directionBadgeClass}">${directionLabel}</span>
+                                        <span class="message-type">${type}</span>
+                                    </div>
+                                    <span class="message-time">${time}</span>
+                                </div>
+                                <div class="message-content">${content}</div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    container.innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Failed to load messages:', error);
+                document.getElementById('messagesList').innerHTML = `<p style="text-align: center; color: #ef4444;">加载失败: ${error.message}</p>`;
+            }
+        }
+
+        // Clear messages
+        async function clearMessages() {
+            if (!confirm('确定要清空所有消息历史吗？')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/messages`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    await loadMessages();
+                    alert('消息历史已清空');
+                } else {
+                    alert('清空失败: ' + (data.error || '未知错误'));
+                }
+            } catch (error) {
+                alert('清空失败: ' + error.message);
+            }
+        }
+
+        // Clear realtime messages
+        async function clearRealtimeMessages() {
+            if (!confirm('确定要清空消息列表吗？')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/messages`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    await loadRealtimeMessages();
+                    await loadStatus();
+                    alert('消息列表已清空');
+                } else {
+                    alert('清空失败: ' + (data.error || '未知错误'));
+                }
+            } catch (error) {
+                alert('清空失败: ' + error.message);
+            }
+        }
+
+        // Initialize on page load
+        init();
+
+        // Refresh status every 5 seconds
+        setInterval(loadStatus, 5000);
+    </script>
+</body>
+</html>

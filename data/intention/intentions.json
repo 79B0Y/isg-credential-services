@@ -1,0 +1,3123 @@
+[
+  {
+    "timestamp": "2025-10-31T09:30:20.446Z",
+    "input": {
+      "type": "message",
+      "content": "空调关掉",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "空调关掉",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "climate",
+          "device_name": "",
+          "device_name_en": "",
+          "service": "climate.turn_off",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您关闭空调"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-31T09:30:06.779Z",
+    "input": {
+      "type": "message",
+      "content": "灯打开",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "灯打开",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "device_name": "",
+          "device_name_en": "",
+          "service": "light.turn_on",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.85,
+      "user_responds": "好的，即将为您打开灯"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-31T09:29:46.119Z",
+    "input": {
+      "type": "message",
+      "content": "电视房有人么",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "电视房有人么",
+      "intent": "Query Device Status",
+      "devices": [
+        {
+          "room_type": "tv_room",
+          "room_name": "电视房",
+          "room_name_en": "tv_room",
+          "device_type": "occupancy",
+          "device_name": "占用传感器",
+          "device_name_en": "occupancy_sensor",
+          "service": "binary_sensor.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "tv_room",
+          "room_name": "电视房",
+          "room_name_en": "tv_room",
+          "device_type": "motion",
+          "device_name": "运动传感器",
+          "device_name_en": "motion_sensor",
+          "service": "binary_sensor.state",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "正在查询电视房是否有人"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-31T09:29:07.447Z",
+    "input": {
+      "type": "message",
+      "content": "电视房有人么",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "电视房有人么",
+      "intent": "Query Device Status",
+      "devices": [
+        {
+          "room_type": "tv_room",
+          "room_name": "电视房",
+          "room_name_en": "tv_room",
+          "device_type": "occupancy",
+          "device_name": "有人传感器",
+          "device_name_en": "occupancy_sensor",
+          "service": "binary_sensor.state",
+          "service_data": {
+            "state": "on"
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "正在查询电视房是否有人"
+    },
+    "ai_provider": "openai"
+  },
+  {
+    "timestamp": "2025-10-31T09:28:53.552Z",
+    "input": {
+      "type": "message",
+      "content": "有人么",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "有人么",
+      "intent": "Query Device Status",
+      "devices": [],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "请问您想查询有人的哪个房间？"
+    },
+    "ai_provider": "openai"
+  },
+  {
+    "timestamp": "2025-10-31T09:28:44.820Z",
+    "input": {
+      "type": "message",
+      "content": "电视房灯关掉",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "电视房灯关掉",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "tv_room",
+          "room_name": "电视房",
+          "room_name_en": "tv_room",
+          "device_type": "light",
+          "service": "light.turn_off",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "已为您关闭电视房的灯"
+    },
+    "ai_provider": "openai"
+  },
+  {
+    "timestamp": "2025-10-31T09:28:28.419Z",
+    "input": {
+      "type": "message",
+      "content": "电视房和书房灯黄色，亮度80",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "电视房和书房灯黄色，亮度80",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "tv_room",
+          "room_name": "电视房",
+          "room_name_en": "tv_room",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_name": "yellow",
+            "brightness_pct": 80
+          }
+        },
+        {
+          "room_type": "study",
+          "room_name": "书房",
+          "room_name_en": "study",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_name": "yellow",
+            "brightness_pct": 80
+          }
+        }
+      ],
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您调节电视房和书房的灯光为黄色，亮度80%"
+    },
+    "ai_provider": "openai"
+  },
+  {
+    "timestamp": "2025-10-31T09:27:49.905Z",
+    "input": {
+      "type": "message",
+      "content": "电视房和书房灯粉黄色，亮度50",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "电视房和书房灯粉黄色，亮度50",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "tv_room",
+          "room_name": "电视房",
+          "room_name_en": "tv_room",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_name": "pink",
+            "brightness_pct": 50
+          }
+        },
+        {
+          "room_type": "study",
+          "room_name": "书房",
+          "room_name_en": "study",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_name": "yellow",
+            "brightness_pct": 50
+          }
+        }
+      ],
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您调节电视房和书房的灯光颜色为粉黄色，亮度为50%"
+    },
+    "ai_provider": "openai"
+  },
+  {
+    "timestamp": "2025-10-31T09:27:07.323Z",
+    "input": {
+      "type": "message",
+      "content": "电视房和书房灯粉红色",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "电视房和书房灯粉红色",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "tv_room",
+          "room_name": "电视房",
+          "room_name_en": "tv_room",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_name": "pink"
+          }
+        },
+        {
+          "room_type": "study",
+          "room_name": "书房",
+          "room_name_en": "study",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_name": "pink"
+          }
+        }
+      ],
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您调节电视房和书房的灯为粉红色"
+    },
+    "ai_provider": "openai"
+  },
+  {
+    "timestamp": "2025-10-31T09:26:34.868Z",
+    "input": {
+      "type": "message",
+      "content": "电视房灯最亮",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "电视房灯最亮",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "tv_room",
+          "room_name": "电视房",
+          "room_name_en": "tv_room",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "brightness_pct": 100
+          }
+        }
+      ],
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您调节电视房灯至最亮"
+    },
+    "ai_provider": "openai"
+  },
+  {
+    "timestamp": "2025-10-31T09:26:16.076Z",
+    "input": {
+      "type": "message",
+      "content": "关闭电视房灯",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "关闭电视房灯",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "tv_room",
+          "room_name": "电视房",
+          "room_name_en": "tv_room",
+          "device_type": "light",
+          "service": "light.turn_off",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将关闭电视房的灯"
+    },
+    "ai_provider": "openai"
+  },
+  {
+    "timestamp": "2025-10-31T09:24:13.359Z",
+    "input": {
+      "type": "message",
+      "content": "打开客厅灯",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "打开客厅灯",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您打开客厅灯"
+    },
+    "ai_provider": "openai"
+  },
+  {
+    "timestamp": "2025-10-31T09:23:47.183Z",
+    "input": {
+      "type": "message",
+      "content": "打开客厅灯",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "打开客厅灯",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {}
+        }
+      ],
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您打开客厅灯"
+    },
+    "ai_provider": "openai"
+  },
+  {
+    "timestamp": "2025-10-31T09:23:24.698Z",
+    "input": {
+      "type": "message",
+      "content": "打开客厅灯",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "打开客厅灯",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，正在打开客厅灯"
+    },
+    "ai_provider": "gemini"
+  },
+  {
+    "timestamp": "2025-10-31T09:22:28.067Z",
+    "input": {
+      "type": "message",
+      "content": "打开客厅灯",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "打开客厅灯",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，正在打开客厅灯"
+    },
+    "ai_provider": "gemini"
+  },
+  {
+    "timestamp": "2025-10-31T09:21:57.331Z",
+    "input": {
+      "type": "message",
+      "content": "打开客厅灯",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "打开客厅灯",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "light",
+          "device_name": "",
+          "device_name_en": "",
+          "service": "light.turn_on",
+          "service_data": {},
+          "automation": ""
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.95,
+      "user_responds": "好的，即将为您打开客厅灯"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-31T09:17:26.926Z",
+    "input": {
+      "type": "message",
+      "content": "打开所有灯",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "打开所有灯",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您打开所有灯"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-31T09:16:45.843Z",
+    "input": {
+      "type": "message",
+      "content": "打开所有灯",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "打开所有灯",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您打开所有灯"
+    },
+    "ai_provider": "gemini"
+  },
+  {
+    "timestamp": "2025-10-31T08:28:37.153Z",
+    "input": {
+      "type": "message",
+      "content": "客厅的温度是多少",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "客厅的温度是多少",
+      "intent": "Query Device Status",
+      "devices": [
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "temperature",
+          "device_name": "温度传感器",
+          "device_name_en": "temperature_sensor",
+          "service": "sensor.state",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "正在查询客厅的温度"
+    },
+    "ai_provider": "gemini"
+  },
+  {
+    "timestamp": "2025-10-31T08:27:37.153Z",
+    "input": {
+      "type": "message",
+      "content": "把客厅的灯调成蓝色，亮度50%",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "把客厅的灯调成蓝色，亮度50%",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_name": "blue",
+            "brightness_pct": 50
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您调整客厅灯光"
+    },
+    "ai_provider": "gemini"
+  },
+  {
+    "timestamp": "2025-10-31T08:25:37.153Z",
+    "input": {
+      "type": "message",
+      "content": "打开所有灯",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "打开所有灯",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您打开所有灯"
+    },
+    "ai_provider": "gemini"
+  },
+  {
+    "timestamp": "2025-10-31T08:25:37.153Z",
+    "input": {
+      "type": "message",
+      "content": "打开所有灯",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "打开所有灯",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您打开所有灯"
+    },
+    "ai_provider": "gemini"
+  },
+  {
+    "timestamp": "2025-10-31T08:25:37.153Z",
+    "input": {
+      "type": "message",
+      "content": "打开所有灯",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "打开所有灯",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您打开所有灯"
+    },
+    "ai_provider": "gemini"
+  },
+  {
+    "timestamp": "2025-10-31T06:21:12.940Z",
+    "input": {
+      "type": "message",
+      "content": "打开所有灯",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "打开所有灯",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您打开所有灯"
+    },
+    "ai_provider": "openai"
+  },
+  {
+    "timestamp": "2025-10-30T08:57:13.413Z",
+    "input": {
+      "type": "message",
+      "content": "光温暖一些",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "光温暖一些",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_temp": 333
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.8,
+      "user_responds": "好的，已将灯光调整为更温暖的色温"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T08:56:49.879Z",
+    "input": {
+      "type": "message",
+      "content": "再亮一点",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "再亮一点",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "brightness_step_pct": 20
+          }
+        }
+      ],
+      "confidence": 0.8,
+      "user_responds": "好的，为您调亮灯光"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T08:56:29.717Z",
+    "input": {
+      "type": "message",
+      "content": "厨房亮一点",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "厨房亮一点",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "kitchen",
+          "room_name": "厨房",
+          "room_name_en": "kitchen",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "brightness_step_pct": 20
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.85,
+      "user_responds": "好的，即将调亮厨房的灯光"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T08:55:54.363Z",
+    "input": {
+      "type": "message",
+      "content": "温度多少",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "温度多少",
+      "intent": "Query Device Status",
+      "devices": [
+        {
+          "device_type": "temperature",
+          "device_name": "温度传感器",
+          "device_name_en": "temperature_sensor",
+          "service": "sensor.state",
+          "service_data": {}
+        }
+      ],
+      "confidence": 0.9,
+      "user_responds": "好的，我来查询当前温度"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T08:55:42.891Z",
+    "input": {
+      "type": "message",
+      "content": "空调风速低",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "空调风速低",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "device_type": "climate",
+          "service": "climate.set_fan_mode",
+          "service_data": {
+            "fan_mode": "low"
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.85,
+      "user_responds": "好的，已将空调风速设置为低档"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T08:55:31.059Z",
+    "input": {
+      "type": "message",
+      "content": "关闭卧室灯",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "关闭卧室灯",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "light",
+          "device_name": "",
+          "device_name_en": "",
+          "service": "light.turn_off",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.95,
+      "user_responds": "好的，已关闭卧室灯"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T08:40:58.597Z",
+    "input": {
+      "type": "message",
+      "content": "客厅没人时关闭所有设备",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "客厅没人时关闭所有设备",
+      "intent": "Set Automation",
+      "devices": [
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "occupancy",
+          "device_name": "占用传感器",
+          "device_name_en": "occupancy_sensor",
+          "service": "binary_sensor.state",
+          "service_data": {
+            "state": "off"
+          },
+          "automation": "trigger"
+        },
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "motion",
+          "device_name": "运动传感器",
+          "device_name_en": "motion_sensor",
+          "service": "binary_sensor.state",
+          "service_data": {
+            "state": "off"
+          },
+          "automation": "trigger"
+        },
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "light",
+          "service": "light.turn_off",
+          "service_data": {},
+          "automation": "action"
+        },
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "climate",
+          "service": "climate.turn_off",
+          "service_data": {},
+          "automation": "action"
+        },
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "fan",
+          "service": "fan.turn_off",
+          "service_data": {},
+          "automation": "action"
+        },
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "cover",
+          "service": "cover.close_cover",
+          "service_data": {},
+          "automation": "action"
+        },
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "switch",
+          "service": "switch.turn_off",
+          "service_data": {},
+          "automation": "action"
+        },
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "media_player",
+          "service": "media_player.turn_off",
+          "service_data": {},
+          "automation": "action"
+        }
+      ],
+      "scene": {},
+      "automation": {
+        "automation_name": "客厅无人关闭设备",
+        "automation_name_en": "living_room_unoccupied_turn_off",
+        "operation": "add",
+        "operation_type": "setup",
+        "description": "当客厅没人时关闭所有设备"
+      },
+      "confidence": 0.9,
+      "user_responds": "好的，我将为您创建自动化规则：当客厅没人时关闭所有设备"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T08:39:22.362Z",
+    "input": {
+      "type": "message",
+      "content": "删除电视房温度控制",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除电视房温度控制",
+      "intent": "Set Automation",
+      "devices": [],
+      "scene": {},
+      "automation": {
+        "automation_name": "电视房温度控制",
+        "automation_name_en": "tv_room_temperature_control",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除电视房温度控制的自动化规则"
+      },
+      "confidence": 0.9,
+      "user_responds": "好的，我将为您删除电视房温度控制的自动化规则"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T08:38:56.374Z",
+    "input": {
+      "type": "message",
+      "content": "删除车库无人时关闭设备\n",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除车库无人时关闭设备",
+      "intent": "Set Automation",
+      "devices": [
+        {
+          "room_type": "garage",
+          "room_name": "车库",
+          "room_name_en": "garage",
+          "device_type": "occupancy",
+          "device_name": "占用传感器",
+          "device_name_en": "occupancy_sensor",
+          "service": "binary_sensor.state",
+          "service_data": {
+            "state": "off"
+          },
+          "automation": "trigger"
+        },
+        {
+          "room_type": "garage",
+          "room_name": "车库",
+          "room_name_en": "garage",
+          "device_type": "motion",
+          "device_name": "运动传感器",
+          "device_name_en": "motion_sensor",
+          "service": "binary_sensor.state",
+          "service_data": {
+            "state": "off"
+          },
+          "automation": "trigger"
+        }
+      ],
+      "scene": {},
+      "automation": {
+        "automation_name": "车库无人时关闭设备",
+        "automation_name_en": "garage_unoccupied_turn_off_devices",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除车库无人时关闭设备的自动化规则"
+      },
+      "confidence": 0.9,
+      "user_responds": "好��，我将为您删除车库无人时关闭设备的自动化规则"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T08:38:12.984Z",
+    "input": {
+      "type": "message",
+      "content": "删除车库无人时关闭设备自动化",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除车库无人时关闭设备自动化",
+      "intent": "Set Automation",
+      "devices": [],
+      "scene": {},
+      "automation": {
+        "automation_name": "车库无人时关闭设备自动化",
+        "automation_name_en": "garage_unoccupied_turn_off_devices_automation",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除车库无人时关闭设备的自动化规则"
+      },
+      "confidence": 0.9,
+      "user_responds": "好的，我将为您删除车库无人时关闭设备的自动化规则"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T08:36:53.301Z",
+    "input": {
+      "type": "message",
+      "content": "将客厅设备当前状态设置为会客模式",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "将客厅设备当前状态设置为会客模式",
+      "intent": "Set Scene",
+      "devices": [
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "light",
+          "service": "light.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "climate",
+          "service": "climate.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "fan",
+          "service": "fan.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "cover",
+          "service": "cover.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "switch",
+          "service": "switch.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "media_player",
+          "service": "media_player.state",
+          "service_data": {}
+        }
+      ],
+      "scene": {
+        "scene_name": "会客模式",
+        "scene_name_en": "reception_mode",
+        "operation": "add",
+        "operation_type": "setup",
+        "description": "保存客厅当前设备状态为会客模式"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，我将读取客厅所有设备的当前状态并保存为会客模式"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T08:35:05.582Z",
+    "input": {
+      "type": "message",
+      "content": "删除我睡觉了模式",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除我睡觉了模式",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "我睡觉了模式",
+        "scene_name_en": "sleep_mode",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除睡觉模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已删除睡觉模式场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T08:34:39.659Z",
+    "input": {
+      "type": "message",
+      "content": "删除空调场景",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除空调场景",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "空调场景",
+        "scene_name_en": "air_conditioner_scene",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除空调场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，我将为您删除空调场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T08:34:01.349Z",
+    "input": {
+      "type": "message",
+      "content": "删除开心模式",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除开心模式",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "开心模式",
+        "scene_name_en": "happy_mode",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除开心模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，我将删除开心模式场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T08:05:14.618Z",
+    "input": {
+      "type": "message",
+      "content": "删除会客模式",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除会客模式",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "会客模式",
+        "scene_name_en": "reception_mode",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除会客模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您删除会客模式场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T07:52:23.955Z",
+    "input": {
+      "type": "message",
+      "content": "删除会客模式",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除会客模式",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "会客模式",
+        "scene_name_en": "reception_mode",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除会客模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已删除会客模式场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T07:47:25.041Z",
+    "input": {
+      "type": "message",
+      "content": "删除会客模式",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除会客模式",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "会客模式",
+        "scene_name_en": "reception_mode",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除会客模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您删除会客模式场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T07:21:43.178Z",
+    "input": {
+      "type": "message",
+      "content": "删除会客模式",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除会客模式",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "会客模式",
+        "scene_name_en": "reception_mode",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除会客模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将删除会客模式场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:57:23.746Z",
+    "input": {
+      "type": "message",
+      "content": "删除开心模式",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除开心模式",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "开心模式",
+        "scene_name_en": "happy_mode",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除开心模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已删除开心模式场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:51:38.299Z",
+    "input": {
+      "type": "message",
+      "content": "删除会客模式",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除会客模式",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "会客模式",
+        "scene_name_en": "reception_mode",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除会客模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已删除会客模式场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:42:11.498Z",
+    "input": {
+      "type": "message",
+      "content": "删除会客模式",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除会客模式",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "会客模式",
+        "scene_name_en": "reception_mode",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除会客模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已删除会客模式场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:30:31.134Z",
+    "input": {
+      "type": "message",
+      "content": "删除会客模式",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除会客模式",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "会客模式",
+        "scene_name_en": "reception_mode",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除会客模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已删除会客模式场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:30:16.421Z",
+    "input": {
+      "type": "message",
+      "content": "有哪些场景",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "有哪些场景",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "",
+        "scene_name_en": "",
+        "operation": "list",
+        "operation_type": "query",
+        "description": "查询所有已保存的场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "我将为您列出所有已保存的场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:29:35.476Z",
+    "input": {
+      "type": "message",
+      "content": "删除会客模式",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除会客模式",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "会客模式",
+        "scene_name_en": "reception_mode",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除会客模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已删除会客模式场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:23:10.941Z",
+    "input": {
+      "type": "message",
+      "content": "删除会客模式",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除会客模式",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "会客模式",
+        "scene_name_en": "reception_mode",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除会客模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已删除会客模式场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:05:03.784Z",
+    "input": {
+      "type": "message",
+      "content": "删除会客模式",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除会客模式",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "会客模式",
+        "scene_name_en": "reception_mode",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除会客模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已删除会客模式场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:04:36.431Z",
+    "input": {
+      "type": "message",
+      "content": "厨房有人么",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "厨房有人么",
+      "intent": "Query Device Status",
+      "devices": [
+        {
+          "room_type": "kitchen",
+          "room_name": "厨房",
+          "room_name_en": "kitchen",
+          "device_type": "occupancy",
+          "device_name": "占用传感器",
+          "device_name_en": "occupancy_sensor",
+          "service": "binary_sensor.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "kitchen",
+          "room_name": "厨房",
+          "room_name_en": "kitchen",
+          "device_type": "motion",
+          "device_name": "运动传感器",
+          "device_name_en": "motion_sensor",
+          "service": "binary_sensor.state",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "正在查询厨房是否有人"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:04:12.015Z",
+    "input": {
+      "type": "message",
+      "content": "灯颜色蓝",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "灯颜色蓝",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "device_name": "",
+          "device_name_en": "",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_name": "blue"
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已将灯的颜色设置为蓝色"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:03:59.427Z",
+    "input": {
+      "type": "message",
+      "content": "灯最亮",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "灯最亮",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "brightness_pct": 100
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已将灯调至最亮"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:03:49.416Z",
+    "input": {
+      "type": "message",
+      "content": "书房灯调到最暗",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "书房灯调到最暗",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "study",
+          "room_name": "书房",
+          "room_name_en": "study",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "brightness_pct": 1
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.95,
+      "user_responds": "好的，已将书房灯调到最暗"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:03:16.664Z",
+    "input": {
+      "type": "message",
+      "content": "空调打开制冷23",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "空调打开制冷23",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "climate",
+          "device_name": "",
+          "device_name_en": "",
+          "service": "climate.set_temperature",
+          "service_data": {
+            "temperature": 23,
+            "hvac_mode": "cool"
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您打开空调并设置为制冷23度"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:03:03.463Z",
+    "input": {
+      "type": "message",
+      "content": "灯关掉",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "灯关掉",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "device_type": "light",
+          "service": "light.turn_off",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您关闭所有灯光"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:02:53.200Z",
+    "input": {
+      "type": "message",
+      "content": "书房温度多少",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "书房温度多少",
+      "intent": "Query Device Status",
+      "devices": [
+        {
+          "room_type": "study",
+          "room_name": "书房",
+          "room_name_en": "study",
+          "device_type": "temperature",
+          "device_name": "温度传感器",
+          "device_name_en": "temperature_sensor",
+          "service": "sensor.state",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "正在查询书房的温度"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:02:29.299Z",
+    "input": {
+      "type": "message",
+      "content": "温度多少",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "温度多少",
+      "intent": "Query Device Status",
+      "devices": [
+        {
+          "device_type": "temperature",
+          "device_name": "温度传感器",
+          "device_name_en": "temperature_sensor",
+          "service": "sensor.state",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，我来查询当前温度"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:02:20.713Z",
+    "input": {
+      "type": "message",
+      "content": "书房灯调到50",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "书房灯调到50",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "study",
+          "room_name": "书房",
+          "room_name_en": "study",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "brightness_pct": 50
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已将书房灯亮度调到50%"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:01:37.909Z",
+    "input": {
+      "type": "message",
+      "content": "书房灯和电视房灯调成最暖",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "书房灯和电视房灯调成最暖",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "study",
+          "room_name": "书房",
+          "room_name_en": "study",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_temp": 333
+          }
+        },
+        {
+          "room_type": "tv_room",
+          "room_name": "电视房",
+          "room_name_en": "tv_room",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_temp": 333
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已将书房和电视房的灯光调成最暖色调"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T06:00:43.145Z",
+    "input": {
+      "type": "message",
+      "content": "卧室灯调成最暖",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "卧室灯调成最暖",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_temp": 333
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已将卧室灯调成最暖色调"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T05:58:16.483Z",
+    "input": {
+      "type": "message",
+      "content": "卧室灯冷色\n",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "卧室灯冷色",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_temp": 153
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已将卧室灯调整为冷色"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-30T05:46:22.537Z",
+    "input": {
+      "type": "message",
+      "content": "卧室灯调成暖色",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "卧室灯调成暖色",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_temp": 333
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已将卧室灯调成暖色"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:45:02.944Z",
+    "input": {
+      "type": "downlink",
+      "content": "有哪些自动化"
+    },
+    "output": {
+      "user_input": "有哪些自动化",
+      "intent": "Set Automation",
+      "devices": [],
+      "scene": {},
+      "automation": {
+        "automation_name": "",
+        "automation_name_en": "",
+        "operation": "list",
+        "operation_type": "query",
+        "description": "查询现有的自动化规则"
+      },
+      "confidence": 0.9,
+      "user_responds": "我将为您列出当前所有的自动化规则"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:42:00.218Z",
+    "input": {
+      "type": "downlink",
+      "content": "删除开心模式"
+    },
+    "output": {
+      "user_input": "删除开心模式",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "开心模式",
+        "scene_name_en": "happy_mode",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除开心模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您删除开心模式场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:41:26.082Z",
+    "input": {
+      "type": "downlink",
+      "content": "有哪些场景"
+    },
+    "output": {
+      "user_input": "有哪些场景",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "场景列表",
+        "scene_name_en": "scene_list",
+        "operation": "list",
+        "operation_type": "query",
+        "description": "查询所有已保存的场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "我将为您查询所有已保存的场景列表"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:40:58.506Z",
+    "input": {
+      "type": "downlink",
+      "content": "空调开制热"
+    },
+    "output": {
+      "user_input": "空调开制热",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "device_type": "climate",
+          "service": "climate.set_hvac_mode",
+          "service_data": {
+            "hvac_mode": "heat"
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已为您将空调设置为制热模式"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:40:41.117Z",
+    "input": {
+      "type": "downlink",
+      "content": "卧室热么"
+    },
+    "output": {
+      "user_input": "卧室热么",
+      "intent": "Query Device Status",
+      "devices": [
+        {
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "temperature",
+          "device_name": "温度传感器",
+          "device_name_en": "temperature_sensor",
+          "service": "sensor.state",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "我来帮您查看卧室的温度"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:40:05.076Z",
+    "input": {
+      "type": "downlink",
+      "content": "热么"
+    },
+    "output": {
+      "user_input": "热么",
+      "intent": "Query Device Status",
+      "devices": [
+        {
+          "device_type": "temperature",
+          "service": "sensor.state",
+          "service_data": {}
+        }
+      ],
+      "confidence": 0.8,
+      "user_responds": "我来帮您查看当前的温度情况"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:39:53.373Z",
+    "input": {
+      "type": "downlink",
+      "content": "书房灯开了"
+    },
+    "output": {
+      "user_input": "书房灯开了",
+      "intent": "Query Device Status",
+      "devices": [
+        {
+          "room_type": "study",
+          "room_name": "书房",
+          "room_name_en": "study",
+          "device_type": "light",
+          "service": "light.state",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，我来查询书房灯的状态"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:39:30.845Z",
+    "input": {
+      "type": "downlink",
+      "content": "温度多少"
+    },
+    "output": {
+      "user_input": "温度多少",
+      "intent": "Query Device Status",
+      "devices": [
+        {
+          "device_type": "temperature",
+          "device_name": "温度传感器",
+          "device_name_en": "temperature_sensor",
+          "service": "sensor.state",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，我来查询当前温度"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:39:14.354Z",
+    "input": {
+      "type": "downlink",
+      "content": "书房灯和空调关了"
+    },
+    "output": {
+      "user_input": "书房灯和空调关了",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "study",
+          "room_name": "书房",
+          "room_name_en": "study",
+          "device_type": "light",
+          "service": "light.turn_off",
+          "service_data": {}
+        },
+        {
+          "room_type": "study",
+          "room_name": "书房",
+          "room_name_en": "study",
+          "device_type": "climate",
+          "service": "climate.turn_off",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.95,
+      "user_responds": "好的，已为您关闭书房的灯和空调"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:38:31.205Z",
+    "input": {
+      "type": "downlink",
+      "content": "电视房空调制冷25，卧室灯关了"
+    },
+    "output": {
+      "user_input": "电视房空调制冷25，卧室灯关了",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "tv_room",
+          "room_name": "电视房",
+          "room_name_en": "tv_room",
+          "device_type": "climate",
+          "service": "climate.set_temperature",
+          "service_data": {
+            "temperature": 25,
+            "hvac_mode": "cool"
+          }
+        },
+        {
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "light",
+          "service": "light.turn_off",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，电视房空调设为制冷25度，卧室灯已关闭"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:35:50.489Z",
+    "input": {
+      "type": "downlink",
+      "content": "家里灯调成开心的颜色"
+    },
+    "output": {
+      "user_input": "家里灯调成开心的颜色",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "device_name": "",
+          "device_name_en": "",
+          "service": "light.turn_on",
+          "service_data": {
+            "brightness_pct": 90,
+            "color_name": "white"
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.75,
+      "user_responds": "好的，已为您将家中所有灯光调至开心的明亮白色"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:35:10.986Z",
+    "input": {
+      "type": "downlink",
+      "content": "我不开心，家里灯调成蓝色"
+    },
+    "output": {
+      "user_input": "我不开心，家里灯调成蓝色",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "device_name": "",
+          "device_name_en": "",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_name": "blue",
+            "brightness_pct": 55
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.75,
+      "user_responds": "好的，我理解您的心情，已将家中所有灯光调成柔和的蓝色，希望能让您感觉好一些"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:18:33.813Z",
+    "input": {
+      "type": "downlink",
+      "content": "设置我很开心场景，把家里灯都调成粉红色"
+    },
+    "output": {
+      "user_input": "设置我很开心场景，把家里灯都调成粉红色",
+      "intent": "Set Scene",
+      "devices": [
+        {
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_name": "pink"
+          }
+        }
+      ],
+      "scene": {
+        "scene_name": "我很开心场景",
+        "scene_name_en": "happy_scene",
+        "operation": "add",
+        "operation_type": "setup",
+        "description": "将家里所有灯调成粉红色"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，我将为您创建'我很开心场景'，把家里所有灯都调成粉红色"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:17:13.935Z",
+    "input": {
+      "type": "downlink",
+      "content": "有哪些场景"
+    },
+    "output": {
+      "user_input": "有哪些场景",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "场景列表",
+        "scene_name_en": "scene_list",
+        "operation": "list",
+        "operation_type": "query",
+        "description": "查询所有已保存的场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "我将为您列出所有已保存的场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:15:05.825Z",
+    "input": {
+      "type": "downlink",
+      "content": "有哪些自动化"
+    },
+    "output": {
+      "user_input": "有哪些自动化",
+      "intent": "Set Automation",
+      "devices": [],
+      "scene": {},
+      "automation": {
+        "automation_name": "自动化列表",
+        "automation_name_en": "automation_list",
+        "operation": "list",
+        "operation_type": "query",
+        "description": "查询当前所有自动化规则"
+      },
+      "confidence": 0.9,
+      "user_responds": "好的，我将为您列出当前所有的自动化规则"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:14:27.627Z",
+    "input": {
+      "type": "downlink",
+      "content": "有哪些自动化"
+    },
+    "output": {
+      "user_input": "有哪些自动化",
+      "intent": "Set Automation",
+      "devices": [],
+      "scene": {},
+      "automation": {
+        "automation_name": "自动化列表",
+        "automation_name_en": "automation_list",
+        "operation": "list",
+        "operation_type": "query",
+        "description": "查询当前已设置的自动化规则"
+      },
+      "confidence": 0.9,
+      "user_responds": "我将为您列出当前已设置的所有自动化规则"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:13:34.706Z",
+    "input": {
+      "type": "downlink",
+      "content": "灯关了"
+    },
+    "output": {
+      "user_input": "灯关了",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "device_type": "light",
+          "service": "light.turn_off",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已关闭所有灯光"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:13:14.512Z",
+    "input": {
+      "type": "downlink",
+      "content": "温度多少"
+    },
+    "output": {
+      "user_input": "温度多少",
+      "intent": "Query Device Status",
+      "devices": [
+        {
+          "device_type": "temperature",
+          "device_name": "温度传感器",
+          "device_name_en": "temperature_sensor",
+          "service": "sensor.state",
+          "service_data": {}
+        }
+      ],
+      "confidence": 0.9,
+      "user_responds": "好的，我将为您查询当前温度"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:12:53.517Z",
+    "input": {
+      "type": "downlink",
+      "content": "打开书房的空调29度"
+    },
+    "output": {
+      "user_input": "打开书房的空调29度",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "study",
+          "room_name": "书房",
+          "room_name_en": "study",
+          "device_type": "climate",
+          "service": "climate.set_temperature",
+          "service_data": {
+            "temperature": 29
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您打开书房的空调并设置为29度"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:09:22.664Z",
+    "input": {
+      "type": "downlink",
+      "content": "电视房温度高于26度，有人时且灯开着，空调设置24度"
+    },
+    "output": {
+      "user_input": "电视房温度高于26度，有人时且灯开着，空调设置24度",
+      "intent": "Set Automation",
+      "devices": [
+        {
+          "room_type": "tv_room",
+          "room_name": "电视房",
+          "room_name_en": "tv_room",
+          "device_type": "temperature",
+          "device_name": "温度传感器",
+          "device_name_en": "temperature_sensor",
+          "service": "sensor.state",
+          "service_data": {
+            "threshold": 26,
+            "comparison": "above"
+          },
+          "automation": "trigger"
+        },
+        {
+          "room_type": "tv_room",
+          "room_name": "电视房",
+          "room_name_en": "tv_room",
+          "device_type": "occupancy",
+          "device_name": "占用传感器",
+          "device_name_en": "occupancy_sensor",
+          "service": "binary_sensor.state",
+          "service_data": {
+            "state": "on"
+          },
+          "automation": "condition"
+        },
+        {
+          "room_type": "tv_room",
+          "room_name": "电视房",
+          "room_name_en": "tv_room",
+          "device_type": "motion",
+          "device_name": "运动传感器",
+          "device_name_en": "motion_sensor",
+          "service": "binary_sensor.state",
+          "service_data": {
+            "state": "on"
+          },
+          "automation": "condition"
+        },
+        {
+          "room_type": "tv_room",
+          "room_name": "电视房",
+          "room_name_en": "tv_room",
+          "device_type": "light",
+          "service": "light.state",
+          "service_data": {
+            "state": "on"
+          },
+          "automation": "condition"
+        },
+        {
+          "room_type": "tv_room",
+          "room_name": "电视房",
+          "room_name_en": "tv_room",
+          "device_type": "climate",
+          "service": "climate.set_temperature",
+          "service_data": {
+            "temperature": 24
+          },
+          "automation": "action"
+        }
+      ],
+      "scene": {},
+      "automation": {
+        "automation_name": "电视房温度控制",
+        "automation_name_en": "tv_room_temperature_control",
+        "operation": "add",
+        "operation_type": "setup",
+        "description": "当电视房温度高于26度、有人且灯开着时，空调设置24度"
+      },
+      "confidence": 0.9,
+      "user_responds": "好的，我将为您创建电视房温度控制的自动化规则：当温度高于26度、有人且灯开着时，空调自动设置为24度"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:05:39.420Z",
+    "input": {
+      "type": "downlink",
+      "content": "书房空调26度"
+    },
+    "output": {
+      "user_input": "书房空调26度",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "study",
+          "room_name": "书房",
+          "room_name_en": "study",
+          "device_type": "climate",
+          "service": "climate.set_temperature",
+          "service_data": {
+            "temperature": 26
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已将书房空调设置为26度"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T13:00:01.510Z",
+    "input": {
+      "type": "downlink",
+      "content": "有哪些场景"
+    },
+    "output": {
+      "user_input": "有哪些场景",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "",
+        "scene_name_en": "",
+        "operation": "list",
+        "operation_type": "query",
+        "description": "查询所有已保存的场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "我将为您列出所有已保存的场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T12:59:37.517Z",
+    "input": {
+      "type": "downlink",
+      "content": "删掉我回家的場景"
+    },
+    "output": {
+      "user_input": "删掉我回家的場景",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "回家场景",
+        "scene_name_en": "arrival_home",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除回家场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已为您删除回家场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T12:58:37.608Z",
+    "input": {
+      "type": "downlink",
+      "content": "有哪些场景"
+    },
+    "output": {
+      "user_input": "有哪些场景",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "",
+        "scene_name_en": "",
+        "operation": "list",
+        "operation_type": "query",
+        "description": "查询已保存的场景列表"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "我将为您查询已保存的场景列表"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T12:58:03.100Z",
+    "input": {
+      "type": "downlink",
+      "content": "卧室空调28度制热"
+    },
+    "output": {
+      "user_input": "卧室空调28度制热",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "climate",
+          "service": "climate.set_temperature",
+          "service_data": {
+            "temperature": 28,
+            "hvac_mode": "heat"
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已将卧室空调设置为28度制热模式"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T12:56:37.946Z",
+    "input": {
+      "type": "downlink",
+      "content": "打开客厅空调高风制冷23度"
+    },
+    "output": {
+      "user_input": "打开客厅空调高风制冷23度",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "climate",
+          "service": "climate.set_temperature",
+          "service_data": {
+            "temperature": 23,
+            "hvac_mode": "cool",
+            "fan_mode": "high"
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您打开客厅空调，设置为高风制冷23度"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T12:42:05.459Z",
+    "input": {
+      "type": "message",
+      "content": "卧室温度大于23度，有人时，空调开制冷20度大风",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "卧室温度大于23度，有人时，空调开制冷20度大风",
+      "intent": "Set Automation",
+      "devices": [
+        {
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "temperature",
+          "device_name": "温度传感器",
+          "device_name_en": "temperature_sensor",
+          "service": "sensor.state",
+          "service_data": {
+            "threshold": 23,
+            "comparison": "above"
+          },
+          "automation": "trigger"
+        },
+        {
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "occupancy",
+          "device_name": "占用传感器",
+          "device_name_en": "occupancy_sensor",
+          "service": "binary_sensor.state",
+          "service_data": {
+            "state": "on"
+          },
+          "automation": "condition"
+        },
+        {
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "motion",
+          "device_name": "运动传感器",
+          "device_name_en": "motion_sensor",
+          "service": "binary_sensor.state",
+          "service_data": {
+            "state": "on"
+          },
+          "automation": "condition"
+        },
+        {
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "climate",
+          "service": "climate.set_temperature",
+          "service_data": {
+            "temperature": 20,
+            "hvac_mode": "cool",
+            "fan_mode": "high"
+          },
+          "automation": "action"
+        }
+      ],
+      "scene": {},
+      "automation": {
+        "automation_name": "卧室温度控制",
+        "automation_name_en": "bedroom_temperature_control",
+        "operation": "add",
+        "operation_type": "setup",
+        "description": "当卧室温度大于23度且有人时，空调制冷20度大风"
+      },
+      "confidence": 0.9,
+      "user_responds": "好的，我将为您创建卧室温度控制的自动化规则：当温度超过23度且检测到有人时，空调将开启制冷模式，温度设为20度，风速设为大风"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T12:38:38.693Z",
+    "input": {
+      "type": "message",
+      "content": "删除开心模式场景",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除开心模式场景",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "开心模式",
+        "scene_name_en": "happy_mode",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除开心模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，已为您删除开心模式场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T12:38:02.411Z",
+    "input": {
+      "type": "message",
+      "content": "执行开心模式场景",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "执行开心模式场景",
+      "intent": "Control Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "开心模式",
+        "scene_name_en": "happy_mode",
+        "operation": "execute",
+        "operation_type": "control",
+        "description": "启动开心模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您启动开心模式场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T12:37:33.996Z",
+    "input": {
+      "type": "message",
+      "content": "开心模式",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "开心模式",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "brightness_pct": 90,
+            "color_name": "white"
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.75,
+      "user_responds": "好的，为您设置开心模式：灯光调至90%亮度，白色光效，让心情更愉悦！"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T12:36:47.566Z",
+    "input": {
+      "type": "message",
+      "content": "我很开心",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "我很开心",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "device_type": "light",
+          "service": "light.turn_on",
+          "service_data": {
+            "brightness_pct": 90,
+            "color_name": "white"
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.75,
+      "user_responds": "检测到您心情很好，已为您调亮灯光营造愉悦氛围"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T12:35:14.984Z",
+    "input": {
+      "type": "message",
+      "content": "将卧室和书房的设备当前状态设置为开心模式",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "将卧室和书房的设备当前状态设置为开心模式",
+      "intent": "Set Scene",
+      "devices": [
+        {
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "light",
+          "service": "light.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "climate",
+          "service": "climate.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "fan",
+          "service": "fan.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "cover",
+          "service": "cover.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "switch",
+          "service": "switch.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "bedroom",
+          "room_name": "卧室",
+          "room_name_en": "bedroom",
+          "device_type": "media_player",
+          "service": "media_player.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "study",
+          "room_name": "书房",
+          "room_name_en": "study",
+          "device_type": "light",
+          "service": "light.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "study",
+          "room_name": "书房",
+          "room_name_en": "study",
+          "device_type": "climate",
+          "service": "climate.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "study",
+          "room_name": "书房",
+          "room_name_en": "study",
+          "device_type": "fan",
+          "service": "fan.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "study",
+          "room_name": "书房",
+          "room_name_en": "study",
+          "device_type": "cover",
+          "service": "cover.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "study",
+          "room_name": "书房",
+          "room_name_en": "study",
+          "device_type": "switch",
+          "service": "switch.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "study",
+          "room_name": "书房",
+          "room_name_en": "study",
+          "device_type": "media_player",
+          "service": "media_player.state",
+          "service_data": {}
+        }
+      ],
+      "scene": {
+        "scene_name": "开心模式",
+        "scene_name_en": "happy_mode",
+        "operation": "add",
+        "operation_type": "setup",
+        "description": "保存卧室和书房设备当前状态为开心模式"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，我将读取卧室和书房所有设备的当前状态并保存为开心模式场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T12:33:36.018Z",
+    "input": {
+      "type": "message",
+      "content": "会客",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "会客",
+      "intent": "Control Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "会客模式",
+        "scene_name_en": "entertainment_mode",
+        "operation": "execute",
+        "operation_type": "control",
+        "description": "启动会客模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，即将为您启动会客模式"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T12:33:07.017Z",
+    "input": {
+      "type": "message",
+      "content": "我回家了",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "我回家了",
+      "intent": "Control Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "回家模式",
+        "scene_name_en": "arrival_home",
+        "operation": "execute",
+        "operation_type": "control",
+        "description": "启动回家模式场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "欢迎回家，即将为您启动回家模式"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T12:32:47.985Z",
+    "input": {
+      "type": "message",
+      "content": "有哪些场景",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "有哪些场景",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "场景列表",
+        "scene_name_en": "scene_list",
+        "operation": "list",
+        "operation_type": "query",
+        "description": "查询所有已保存的场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "我将为您查询所有已保存的场景列表"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T12:32:19.839Z",
+    "input": {
+      "type": "message",
+      "content": "删除test",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "删除test",
+      "intent": "Set Scene",
+      "devices": [],
+      "scene": {
+        "scene_name": "test",
+        "scene_name_en": "test",
+        "operation": "delete",
+        "operation_type": "setup",
+        "description": "删除名为test的场景"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，我将删除名为test的场景"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-10-29T12:29:45.177Z",
+    "input": {
+      "type": "message",
+      "content": "客厅设备当前状态设置为会客模式\n",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "客厅设备当前状态设置为会客模式",
+      "intent": "Set Scene",
+      "devices": [
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "light",
+          "service": "light.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "climate",
+          "service": "climate.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "cover",
+          "service": "cover.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "media_player",
+          "service": "media_player.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "fan",
+          "service": "fan.state",
+          "service_data": {}
+        },
+        {
+          "room_type": "living_room",
+          "room_name": "客厅",
+          "room_name_en": "living_room",
+          "device_type": "switch",
+          "service": "switch.state",
+          "service_data": {}
+        }
+      ],
+      "scene": {
+        "scene_name": "会客模式",
+        "scene_name_en": "entertainment_mode",
+        "operation": "add",
+        "operation_type": "setup",
+        "description": "保存客厅当前设备状态为会客模式"
+      },
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "好的，我将读取客厅所有设备的当前状态并保存为会客模式场景"
+    },
+    "ai_provider": "deepseek"
+  }
+]

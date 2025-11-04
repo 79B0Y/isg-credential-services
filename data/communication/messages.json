@@ -1,0 +1,333 @@
+[
+  {
+    "id": "1761903028386_ossjdla8l",
+    "timestamp": "2025-10-31T09:30:28.386Z",
+    "type": "notification",
+    "content": "• HA VT AC 1 — off",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761903023050_r5lks8kzk",
+    "timestamp": "2025-10-31T09:30:23.050Z",
+    "type": "notification",
+    "content": "好的，即将为您关掉空调",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761903020446_pwx7bqhlq",
+    "timestamp": "2025-10-31T09:30:20.446Z",
+    "type": "message",
+    "content": "空调关掉",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1761903015635_iymc5h2tq",
+    "timestamp": "2025-10-31T09:30:15.635Z",
+    "type": "notification",
+    "content": "• 顶灯 — on · 80% · Yellow",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761903008935_0cuev586j",
+    "timestamp": "2025-10-31T09:30:08.935Z",
+    "type": "notification",
+    "content": "好的，即将为您打开灯",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761903006779_8vdji82ye",
+    "timestamp": "2025-10-31T09:30:06.779Z",
+    "type": "message",
+    "content": "灯打开",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1761902997347_b42p34zkc",
+    "timestamp": "2025-10-31T09:29:57.347Z",
+    "type": "notification",
+    "content": "• HA VT Motion 1 — on",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902988222_9qjdae6lr",
+    "timestamp": "2025-10-31T09:29:48.222Z",
+    "type": "notification",
+    "content": "正在查询电视房是否有人",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902986119_4tt26qqt9",
+    "timestamp": "2025-10-31T09:29:46.119Z",
+    "type": "message",
+    "content": "电视房有人么",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1761902951794_3xomq9fve",
+    "timestamp": "2025-10-31T09:29:11.794Z",
+    "type": "message",
+    "metadata": {},
+    "source": "api",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902950788_m7ftyrpf7",
+    "timestamp": "2025-10-31T09:29:10.788Z",
+    "type": "notification",
+    "content": "Sorry, device not found",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902948988_ngdb7ei9d",
+    "timestamp": "2025-10-31T09:29:08.988Z",
+    "type": "notification",
+    "content": "正在查询...",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902947447_83x2vy82t",
+    "timestamp": "2025-10-31T09:29:07.447Z",
+    "type": "message",
+    "content": "电视房有人么",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1761902937143_amqqmbnzo",
+    "timestamp": "2025-10-31T09:28:57.143Z",
+    "type": "message",
+    "metadata": {},
+    "source": "api",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902936138_lo41afmrr",
+    "timestamp": "2025-10-31T09:28:56.138Z",
+    "type": "notification",
+    "content": "Sorry, device not found",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902935556_2xaz7d4gb",
+    "timestamp": "2025-10-31T09:28:55.556Z",
+    "type": "notification",
+    "content": "Checking...",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902933552_fd9hucxdb",
+    "timestamp": "2025-10-31T09:28:53.552Z",
+    "type": "message",
+    "content": "有人么",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1761902929118_3q9iaeoiu",
+    "timestamp": "2025-10-31T09:28:49.118Z",
+    "type": "notification",
+    "content": "• 顶灯 — off",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902927675_x612f3slg",
+    "timestamp": "2025-10-31T09:28:47.675Z",
+    "type": "notification",
+    "content": "好的，即将为您关闭电视房灯",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902924821_ukgw51hc6",
+    "timestamp": "2025-10-31T09:28:44.820Z",
+    "type": "message",
+    "content": "电视房灯关掉",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1761902915207_fiv0ngi73",
+    "timestamp": "2025-10-31T09:28:35.207Z",
+    "type": "notification",
+    "content": "• 顶灯 — on · 80% · Yellow\n• HA VT color light 8 — on · 80% · Yellow",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902911498_gevfbv5ti",
+    "timestamp": "2025-10-31T09:28:31.498Z",
+    "type": "notification",
+    "content": "好的，即将为您将电视房和书房灯调成黄色，亮度80",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902908419_nlfxm5zaj",
+    "timestamp": "2025-10-31T09:28:28.419Z",
+    "type": "message",
+    "content": "电视房和书房灯黄色，亮度80",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1761902876310_ywfocqxtc",
+    "timestamp": "2025-10-31T09:27:56.310Z",
+    "type": "notification",
+    "content": "• 顶灯 — on · 50% · Pink\n• HA VT color light 8 — on · 50% · Yellow",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902872677_kg0jih2r0",
+    "timestamp": "2025-10-31T09:27:52.677Z",
+    "type": "notification",
+    "content": "好的，我将保存电视房和书房灯为粉黄色，亮度50",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902869905_ivtk2ey0q",
+    "timestamp": "2025-10-31T09:27:49.905Z",
+    "type": "message",
+    "content": "电视房和书房灯粉黄色，亮度50",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1761902839111_d18mdazpt",
+    "timestamp": "2025-10-31T09:27:19.111Z",
+    "type": "notification",
+    "content": "• 顶灯 — on · 100% · Pink\n• HA VT color light 8 — on · 100% · Pink",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902833615_4b7xgl6qo",
+    "timestamp": "2025-10-31T09:27:13.615Z",
+    "type": "notification",
+    "content": "与输入语言一致的回复",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902827323_3oknumq3l",
+    "timestamp": "2025-10-31T09:27:07.323Z",
+    "type": "message",
+    "content": "电视房和书房灯粉红色",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1761902801591_v9gg5axyv",
+    "timestamp": "2025-10-31T09:26:41.591Z",
+    "type": "notification",
+    "content": "• 顶灯 — on · 100% · Natural White",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902799209_l38i7le0z",
+    "timestamp": "2025-10-31T09:26:39.209Z",
+    "type": "notification",
+    "content": "正在查询...",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902794868_ejf82teko",
+    "timestamp": "2025-10-31T09:26:34.868Z",
+    "type": "message",
+    "content": "电视房灯最亮",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1761902780880_vxgwmy31e",
+    "timestamp": "2025-10-31T09:26:20.880Z",
+    "type": "notification",
+    "content": "• 顶灯 — off",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902778675_e7uwvsjh8",
+    "timestamp": "2025-10-31T09:26:18.675Z",
+    "type": "notification",
+    "content": "好的，即将为您关闭电视房灯",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902776076_ncp2gd4aw",
+    "timestamp": "2025-10-31T09:26:16.076Z",
+    "type": "message",
+    "content": "关闭电视房灯",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1761902659112_oobj6yftm",
+    "timestamp": "2025-10-31T09:24:19.112Z",
+    "type": "notification",
+    "content": "• light.light_test_001 — n/a\n• light.color_light_1 — n/a\n• light.color_light_4 — n/a",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902653498_wc6igkk52",
+    "timestamp": "2025-10-31T09:24:13.498Z",
+    "type": "notification",
+    "content": {
+      "success": false,
+      "error": "Request failed: Client network socket disconnected before secure TLS connection was established"
+    },
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1761902653359_rwo33e0cf",
+    "timestamp": "2025-10-31T09:24:13.359Z",
+    "type": "message",
+    "content": "打开客厅灯",
+    "metadata": {},
+    "direction": "outgoing"
+  }
+]

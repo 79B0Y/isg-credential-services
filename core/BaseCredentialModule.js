@@ -72,6 +72,20 @@ class BaseCredentialModule {
     }
 
     /**
+     * 保存模块配置
+     */
+    async saveConfig() {
+        try {
+            await fs.writeFile(this.configPath, JSON.stringify(this.config, null, 2), 'utf8');
+            this.logger.info(`Config saved for ${this.name}`);
+            return { success: true, message: 'Config saved' };
+        } catch (error) {
+            this.logger.error(`Failed to save config for ${this.name}:`, error);
+            throw error;
+        }
+    }
+
+    /**
      * 加载凭据schema
      */
     async loadSchema() {
@@ -129,6 +143,35 @@ class BaseCredentialModule {
             return { success: true, message: 'Credentials saved' };
         } catch (error) {
             this.logger.error(`Failed to set credentials for ${this.name}:`, error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * 删除凭据配置
+     */
+    async deleteCredentials() {
+        try {
+            const credentialsPath = path.join(this.dataDir, 'credentials.json');
+            
+            // 检查文件是否存在
+            try {
+                await fs.access(credentialsPath);
+            } catch (error) {
+                // 文件不存在，直接返回成功
+                return { success: true, message: 'No credentials to delete' };
+            }
+            
+            // 删除凭据文件
+            await fs.unlink(credentialsPath);
+            
+            // 清除验证缓存
+            this.validationCache.clear();
+            
+            this.logger.info(`Credentials deleted for ${this.name}`);
+            return { success: true, message: 'Credentials deleted' };
+        } catch (error) {
+            this.logger.error(`Failed to delete credentials for ${this.name}:`, error);
             return { success: false, error: error.message };
         }
     }

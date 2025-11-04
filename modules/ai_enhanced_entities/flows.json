@@ -1,0 +1,324 @@
+[
+    {
+        "id": "0880c26b2b0573c9",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "286daf045138e042",
+        "type": "http request",
+        "z": "0880c26b2b0573c9",
+        "name": "获取空间列表",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://localhost:3000/api/home_assistant/home_assistant/spaces",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "other",
+                "keyValue": "Content-Type",
+                "valueType": "other",
+                "valueValue": "application/json"
+            }
+        ],
+        "x": 400,
+        "y": 240,
+        "wires": [
+            [
+                "a5c7c5cbf6afbd7b"
+            ]
+        ]
+    },
+    {
+        "id": "ed21539794100d41",
+        "type": "inject",
+        "z": "0880c26b2b0573c9",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "86400",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 230,
+        "y": 240,
+        "wires": [
+            [
+                "286daf045138e042"
+            ]
+        ]
+    },
+    {
+        "id": "bc87bc981b9c8c19",
+        "type": "function",
+        "z": "0880c26b2b0573c9",
+        "name": "AI提示词",
+        "func": "let inputText = msg.payload;\n\n// 类型检查和转换\nif (typeof inputText !== 'string') {\n    if (inputText === null || inputText === undefined) {\n        inputText = '';\n    } else if (typeof inputText === 'object') {\n        inputText = JSON.stringify(inputText);\n    } else {\n        inputText = String(inputText);\n    }\n}\n\n// 安全地使用 .trim()\ninputText = inputText.trim();\n\n// 设置请求头\nmsg.headers = {\n    \"Content-Type\": \"application/json\"\n};\n\n// 构建请求负载\nmsg.payload = {\n    \"system_prompt\": `您是专业的智能家居数据补全专家,专门负责为现有的房间楼层JSON数据补充缺失的标准化字段。\n\n## 核心任务\n- 接收用户提供的现有JSON数据\n- 识别数据中缺失的必填字段\n- 楼层名称统一翻译为标准英文(如 First Floor, Second Floor)\n- 房间名称翻译为标准英文(如 Living Room, Kitchen等)\n\n## 房间类型智能识别规则\n\n**基于中文房间类型映射：**\n- 客厅/大厅/会客厅/起居室 → \"living_room\"\n- 卧室/睡房 → \"bedroom\"\n- 主卧/主卧室 → \"master_bedroom\"\n- 客卧/次卧 → \"guest_bedroom\"\n- 儿童房/小孩房 → \"kids_room\"\n- 厨房/烹饪间 → \"kitchen\"\n- 餐厅/饭厅/用餐区 → \"dining_room\"\n- 书房/办公室/工作室/学习室 → \"study\"\n- 卫生间/洗手间/厕所/浴室 → \"bathroom\"\n- 主卫/主卫生间 → \"master_bathroom\"\n- 客卫/公卫 → \"guest_bathroom\"\n- 储物间/杂物间/收纳间 → \"storage\"\n- 衣帽间/更衣室 → \"closet\"\n- 走廊/过道/通道 → \"hallway\"\n- 玄关/门厅/入户 → \"entrance\"\n- 阳台/露台/平台 → \"balcony\"\n- 花园/后院/前院/庭院 → \"garden\"\n- 车库/停车库 → \"garage\"\n- 地下室/地库 → \"basement\"\n- 阁楼/顶层 → \"attic\"\n- 楼梯间 → \"stairway\"\n- 娱乐室/游戏室/影音室/TV room → \"entertainment\"\n- 健身房/运动室 → \"gym\"\n- 洗衣房/洗衣间 → \"laundry\"\n\n**多语言支持：**\n- 当房间名称为其他语言时,先理解其含义,再参照上述映射规则进行类型判断\n- 例如：英文\"Living Room\"对应\"living_room\"\n- 例如：日文\"寝室\"对应\"bedroom\"\n\n## 楼层类型识别规则\n\n**基于楼层命名映射：**\n- 一楼/1F/1层/地面层/first floor → \"first_floor\", level: 1\n- 二楼/2F/2层/second floor → \"second_floor\", level: 2\n- 三楼/3F/3层/third floor → \"third_floor\", level: 3\n- 四楼及以上类推\n- 地下室/地库/B1/basement → \"basement\", level: -1\n- 阁楼/顶层/attic → \"attic\"\n\n## 输出要求\n\n必须严格按照以下JSON格式输出,不要添加任何markdown标记或额外文字:\n\n{\n  \"floors\": [\n    {\n      \"floor_name\": \"原始楼层名称\",\n      \"floor_name_en\": \"标准英文楼层名\",\n      \"floor_type\": \"楼层类型\",\n      \"level\": 数字\n    }\n  ],\n  \"rooms\": [\n    {\n      \"room_name\": \"原始房间名称\",\n      \"room_name_en\": \"标准英文房间名\",\n      \"room_type\": \"房间类型\"\n    }\n  ]\n}\n\n请直接返回JSON数据,不要包含任何解释说明。`,\n    \n    \"user_prompt\": inputText,\n    \n    \"options\": {\n      \"model\": [\"gemini-2.5-flash\", \"gpt-3.5-turbo\"],\n        \"temperature\": 0.7,\n        \"max_tokens\": 3500\n    }\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 700,
+        "y": 240,
+        "wires": [
+            [
+                "e0484e4c098388bb"
+            ]
+        ]
+    },
+    {
+        "id": "69ea3113d60c497c",
+        "type": "http request",
+        "z": "0880c26b2b0573c9",
+        "name": "Open AI",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://localhost:3000/api/openai/openai/simple-chat",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 860,
+        "y": 240,
+        "wires": [
+            [
+                "4d639762406fed0a",
+                "aea5690853d23e28"
+            ]
+        ]
+    },
+    {
+        "id": "4d639762406fed0a",
+        "type": "json",
+        "z": "0880c26b2b0573c9",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": true,
+        "x": 1070,
+        "y": 240,
+        "wires": [
+            [
+                "7aaf87789292dedc"
+            ]
+        ]
+    },
+    {
+        "id": "1f446525c6b57179",
+        "type": "function",
+        "z": "0880c26b2b0573c9",
+        "name": "缓存数据",
+        "func": "// Node-RED Function Node代码\n// 提取并缓存实体状态数组\n\ntry {\n    // 检查输入数据是否存在\n    if (!msg.payload || !msg.payload.data || !msg.payload.data.entities) {\n        node.error(\"输入数据格式不正确，缺少 msg.payload.data.entities\", msg);\n        return null;\n    }\n    \n    // 提取实体状态数组\n    const entitiesArray = msg.payload.data.entities;\n    \n    // 将数据缓存到全局上下文中（永久缓存，不会过期）\n    global.set(\"cached_entities\", entitiesArray);\n    \n    // 同时缓存一些元数据\n    const cacheMetadata = {\n        total_count: msg.payload.data.total_count || entitiesArray.length,\n        retrieved_at: msg.payload.data.retrieved_at || new Date().toISOString(),\n        cached_at: new Date().toISOString()\n    };\n    global.set(\"cached_entities_metadata\", cacheMetadata);\n    \n    // 输出提取的数组和缓存信息\n    msg.payload = {\n        entities: entitiesArray,\n        cache_info: {\n            cached: true,\n            cache_key: \"cached_entities\",\n            entity_count: entitiesArray.length,\n            cached_at: cacheMetadata.cached_at,\n            message: \"实体数组已成功缓存到全局上下文\"\n        }\n    };\n    \n    node.log(`成功缓存了 ${entitiesArray.length} 个实体到全局上下文`);\n    \n    return msg;\n    \n} catch (error) {\n    node.error(\"缓存实体数据时发生错误: \" + error.message, msg);\n    msg.payload = {\n        error: true,\n        message: error.message,\n        stack: error.stack\n    };\n    return msg;\n}\n\n// 如果需要读取缓存的数据，可以使用以下代码：\n// const cachedEntities = global.get(\"cached_entities\");\n// const cacheMetadata = global.get(\"cached_entities_metadata\");",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1700,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f1ccacc6207f3751",
+        "type": "http request",
+        "z": "0880c26b2b0573c9",
+        "name": "获取所有实体列表",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://localhost:3000/api/home_assistant/home_assistant/enhanced-entities",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "other",
+                "keyValue": "Content-Type",
+                "valueType": "other",
+                "valueValue": "application/json"
+            }
+        ],
+        "x": 1270,
+        "y": 360,
+        "wires": [
+            [
+                "7aaf87789292dedc"
+            ]
+        ]
+    },
+    {
+        "id": "7aaf87789292dedc",
+        "type": "join",
+        "z": "0880c26b2b0573c9",
+        "name": "",
+        "mode": "custom",
+        "build": "array",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "useparts": false,
+        "accumulate": false,
+        "timeout": "",
+        "count": "2",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 1390,
+        "y": 240,
+        "wires": [
+            [
+                "11022cec1aaa6864"
+            ]
+        ]
+    },
+    {
+        "id": "11022cec1aaa6864",
+        "type": "function",
+        "z": "0880c26b2b0573c9",
+        "name": "增强实体列表",
+        "func": "// 获取输入数据 - 假设 msg.payload 是一个数组,包含两个对象\nlet inputArray = msg.payload;\n\n// 解析两个数据源\nlet translatedData, entitiesData;\n\n// 处理输入数据格式\nif (Array.isArray(inputArray)) {\n    // 从数组中提取数据\n    translatedData = inputArray[0];\n    entitiesData = inputArray[1];\n    \n    // 如果是字符串,需要解析\n    if (typeof translatedData === 'string') {\n        translatedData = JSON.parse(translatedData);\n    }\n    if (typeof entitiesData === 'string') {\n        entitiesData = JSON.parse(entitiesData);\n    }\n} else {\n    msg.payload = {\n        error: \"输入数据格式不正确,需要数组格式\"\n    };\n    return msg;\n}\n\n// 提取翻译后的数据\nlet aiData;\nif (translatedData.success && translatedData.data) {\n    // 如果有嵌套的data字段\n    if (translatedData.data.choices) {\n        // OpenAI格式\n        const content = translatedData.data.message.content || translatedData.data.choices[0].message.content;\n        aiData = JSON.parse(content);\n    } else {\n        aiData = translatedData.data;\n    }\n} else {\n    aiData = translatedData;\n}\n\nconst floors = aiData.floors || [];\nconst rooms = aiData.rooms || [];\n\n// 提取实体数据\nconst entities = entitiesData.success ? entitiesData.data.entities : entitiesData.entities;\n\nif (!entities) {\n    msg.payload = {\n        error: \"无法找到实体数据\",\n        received: entitiesData\n    };\n    return msg;\n}\n\n// 创建楼层映射表 (使用原始楼层名称作为key)\nconst floorMap = {};\nfloors.forEach(floor => {\n    floorMap[floor.floor_name] = {\n        floor_name_en: floor.floor_name_en,\n        floor_type: floor.floor_type,\n        level: floor.level\n    };\n});\n\n// 创建房间映射表 (使用原始房间名称作为key)\nconst roomMap = {};\nrooms.forEach(room => {\n    roomMap[room.room_name] = {\n        room_name_en: room.room_name_en,\n        room_type: room.room_type\n    };\n});\n\n// 调试信息\nnode.warn(\"楼层映射表: \" + JSON.stringify(floorMap));\nnode.warn(\"房间映射表: \" + JSON.stringify(roomMap));\n\n// 遍历所有实体,补全数据\nconst updatedEntities = entities.map(entity => {\n    // 复制实体对象\n    let updatedEntity = {...entity};\n    \n    // 如果实体有楼层信息,补全楼层数据\n    if (updatedEntity.floor_name) {\n        const floorData = floorMap[updatedEntity.floor_name];\n        if (floorData) {\n            updatedEntity.floor_name_en = floorData.floor_name_en;\n            updatedEntity.floor_type = floorData.floor_type;\n            updatedEntity.level = floorData.level;\n        }\n    }\n    \n    // 如果实体有房间信息,补全房间数据\n    if (updatedEntity.room_name) {\n        const roomData = roomMap[updatedEntity.room_name];\n        if (roomData) {\n            updatedEntity.room_name_en = roomData.room_name_en;\n            updatedEntity.room_type = roomData.room_type;\n        }\n    }\n    \n    return updatedEntity;\n});\n\n// 输出结果\nmsg.payload = {\n    success: true,\n    data: {\n        entities: updatedEntities,\n        count: updatedEntities.length,\n        summary: {\n            total_entities: updatedEntities.length,\n            entities_with_floor_translation: updatedEntities.filter(e => e.floor_name_en).length,\n            entities_with_room_translation: updatedEntities.filter(e => e.room_name_en).length\n        }\n    }\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1540,
+        "y": 240,
+        "wires": [
+            [
+                "1f446525c6b57179"
+            ]
+        ]
+    },
+    {
+        "id": "aea5690853d23e28",
+        "type": "delay",
+        "z": "0880c26b2b0573c9",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "1",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 1080,
+        "y": 360,
+        "wires": [
+            [
+                "f1ccacc6207f3751"
+            ]
+        ]
+    },
+    {
+        "id": "a5c7c5cbf6afbd7b",
+        "type": "function",
+        "z": "0880c26b2b0573c9",
+        "name": "function 3",
+        "func": "// 获取输入的数据\nlet inputData = msg.payload;\n\n// 如果payload是字符串,先解析成JSON\nif (typeof inputData === 'string') {\n    try {\n        inputData = JSON.parse(inputData);\n    } catch (e) {\n        msg.payload = {\n            error: \"JSON解析失败: \" + e.message\n        };\n        return msg;\n    }\n}\n\n// 检查数据格式是否正确\nif (!inputData || !inputData.success || !inputData.data || !inputData.data.floors) {\n    msg.payload = {\n        error: \"数据格式不正确\",\n        received: inputData\n    };\n    return msg;\n}\n\n// 初始化结果数组\nlet floors = [];\nlet rooms = [];\n\n// 遍历所有楼层\ninputData.data.floors.forEach(floor => {\n    // 添加楼层名称\n    floors.push(floor.name);\n    \n    // 遍历该楼层的所有房间\n    if (floor.rooms && floor.rooms.length > 0) {\n        floor.rooms.forEach(room => {\n            rooms.push(room.name);\n        });\n    }\n});\n\n// 输出结果\nmsg.payload = {\n    floors: floors,\n    rooms: rooms\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 240,
+        "wires": [
+            [
+                "bc87bc981b9c8c19"
+            ]
+        ]
+    },
+    {
+        "id": "34387df14c1da509",
+        "type": "http request",
+        "z": "0880c26b2b0573c9",
+        "name": "Gemini AI",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://localhost:3000/api/gemini/gemini/simple-chat",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 860,
+        "y": 300,
+        "wires": [
+            [
+                "4d639762406fed0a",
+                "aea5690853d23e28"
+            ]
+        ]
+    },
+    {
+        "id": "e0484e4c098388bb",
+        "type": "http request",
+        "z": "0880c26b2b0573c9",
+        "name": "Deepseek AI",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://localhost:3000/api/deepseek/deepseek/simple-chat",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 870,
+        "y": 360,
+        "wires": [
+            [
+                "4d639762406fed0a",
+                "aea5690853d23e28"
+            ]
+        ]
+    }
+]

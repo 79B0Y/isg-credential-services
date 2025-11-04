@@ -3,14 +3,14 @@
   "properties": {
     "base_url": {
       "type": "string",
-      "title": "Node-RED Service URL",
-      "description": "The base URL of your Node-RED instance",
+      "title": "Agent Flow Service URL",
+      "description": "The base URL of your Agent Flow instance",
       "default": "http://localhost:1880",
       "minLength": 1,
       "required": true,
       "ui": {
         "placeholder": "http://localhost:1880",
-        "help": "Enter your Node-RED service address"
+        "help": "Enter your Agent Flow service address"
       }
     }
   },

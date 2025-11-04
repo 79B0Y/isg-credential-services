@@ -35,6 +35,25 @@
         "placeholder": "org-xxxxxxxxxxxxxxxxxxxxxxxx",
         "help": "Optional: Your OpenAI organization ID"
       }
+    },
+    "preferred_model": {
+      "type": "string",
+      "title": "Preferred Model",
+      "description": "Select the OpenAI model to use for intention classification",
+      "required": false,
+      "default": "gpt-3.5-turbo",
+      "enum": [
+        "gpt-4o",
+        "gpt-4o-mini",
+        "gpt-4-turbo",
+        "gpt-4",
+        "gpt-3.5-turbo"
+      ],
+      "ui": {
+        "widget": "select",
+        "placeholder": "Select a model",
+        "help": "Choose which OpenAI model to use (default: gpt-3.5-turbo)"
+      }
     }
   },
   "required": ["api_key"],

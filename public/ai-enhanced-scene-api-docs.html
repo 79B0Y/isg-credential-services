@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 AI Enhanced Scene API 测试文档</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-dark: #7c3aed;
+            --secondary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --light: #f5f5f5;
+            --dark: #1f2937;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .panel {
+            background: var(--white);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-error {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-info {
+            background: var(--info);
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #0891b2;
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #2563eb;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--light);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .result-box {
+            background: var(--dark);
+            color: #00ff00;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--dark);
+            opacity: 0.6;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            opacity: 0.8;
+        }
+
+        .tab.active {
+            opacity: 1;
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .info-box {
+            background: #f0f9ff;
+            border-left: 4px solid var(--info);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .warning-box {
+            background: #fffbeb;
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .prompt-view {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .prompt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .prompt-title {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .prompt-content {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            padding: 1rem;
+            border-radius: 0.25rem;
+        }
+
+        .prompt-textarea {
+            width: 100%;
+            min-height: 400px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            padding: 1rem;
+            border: 2px solid var(--primary);
+            border-radius: 0.25rem;
+            resize: vertical;
+        }
+
+        .prompt-textarea:focus {
+            outline: none;
+            border-color: var(--primary-dark);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .edit-mode {
+            display: none;
+        }
+
+        .view-mode {
+            display: block;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .home-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .home-btn:hover {
+            transform: translateY(-4px) scale(1.1);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 AI Enhanced Scene API</h1>
+            <p>智能场景管理 - 执行、创建、删除场景</p>
+        </div>
+
+        <!-- Prompts Management Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    📝 AI 提示词管理
+                </div>
+                <button class="btn btn-secondary" onclick="loadPrompts()">🔄 刷新提示词</button>
+            </div>
+
+            <div class="info-box">
+                <strong>提示词说明：</strong> 系统使用三个独立的 AI 提示词来处理不同的场景操作，您可以在这里查看和修改这些提示词。
+            </div>
+
+            <div id="promptsContainer"></div>
+        </div>
+
+        <!-- Test Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    🧪 API 测试
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('list')">📋 查看场景列表</button>
+                <button class="tab" onclick="switchTab('execute')">🎬 执行场景</button>
+                <button class="tab" onclick="switchTab('create')">➕ 创建场景</button>
+                <button class="tab" onclick="switchTab('delete')">🗑️ 删除场景</button>
+            </div>
+
+            <!-- List Scenes Tab -->
+            <div id="list-tab" class="tab-content active">
+                <div class="form-group">
+                    <label class="form-label">输入数据（来自 Intention 模块）</label>
+                    <textarea id="listInput" class="form-control" placeholder="粘贴来自 Intention 模块的 JSON 数据...">{"success":true,"data":{"intent":"Set Scene","user_input":"系统有多少个场景","actions":[],"matched_devices":[],"scene":{"scene_name":"","scene_name_en":"","operation":"list","operation_type":"query","description":"查询系统中所有已保存的场景"},"automation":{}}}</textarea>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-info" onclick="listScenes()">
+                        <span id="listLoading" class="loading hidden"></span>
+                        📋 查看场景列表
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearResult('listResult')">🧹 清空结果</button>
+                </div>
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label class="form-label">场景列表结果</label>
+                    <div id="listResult" class="result-box">等待查询...</div>
+                </div>
+            </div>
+
+            <!-- Execute Scene Tab -->
+            <div id="execute-tab" class="tab-content">
+                <div class="form-group">
+                    <label class="form-label">输入数据（来自 Intention 模块）</label>
+                    <textarea id="executeInput" class="form-control" placeholder="粘贴来自 Intention 模块的 JSON 数据...">{"success":true,"data":{"intent":"Control Scene","user_input":"我回来了","actions":[],"matched_devices":[],"scene":{"scene_name":"回家模式","scene_name_en":"arrival_home","operation":"execute","operation_type":"control","description":"启动回家模式场景"},"automation":{}}}</textarea>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="executeScene()">
+                        <span id="executeLoading" class="loading hidden"></span>
+                        🎬 执行场景
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearResult('executeResult')">🧹 清空结果</button>
+                </div>
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label class="form-label">执行结果</label>
+                    <div id="executeResult" class="result-box">等待执行...</div>
+                </div>
+            </div>
+
+            <!-- Create Scene Tab -->
+            <div id="create-tab" class="tab-content">
+                <div class="form-group">
+                    <label class="form-label">输入数据（来自 Intention 模块）</label>
+                    <textarea id="createInput" class="form-control" placeholder="粘贴来自 Intention 模块的 JSON 数据...">{"success":true,"data":{"intent":"Set Scene","user_input":"读取客厅所有设备当前状态创建我回家了的场景","actions":[{"request":{"floor":null,"room":"living_room","device_name":null,"device_type":"light","service":"light.state","service_data":{}},"targets":[{"entity_id":"light.light_test_001","device_type":"light","device_name":"Floor light","floor":"First Floor","room":"Living Room","score":0.677}]}],"matched_devices":[{"entity_id":"light.light_test_001","service":"light.state","service_data":{}}],"scene":{"scene_name":"我回家了","scene_name_en":"arrival_home","operation":"add","operation_type":"setup","description":"读取客厅所有设备当前状态创建回家场景"},"automation":{}}}</textarea>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-success" onclick="createScene()">
+                        <span id="createLoading" class="loading hidden"></span>
+                        ➕ 创建场景
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearResult('createResult')">🧹 清空结果</button>
+                </div>
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label class="form-label">创建结果</label>
+                    <div id="createResult" class="result-box">等待创建...</div>
+                </div>
+            </div>
+
+            <!-- Delete Scene Tab -->
+            <div id="delete-tab" class="tab-content">
+                <div class="form-group">
+                    <label class="form-label">输入数据（来自 Intention 模块）</label>
+                    <textarea id="deleteInput" class="form-control" placeholder="粘贴来自 Intention 模块的 JSON 数据...">{"success":true,"data":{"intent":"Set Scene","user_input":"删除我回家场景","actions":[],"matched_devices":[],"scene":{"scene_name":"我回家场景","scene_name_en":"arrival_home","operation":"delete","operation_type":"setup","description":"删除回家场景"},"automation":{}}}</textarea>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="deleteScene()">
+                        <span id="deleteLoading" class="loading hidden"></span>
+                        🗑️ 删除场景
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearResult('deleteResult')">🧹 清空结果</button>
+                </div>
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label class="form-label">删除结果</label>
+                    <div id="deleteResult" class="result-box">等待删除...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Documentation Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    📖 API 接口文档
+                </div>
+            </div>
+
+            <div class="info-box">
+                <strong>⚠️ 重要：API 基础信息</strong>
+                <ul style="margin: 0.5rem 0 0 1.5rem;">
+                    <li>所有 API 接口使用 <code>/api/ai_enhanced_scene/:module</code> 作为路径模板</li>
+                    <li><code>:module</code> 参数必须替换为 <code>ai_enhanced_scene</code></li>
+                    <li><strong>正确的基础路径：</strong> <code style="background: #e0f2fe; padding: 0.25rem 0.5rem; border-radius: 0.25rem;">/api/ai_enhanced_scene/ai_enhanced_scene</code></li>
+                </ul>
+            </div>
+
+            <div class="api-section" style="margin-bottom: 2rem;">
+                <h3 style="color: var(--info); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>📋</span>
+                    <span>1. 查看场景列表 (List Scenes)</span>
+                </h3>
+                
+                <div style="margin-bottom: 1rem;">
+                    <strong>端点 (Endpoint):</strong>
+                    <div style="background: #f3f4f6; padding: 0.75rem; border-radius: 0.5rem; margin-top: 0.5rem; font-family: monospace;">
+                        POST /api/ai_enhanced_scene/:module/list
+                    </div>
+                    <div style="background: #e0f2fe; padding: 0.75rem; border-radius: 0.5rem; margin-top: 0.5rem; font-family: monospace; font-weight: 600;">
+                        POST http://localhost:3000/api/ai_enhanced_scene/ai_enhanced_scene/list
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>描述:</strong>
+                    <p>获取所有可用场景列表。系统会根据用户输入的语言（中文或英文）返回对应语言的消息。支持语言自动检测。<br>
+                    <strong>输入来源：</strong>通常来自 Intention 模块的输出，其中 <code>scene.operation</code> 为 <code>"list"</code>。</p>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>请求格式 (Request):</strong>
+                    <pre style="background: #1f2937; color: #10b981; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-top: 0.5rem;">
+// 来自 Intention 模块的完整格式（推荐）
+{
+    "success": true,
+    "data": {
+        "intent": "Set Scene",
+        "user_input": "系统有多少个场景",
+        "actions": [],
+        "matched_devices": [],
+        "scene": {
+            "scene_name": "",
+            "scene_name_en": "",
+            "operation": "list",
+            "operation_type": "query",
+            "description": "查询系统中所有已保存的场景"
+        },
+        "automation": {}
+    }
+}
+
+// 或英文输入
+{
+    "success": true,
+    "data": {
+        "intent": "Set Scene",
+        "user_input": "how many scenes in the system",
+        "scene": {
+            "operation": "list"
+        }
+    }
+}
+
+// 简化格式（也支持）
+{
+    "data": {
+        "user_input": "显示所有场景"
+    }
+}</pre>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>响应格式 (Response):</strong>
+                    <pre style="background: #1f2937; color: #10b981; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-top: 0.5rem;">
+{
+    "success": true,
+    "data": {
+        "scenes": [
+            {
+                "scene_id": "scene.arrival_home",
+                "scene_name": "arrival_home",
+                "friendly_name": "回家模式",
+                "entity_id": "scene.arrival_home"
+            },
+            {
+                "scene_id": "scene.movie_mode",
+                "scene_name": "movie_mode",
+                "friendly_name": "观影模式",
+                "entity_id": "scene.movie_mode"
+            }
+        ],
+        "total": 2,
+        "message": {
+            "type": "notification",
+            "content": "找到 2 个可用场景：回家模式、观影模式",
+            "source": "external_system"
+        },
+        "language": "zh",
+        "processing_time_ms": 125
+    }
+}
+
+// 英文输入的响应
+{
+    "success": true,
+    "data": {
+        "scenes": [...],
+        "total": 2,
+        "message": {
+            "type": "notification",
+            "content": "Found 2 available scenes: Home Mode, Movie Mode",
+            "source": "external_system"
+        },
+        "language": "en",
+        "processing_time_ms": 125
+    }
+}
+
+// 错误响应
+{
+    "success": false,
+    "error": "获取场景列表失败",
+    "details": "...",
+    "message": {
+        "type": "notification",
+        "content": "获取场景列表失败",
+        "source": "external_system"
+    }
+}</pre>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>特性:</strong>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li>✅ 自动检测用户输入语言（中文/英文）</li>
+                        <li>✅ 根据检测的语言返回对应的消息内容</li>
+                        <li>✅ <strong>消息中列出所有场景名称</strong></li>
+                        <li>✅ 中文使用顿号分隔（、），英文使用逗号分隔（, ）</li>
+                        <li>✅ 统一的消息格式：<code>{"type": "notification", "content": "...", "source": "external_system"}</code></li>
+                        <li>✅ 支持 Intention 模块的完整输出格式</li>
+                        <li>✅ 返回场景总数和详细列表</li>
+                        <li>✅ 包含处理时间统计</li>
+                    </ul>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>识别标志:</strong>
+                    <p style="margin: 0.5rem 0;">当 Intention 模块识别到查询场景的意图时，会生成以下特征：</p>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li><code>intent</code>: "Set Scene"</li>
+                        <li><code>scene.operation</code>: "list"</li>
+                        <li><code>scene.operation_type</code>: "query"</li>
+                        <li><code>user_input</code>: 包含查询关键词（如"多少个场景"、"有哪些场景"、"list scenes"等）</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Execute Scene API -->
+            <div class="api-section" style="margin-bottom: 2rem;">
+                <h3 style="color: var(--primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>🎬</span>
+                    <span>2. 执行场景 (Execute Scene)</span>
+                </h3>
+                
+                <div style="margin-bottom: 1rem;">
+                    <strong>端点 (Endpoint):</strong>
+                    <div style="background: #f3f4f6; padding: 0.75rem; border-radius: 0.5rem; margin-top: 0.5rem; font-family: monospace;">
+                        POST /api/ai_enhanced_scene/:module/execute
+                    </div>
+                    <div style="background: #e0f2fe; padding: 0.75rem; border-radius: 0.5rem; margin-top: 0.5rem; font-family: monospace; font-weight: 600;">
+                        POST http://localhost:3000/api/ai_enhanced_scene/ai_enhanced_scene/execute
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>描述:</strong>
+                    <p>根据用户意图执行已存在的场景。系统会使用 AI 分析用户输入，找到匹配的场景并执行。</p>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>请求格式 (Request):</strong>
+                    <pre style="background: #1f2937; color: #10b981; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-top: 0.5rem;">
+{
+    "success": true,
+    "data": {
+        "intent": "Control Scene",
+        "user_input": "我回来了",
+        "actions": [],
+        "matched_devices": [],
+        "scene": {
+            "scene_name": "回家模式",
+            "scene_name_en": "arrival_home",
+            "operation": "execute",
+            "operation_type": "control",
+            "description": "启动回家模式场景"
+        },
+        "automation": {}
+    }
+}</pre>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>响应格式 (Response):</strong>
+                    <pre style="background: #1f2937; color: #10b981; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-top: 0.5rem;">
+{
+    "success": true,
+    "data": {
+        "message": "场景执行成功",
+        "scene_name": "arrival_home",
+        "scene_id": "scene.arrival_home",
+        "execution_result": {...}
+    }
+}
+
+// 错误响应
+{
+    "success": false,
+    "error": "场景不存在或执行失败",
+    "details": "..."
+}</pre>
+                </div>
+            </div>
+
+            <!-- Create Scene API -->
+            <div class="api-section" style="margin-bottom: 2rem;">
+                <h3 style="color: var(--success); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>➕</span>
+                    <span>3. 创建场景 (Create Scene)</span>
+                </h3>
+                
+                <div style="margin-bottom: 1rem;">
+                    <strong>端点 (Endpoint):</strong>
+                    <div style="background: #f3f4f6; padding: 0.75rem; border-radius: 0.5rem; margin-top: 0.5rem; font-family: monospace;">
+                        POST /api/ai_enhanced_scene/:module/create
+                    </div>
+                    <div style="background: #e0f2fe; padding: 0.75rem; border-radius: 0.5rem; margin-top: 0.5rem; font-family: monospace; font-weight: 600;">
+                        POST http://localhost:3000/api/ai_enhanced_scene/ai_enhanced_scene/create
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>描述:</strong>
+                    <p>根据用户意图和设备状态创建新场景。系统会使用 AI 分析用户输入，读取相关设备的当前状态，并创建场景。</p>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>请求格式 (Request):</strong>
+                    <pre style="background: #1f2937; color: #10b981; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-top: 0.5rem;">
+{
+    "success": true,
+    "data": {
+        "intent": "Set Scene",
+        "user_input": "读取客厅所有设备当前状态创建我回家了的场景",
+        "actions": [
+            {
+                "request": {
+                    "floor": null,
+                    "room": "living_room",
+                    "device_name": null,
+                    "device_type": "light",
+                    "service": "light.state",
+                    "service_data": {}
+                },
+                "targets": [
+                    {
+                        "entity_id": "light.light_test_001",
+                        "device_type": "light",
+                        "device_name": "Floor light",
+                        "floor": "First Floor",
+                        "room": "Living Room",
+                        "score": 0.677
+                    }
+                ]
+            }
+        ],
+        "matched_devices": [
+            {
+                "entity_id": "light.light_test_001",
+                "service": "light.state",
+                "service_data": {}
+            }
+        ],
+        "scene": {
+            "scene_name": "我回家了",
+            "scene_name_en": "arrival_home",
+            "operation": "add",
+            "operation_type": "setup",
+            "description": "读取客厅所有设备当前状态创建回家场景"
+        },
+        "automation": {}
+    }
+}</pre>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>响应格式 (Response):</strong>
+                    <pre style="background: #1f2937; color: #10b981; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-top: 0.5rem;">
+{
+    "success": true,
+    "data": {
+        "message": "场景创建成功",
+        "scene_name": "arrival_home",
+        "scene_id": "scene.arrival_home",
+        "entities": {
+            "light.light_test_001": {
+                "state": "on",
+                "brightness": 255
+            }
+        }
+    }
+}
+
+// 错误响应
+{
+    "success": false,
+    "error": "场景创建失败",
+    "details": "..."
+}</pre>
+                </div>
+            </div>
+
+            <!-- Delete Scene API -->
+            <div class="api-section" style="margin-bottom: 2rem;">
+                <h3 style="color: var(--danger); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>🗑️</span>
+                    <span>4. 删除场景 (Delete Scene)</span>
+                </h3>
+                
+                <div style="margin-bottom: 1rem;">
+                    <strong>端点 (Endpoint):</strong>
+                    <div style="background: #f3f4f6; padding: 0.75rem; border-radius: 0.5rem; margin-top: 0.5rem; font-family: monospace;">
+                        POST /api/ai_enhanced_scene/:module/delete
+                    </div>
+                    <div style="background: #e0f2fe; padding: 0.75rem; border-radius: 0.5rem; margin-top: 0.5rem; font-family: monospace; font-weight: 600;">
+                        POST http://localhost:3000/api/ai_enhanced_scene/ai_enhanced_scene/delete
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>描述:</strong>
+                    <p>根据用户意图删除已存在的场景。系统会使用 AI 分析用户输入，找到匹配的场景并删除。</p>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>请求格式 (Request):</strong>
+                    <pre style="background: #1f2937; color: #10b981; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-top: 0.5rem;">
+{
+    "success": true,
+    "data": {
+        "intent": "Set Scene",
+        "user_input": "删除我回家场景",
+        "actions": [],
+        "matched_devices": [],
+        "scene": {
+            "scene_name": "我回家场景",
+            "scene_name_en": "arrival_home",
+            "operation": "delete",
+            "operation_type": "setup",
+            "description": "删除回家场景"
+        },
+        "automation": {}
+    }
+}</pre>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>响应格式 (Response):</strong>
+                    <pre style="background: #1f2937; color: #10b981; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-top: 0.5rem;">
+{
+    "success": true,
+    "data": {
+        "message": "场景删除成功",
+        "scene_name": "arrival_home",
+        "scene_id": "scene.arrival_home"
+    }
+}
+
+// 错误响应
+{
+    "success": false,
+    "error": "场景不存在或删除失败",
+    "details": "..."
+}</pre>
+                </div>
+            </div>
+
+            <!-- Additional APIs -->
+            <div class="api-section" style="margin-bottom: 2rem;">
+                <h3 style="color: var(--info); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>📝</span>
+                    <span>5. 其他管理接口</span>
+                </h3>
+
+                <!-- Get Prompts -->
+                <div style="margin-bottom: 1.5rem; padding-left: 1rem; border-left: 3px solid var(--info);">
+                    <h4 style="color: var(--dark); margin-bottom: 0.5rem;">获取 AI 提示词</h4>
+                    <div style="background: #f3f4f6; padding: 0.75rem; border-radius: 0.5rem; font-family: monospace; margin: 0.5rem 0;">
+                        GET /api/ai_enhanced_scene/:module/prompts
+                    </div>
+                    <div style="background: #e0f2fe; padding: 0.75rem; border-radius: 0.5rem; font-family: monospace; font-weight: 600; margin: 0.5rem 0;">
+                        GET http://localhost:3000/api/ai_enhanced_scene/ai_enhanced_scene/prompts
+                    </div>
+                    <p style="font-size: 0.9rem; color: #666;">获取所有 AI 提示词配置（执行、创建、删除场景的提示词）</p>
+                </div>
+
+                <!-- Update Prompt -->
+                <div style="margin-bottom: 1.5rem; padding-left: 1rem; border-left: 3px solid var(--info);">
+                    <h4 style="color: var(--dark); margin-bottom: 0.5rem;">更新 AI 提示词</h4>
+                    <div style="background: #f3f4f6; padding: 0.75rem; border-radius: 0.5rem; font-family: monospace; margin: 0.5rem 0;">
+                        PUT /api/ai_enhanced_scene/:module/prompt/:type
+                    </div>
+                    <div style="background: #e0f2fe; padding: 0.75rem; border-radius: 0.5rem; font-family: monospace; font-weight: 600; margin: 0.5rem 0;">
+                        PUT http://localhost:3000/api/ai_enhanced_scene/ai_enhanced_scene/prompt/:type
+                    </div>
+                    <p style="font-size: 0.9rem; color: #666;">更新指定类型的 AI 提示词（type 可以是: execute, create, delete）</p>
+                    <pre style="background: #1f2937; color: #10b981; padding: 0.75rem; border-radius: 0.5rem; overflow-x: auto; margin-top: 0.5rem; font-size: 0.8rem;">
+{
+    "prompt": "你的新提示词内容..."
+}</pre>
+                </div>
+
+                <!-- Get Module Info -->
+                <div style="margin-bottom: 1.5rem; padding-left: 1rem; border-left: 3px solid var(--info);">
+                    <h4 style="color: var(--dark); margin-bottom: 0.5rem;">获取模块信息</h4>
+                    <div style="background: #f3f4f6; padding: 0.75rem; border-radius: 0.5rem; font-family: monospace; margin: 0.5rem 0;">
+                        GET /api/ai_enhanced_scene/:module/info
+                    </div>
+                    <div style="background: #e0f2fe; padding: 0.75rem; border-radius: 0.5rem; font-family: monospace; font-weight: 600; margin: 0.5rem 0;">
+                        GET http://localhost:3000/api/ai_enhanced_scene/ai_enhanced_scene/info
+                    </div>
+                    <p style="font-size: 0.9rem; color: #666;">获取模块的基本信息和配置</p>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ 注意事项：</strong>
+                <ul style="margin: 0.5rem 0 0 1.5rem;">
+                    <li>所有 POST 请求都需要在 headers 中设置 <code>Content-Type: application/json</code></li>
+                    <li>请求数据通常来自 Intention 模块的输出</li>
+                    <li><code>:module</code> 参数必须使用 <code>ai_enhanced_scene</code></li>
+                    <li>场景名称会自动处理中英文转换</li>
+                    <li>创建场景时会自动读取设备的当前状态</li>
+                </ul>
+            </div>
+
+            <!-- Usage Examples -->
+            <div class="api-section" style="margin-top: 2rem;">
+                <h3 style="color: var(--secondary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>💡</span>
+                    <span>6. 使用示例 (cURL)</span>
+                </h3>
+
+                <!-- List Scenes Example -->
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="color: var(--dark); margin-bottom: 0.5rem;">查看场景列表示例</h4>
+                    <pre style="background: #1f2937; color: #10b981; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; font-size: 0.85rem;">
+# 中文输入（Intention 模块格式）
+curl -X POST http://localhost:3000/api/ai_enhanced_scene/ai_enhanced_scene/list \
+  -H "Content-Type: application/json" \
+  -d '{
+    "success": true,
+    "data": {
+      "intent": "Set Scene",
+      "user_input": "系统有多少个场景",
+      "scene": {
+        "operation": "list",
+        "operation_type": "query"
+      }
+    }
+  }'
+
+# 英文输入（Intention 模块格式）
+curl -X POST http://localhost:3000/api/ai_enhanced_scene/ai_enhanced_scene/list \
+  -H "Content-Type: application/json" \
+  -d '{
+    "success": true,
+    "data": {
+      "intent": "Set Scene",
+      "user_input": "how many scenes in the system",
+      "scene": {
+        "operation": "list"
+      }
+    }
+  }'
+
+# 简化格式
+curl -X POST http://localhost:3000/api/ai_enhanced_scene/ai_enhanced_scene/list \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "user_input": "显示所有场景"
+    }
+  }'</pre>
+                </div>
+
+                <!-- Execute Example -->
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="color: var(--dark); margin-bottom: 0.5rem;">执行场景示例</h4>
+                    <pre style="background: #1f2937; color: #10b981; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; font-size: 0.85rem;">
+curl -X POST http://localhost:3000/api/ai_enhanced_scene/ai_enhanced_scene/execute \
+  -H "Content-Type: application/json" \
+  -d '{
+    "success": true,
+    "data": {
+      "intent": "Control Scene",
+      "user_input": "我回来了",
+      "scene": {
+        "scene_name": "回家模式",
+        "scene_name_en": "arrival_home",
+        "operation": "execute"
+      }
+    }
+  }'</pre>
+                </div>
+
+                <!-- Create Example -->
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="color: var(--dark); margin-bottom: 0.5rem;">创建场景示例</h4>
+                    <pre style="background: #1f2937; color: #10b981; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; font-size: 0.85rem;">
+curl -X POST http://localhost:3000/api/ai_enhanced_scene/ai_enhanced_scene/create \
+  -H "Content-Type: application/json" \
+  -d '{
+    "success": true,
+    "data": {
+      "intent": "Set Scene",
+      "user_input": "将电视房设备当前状态设置为观影模式",
+      "matched_devices": [
+        {
+          "entity_id": "light.color_light_3",
+          "service": "light.state"
+        },
+        {
+          "entity_id": "climate.ac_01",
+          "service": "climate.state"
+        }
+      ],
+      "scene": {
+        "scene_name": "观影模式",
+        "scene_name_en": "movie_mode",
+        "operation": "add"
+      }
+    }
+  }'</pre>
+                </div>
+
+                <!-- Delete Example -->
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="color: var(--dark); margin-bottom: 0.5rem;">删除场景示例</h4>
+                    <pre style="background: #1f2937; color: #10b981; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; font-size: 0.85rem;">
+curl -X POST http://localhost:3000/api/ai_enhanced_scene/ai_enhanced_scene/delete \
+  -H "Content-Type: application/json" \
+  -d '{
+    "success": true,
+    "data": {
+      "intent": "Set Scene",
+      "user_input": "删除观影模式场景",
+      "scene": {
+        "scene_name": "观影模式",
+        "scene_name_en": "movie_mode",
+        "operation": "delete"
+      }
+    }
+  }'</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module Info Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    ℹ️ 模块信息
+                </div>
+                <button class="btn btn-info" onclick="loadModuleInfo()">🔄 刷新</button>
+            </div>
+            <div id="moduleInfo" class="result-box">加载中...</div>
+        </div>
+    </div>
+
+    <a href="/" class="home-btn" title="返回首页">🏠</a>
+
+    <script>
+        const API_BASE = window.location.origin;
+        const MODULE_NAME = 'ai_enhanced_scene';
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+
+        // Load prompts
+        async function loadPrompts() {
+            const container = document.getElementById('promptsContainer');
+            container.innerHTML = '<div class="info-box">正在加载提示词...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/ai_enhanced_scene/${MODULE_NAME}/prompts`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const prompts = result.data;
+                    let html = '';
+
+                    // Execute Prompt
+                    html += createPromptView('execute', '执行场景提示词', prompts.execute_prompt);
+                    // Create Prompt
+                    html += createPromptView('create', '创建场景提示词', prompts.create_prompt);
+                    // Delete Prompt
+                    html += createPromptView('delete', '删除场景提示词', prompts.delete_prompt);
+
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = `<div class="warning-box">❌ 加载失败: ${result.error}</div>`;
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="warning-box">❌ 错误: ${error.message}</div>`;
+            }
+        }
+
+        function createPromptView(type, title, content) {
+            return `
+                <div class="prompt-view" id="${type}PromptView">
+                    <div class="prompt-header">
+                        <div class="prompt-title">${title}</div>
+                        <div class="btn-group">
+                            <button class="btn btn-secondary view-mode" id="${type}EditBtn" style="padding: 0.5rem 1rem;" onclick="enterEditMode('${type}')">✏️ 编辑</button>
+                            <button class="btn btn-success edit-mode" id="${type}SaveBtn" style="padding: 0.5rem 1rem;" onclick="savePrompt('${type}')">💾 保存</button>
+                            <button class="btn btn-secondary edit-mode" id="${type}CancelBtn" style="padding: 0.5rem 1rem;" onclick="cancelEdit('${type}')">❌ 取消</button>
+                        </div>
+                    </div>
+                    <div class="view-mode" id="${type}ViewMode">
+                        <div class="prompt-content">${escapeHtml(content)}</div>
+                    </div>
+                    <div class="edit-mode" id="${type}EditMode">
+                        <textarea class="prompt-textarea" id="${type}PromptTextarea">${escapeHtml(content)}</textarea>
+                    </div>
+                </div>
+            `;
+        }
+
+        function enterEditMode(type) {
+            // Hide view mode, show edit mode
+            document.getElementById(`${type}ViewMode`).style.display = 'none';
+            document.getElementById(`${type}EditMode`).style.display = 'block';
+            
+            // Hide edit button, show save/cancel buttons
+            document.getElementById(`${type}EditBtn`).style.display = 'none';
+            document.getElementById(`${type}SaveBtn`).style.display = 'inline-flex';
+            document.getElementById(`${type}CancelBtn`).style.display = 'inline-flex';
+            
+            // Focus on textarea
+            document.getElementById(`${type}PromptTextarea`).focus();
+        }
+
+        function cancelEdit(type) {
+            // Show view mode, hide edit mode
+            document.getElementById(`${type}ViewMode`).style.display = 'block';
+            document.getElementById(`${type}EditMode`).style.display = 'none';
+            
+            // Show edit button, hide save/cancel buttons
+            document.getElementById(`${type}EditBtn`).style.display = 'inline-flex';
+            document.getElementById(`${type}SaveBtn`).style.display = 'none';
+            document.getElementById(`${type}CancelBtn`).style.display = 'none';
+            
+            // Reload prompts to restore original content
+            loadPrompts();
+        }
+
+        async function savePrompt(type) {
+            const textarea = document.getElementById(`${type}PromptTextarea`);
+            const newContent = textarea.value;
+            
+            if (!newContent.trim()) {
+                alert('❌ 提示词不能为空！');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/ai_enhanced_scene/${MODULE_NAME}/prompt/${type}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: newContent })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ 提示词更新成功！');
+                    loadPrompts();
+                } else {
+                    alert(`❌ 更新失败: ${result.error}`);
+                }
+            } catch (error) {
+                alert(`❌ 错误: ${error.message}`);
+            }
+        }
+
+        // Execute scene
+        async function executeScene() {
+            const inputEl = document.getElementById('executeInput');
+            const resultEl = document.getElementById('executeResult');
+            const loadingEl = document.getElementById('executeLoading');
+
+            try {
+                const inputData = JSON.parse(inputEl.value);
+                
+                loadingEl.classList.remove('hidden');
+                resultEl.textContent = '正在执行场景...';
+
+                const response = await fetch(`${API_BASE}/api/ai_enhanced_scene/${MODULE_NAME}/execute`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(inputData)
+                });
+
+                const result = await response.json();
+                resultEl.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultEl.textContent = `错误: ${error.message}`;
+            } finally {
+                loadingEl.classList.add('hidden');
+            }
+        }
+
+        // Create scene
+        async function createScene() {
+            const inputEl = document.getElementById('createInput');
+            const resultEl = document.getElementById('createResult');
+            const loadingEl = document.getElementById('createLoading');
+
+            try {
+                const inputData = JSON.parse(inputEl.value);
+                
+                loadingEl.classList.remove('hidden');
+                resultEl.textContent = '正在创建场景...';
+
+                const response = await fetch(`${API_BASE}/api/ai_enhanced_scene/${MODULE_NAME}/create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(inputData)
+                });
+
+                const result = await response.json();
+                resultEl.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultEl.textContent = `错误: ${error.message}`;
+            } finally {
+                loadingEl.classList.add('hidden');
+            }
+        }
+
+        // Delete scene
+        async function deleteScene() {
+            const inputEl = document.getElementById('deleteInput');
+            const resultEl = document.getElementById('deleteResult');
+            const loadingEl = document.getElementById('deleteLoading');
+
+            try {
+                const inputData = JSON.parse(inputEl.value);
+                
+                loadingEl.classList.remove('hidden');
+                resultEl.textContent = '正在删除场景...';
+
+                const response = await fetch(`${API_BASE}/api/ai_enhanced_scene/${MODULE_NAME}/delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(inputData)
+                });
+
+                const result = await response.json();
+                resultEl.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultEl.textContent = `错误: ${error.message}`;
+            } finally {
+                loadingEl.classList.add('hidden');
+            }
+        }
+
+        // Load module info
+        async function loadModuleInfo() {
+            const resultEl = document.getElementById('moduleInfo');
+            resultEl.textContent = '加载中...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/ai_enhanced_scene/${MODULE_NAME}/info`);
+                const result = await response.json();
+                resultEl.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultEl.textContent = `错误: ${error.message}`;
+            }
+        }
+
+        // List scenes
+        async function listScenes() {
+            const inputEl = document.getElementById('listInput');
+            const resultEl = document.getElementById('listResult');
+            const loadingEl = document.getElementById('listLoading');
+
+            try {
+                const inputData = JSON.parse(inputEl.value);
+                
+                loadingEl.classList.remove('hidden');
+                resultEl.textContent = '正在查询场景列表...';
+
+                const response = await fetch(`${API_BASE}/api/ai_enhanced_scene/${MODULE_NAME}/list`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(inputData)
+                });
+
+                const result = await response.json();
+                resultEl.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultEl.textContent = `错误: ${error.message}`;
+            } finally {
+                loadingEl.classList.add('hidden');
+            }
+        }
+
+        // Clear result
+        function clearResult(elementId) {
+            document.getElementById(elementId).textContent = '已清空';
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPrompts();
+            loadModuleInfo();
+        });
+    </script>
+</body>
+</html>
+

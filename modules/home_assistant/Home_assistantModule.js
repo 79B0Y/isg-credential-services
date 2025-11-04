@@ -2,11 +2,14 @@ const BaseCredentialModule = require('../../core/BaseCredentialModule');
 const InfoListModule = require('./InfoListModule');
 const BasicInfoModule = require('./BasicInfoModule');
 const DeviceControlModule = require('./DeviceControlModule');
+const SceneModule = require('./SceneModule');
+const PermanentSceneModule = require('./PermanentSceneModule');
+const AutomationModule = require('./AutomationModule');
 const WebSocket = require('ws');
 
 /**
  * Home_assistantModule - 重构后的Home Assistant API凭据管理模块
- * 使用模块化设计，分为三个子模块：信息列表、基础信息、设备控制
+ * 使用模块化设计，分为多个子模块：信息列表、基础信息、设备控制、场景、自动化
  */
 class Home_assistantModule extends BaseCredentialModule {
     constructor(name, moduleDir) {
@@ -19,6 +22,9 @@ class Home_assistantModule extends BaseCredentialModule {
         this.infoListModule = null;
         this.basicInfoModule = null;
         this.deviceControlModule = null;
+        this.sceneModule = null;
+        this.permanentSceneModule = null;
+        this.automationModule = null;
         
         // 空间列表监控
         this.spaceMonitorTimer = null;
@@ -28,7 +34,7 @@ class Home_assistantModule extends BaseCredentialModule {
         
         // WebSocket 服务器
         this.wss = null;
-        this.websocketPort = 8081; // 使用不同的端口（Telegram 使用 8080）
+        this.websocketPort = 8081;
         this.websocketClients = new Set();
     }
 
@@ -46,6 +52,9 @@ class Home_assistantModule extends BaseCredentialModule {
         this.infoListModule = new InfoListModule(this.logger, this);
         this.basicInfoModule = new BasicInfoModule(this.logger, this);
         this.deviceControlModule = new DeviceControlModule(this.logger, this);
+        this.sceneModule = new SceneModule(this.logger, this);
+        this.permanentSceneModule = new PermanentSceneModule(this.logger, this);
+        this.automationModule = new AutomationModule(this.logger, this);
 
         // 启动信息列表缓存更新器
         this.infoListModule.startEnhancedListCacheUpdater();
@@ -227,6 +236,164 @@ class Home_assistantModule extends BaseCredentialModule {
      */
     async getSpaces(op = 'floors', credentials = null) {
         return await this.infoListModule.getSpaces(op, credentials);
+    }
+
+    /**
+     * 获取空间列表（getSpacesList别名，用于向后兼容）
+     */
+    async getSpacesList(credentials = null) {
+        return await this.getSpaces('floors', credentials);
+    }
+
+    /**
+     * 构建增强实体列表（包含state、device、room、floor等完整信息）
+     */
+    async buildEnhancedEntities(credentials = null) {
+        try {
+            if (!credentials) {
+                const credResult = await this.getCredentials();
+                if (!credResult.success) {
+                    return { success: false, error: 'No credentials found' };
+                }
+                credentials = credResult.data;
+            }
+
+            // 获取增强状态列表（包含 state, attributes 等）
+            const enhancedStatesResult = await this.infoListModule.getEnhancedStates(credentials);
+
+            if (!enhancedStatesResult.success) {
+                return enhancedStatesResult;
+            }
+
+            // 应用楼层和房间的映射表增强
+            const floorMappings = this.getFloorMappings();
+            const roomMappings = this.getRoomMappings();
+
+            const enrichedEntities = (enhancedStatesResult.data.states || []).map(entity => {
+                const enriched = { ...entity };
+
+                // 添加 area_id（与 room_id 相同）
+                if (entity.room_id) {
+                    enriched.area_id = entity.room_id;
+                }
+
+                // 应用楼层映射
+                if (entity.floor_name && floorMappings[entity.floor_name]) {
+                    const mapping = floorMappings[entity.floor_name];
+                    enriched.floor_name_en = mapping.floor_name_en;
+                    enriched.floor_type = mapping.floor_type;
+                    enriched.level = mapping.level;
+                }
+
+                // 应用房间映射
+                if (entity.room_name && roomMappings[entity.room_name]) {
+                    const mapping = roomMappings[entity.room_name];
+                    enriched.room_name_en = mapping.room_name_en;
+                    enriched.room_type = mapping.room_type;
+                }
+
+                return enriched;
+            });
+
+            return {
+                success: true,
+                data: {
+                    entities: enrichedEntities,
+                    total_count: enrichedEntities.length,
+                    retrieved_at: enhancedStatesResult.data.retrieved_at || new Date().toISOString()
+                }
+            };
+        } catch (error) {
+            this.logger.error('Failed to build enhanced entities:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * 获取AI提示词（用于空间数据增强）
+     */
+    async getPrompt() {
+        const systemPrompt = `您是专业的智能家居数据补全专家,专门负责为现有的房间楼层JSON数据补充缺失的标准化字段。
+
+## 核心任务
+- 接收用户提供的现有JSON数据
+- 识别数据中缺失的必填字段
+- 楼层名称统一翻译为标准英文(如 First Floor, Second Floor)
+- 房间名称翻译为标准英文(如 Living Room, Kitchen等)
+
+## 房间类型智能识别规则
+
+**基于中文房间类型映射：**
+- 客厅/大厅/会客厅/起居室 → "living_room"
+- 卧室/睡房 → "bedroom"
+- 主卧/主卧室 → "master_bedroom"
+- 客卧/次卧 → "guest_bedroom"
+- 儿童房/小孩房 → "kids_room"
+- 厨房/烹饪间 → "kitchen"
+- 餐厅/饭厅/用餐区 → "dining_room"
+- 书房/办公室/工作室/学习室 → "study"
+- 卫生间/洗手间/厕所/浴室 → "bathroom"
+- 主卫/主卫生间 → "master_bathroom"
+- 客卫/公卫 → "guest_bathroom"
+- 储物间/杂物间/收纳间 → "storage"
+- 衣帽间/更衣室 → "closet"
+- 走廊/过道/通道 → "hallway"
+- 玄关/门厅/入户 → "entrance"
+- 阳台/露台/平台 → "balcony"
+- 花园/后院/前院/庭院 → "garden"
+- 车库/停车库 → "garage"
+- 地下室/地库 → "basement"
+- 阁楼/顶层 → "attic"
+- 楼梯间 → "stairway"
+- 娱乐室/游戏室/影音室/TV room → "entertainment"
+- 健身房/运动室 → "gym"
+- 洗衣房/洗衣间 → "laundry"
+
+**多语言支持：**
+- 当房间名称为其他语言时,先理解其含义,再参照上述映射规则进行类型判断
+- 例如：英文"Living Room"对应"living_room"
+- 例如：日文"寝室"对应"bedroom"
+
+## 楼层类型识别规则
+
+**基于楼层命名映射：**
+- 一楼/1F/1层/地面层/first floor → "first_floor", level: 1
+- 二楼/2F/2层/second floor → "second_floor", level: 2
+- 三楼/3F/3层/third floor → "third_floor", level: 3
+- 四楼及以上类推
+- 地下室/地库/B1/basement → "basement", level: -1
+- 阁楼/顶层/attic → "attic"
+
+## 输出要求
+
+必须严格按照以下JSON格式输出,不要添加任何markdown标记或额外文字:
+
+{
+  "floors": [
+    {
+      "floor_name": "原始楼层名称",
+      "floor_name_en": "标准英文楼层名",
+      "floor_type": "楼层类型",
+      "level": 数字
+    }
+  ],
+  "rooms": [
+    {
+      "room_name": "原始房间名称",
+      "room_name_en": "标准英文房间名",
+      "room_type": "房间类型"
+    }
+  ]
+}
+
+请直接返回JSON数据,不要包含任何解释说明。`;
+
+        return {
+            success: true,
+            data: {
+                prompt: systemPrompt
+            }
+        };
     }
 
     /**
@@ -752,6 +919,113 @@ class Home_assistantModule extends BaseCredentialModule {
         });
 
         this.logger.info(`[WebSocket] Broadcast complete: ${successCount} success, ${failCount} failed`);
+    }
+
+    /**
+     * 获取所有场景列表
+     */
+    async getScenes(credentials = null) {
+        return await this.sceneModule.getScenes(credentials);
+    }
+
+    /**
+     * 执行场景
+     */
+    async activateScene(sceneId, credentials = null) {
+        return await this.sceneModule.activateScene(sceneId, credentials);
+    }
+
+    /**
+     * 创建场景
+     */
+    async createScene(sceneData, credentials = null) {
+        return await this.sceneModule.createScene(sceneData, credentials);
+    }
+
+    /**
+     * 批量执行场景
+     */
+    async activateScenes(sceneIds, credentials = null) {
+        return await this.sceneModule.activateScenes(sceneIds, credentials);
+    }
+
+    /**
+     * 删除场景
+     */
+    async deleteScene(sceneId, credentials = null) {
+        return await this.sceneModule.deleteScene(sceneId, credentials);
+    }
+
+    /**
+     * 批量删除场景
+     */
+    async deleteScenes(sceneIds, credentials = null) {
+        return await this.sceneModule.deleteScenes(sceneIds, credentials);
+    }
+
+    /**
+     * 获取场景示例
+     */
+    getSceneExamples() {
+        return this.sceneModule.getSceneExamples();
+    }
+
+    // ========== 自动化相关方法 ==========
+
+    /**
+     * 获取所有自动化列表
+     */
+    async getAutomations(credentials = null) {
+        return await this.automationModule.getAutomations(credentials);
+    }
+
+    /**
+     * 创建自动化
+     */
+    async createAutomation(automationConfig, credentials = null) {
+        return await this.automationModule.createAutomation(automationConfig, credentials);
+    }
+
+    /**
+     * 删除自动化
+     */
+    async deleteAutomation(automationId, credentials = null) {
+        return await this.automationModule.deleteAutomation(automationId, credentials);
+    }
+
+    /**
+     * 启用自动化
+     */
+    async enableAutomation(automationId, credentials = null) {
+        return await this.automationModule.enableAutomation(automationId, credentials);
+    }
+
+    /**
+     * 禁用自动化
+     */
+    async disableAutomation(automationId, credentials = null) {
+        return await this.automationModule.disableAutomation(automationId, credentials);
+    }
+
+    /**
+     * 触发自动化（手动执行）
+     */
+    async triggerAutomation(automationId, credentials = null) {
+        return await this.automationModule.triggerAutomation(automationId, credentials);
+    }
+
+    /**
+     * 获取单个自动化详情
+     */
+    async getAutomation(automationId, credentials = null) {
+        return await this.automationModule.getAutomation(automationId, credentials);
+    }
+
+    /**
+     * 重新加载自动化配置
+     */
+    async reloadAutomations(credentials = null) {
+        return await this.automationModule.reloadAutomations(credentials);
     }
 
     /**

@@ -21,7 +21,9 @@
     "autoBackup": true,
     "backupInterval": 3600000,
     "maxBackups": 10,
-    "validationTimeout": 30000
+    "validationTimeout": 30000,
+    "autoUpdate": true,
+    "autoUpdateInterval": 180000
   },
   "security": {
     "requireAuth": true,

@@ -192,12 +192,16 @@
             width: 2rem;
             height: 2rem;
             border-radius: 0.5rem;
-            background: var(--primary-color);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: bold;
+            overflow: hidden;
+        }
+
+        .module-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .module-status {
@@ -1437,9 +1441,6 @@
                     <span class="status-dot"></span>
                     <span>Checking connection...</span>
                 </div>
-                <button class="btn btn-primary" onclick="showApiDocumentation()" style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3);">
-                    📚 API Documentation
-                </button>
                 <button class="btn btn-primary" onclick="showQRCode()" style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3);">
                     📱 QR Code
                 </button>
@@ -1455,24 +1456,11 @@
             </div>
         </div>
 
-        <!-- Health Check Section -->
-        <div class="health-check-section">
-            <h2>🏥 Health Check & Validation</h2>
-            <div class="health-controls">
-                <button class="btn btn-primary" onclick="runHealthCheck()">🔍 Run Health Check</button>
-                <button class="btn btn-success" onclick="startPeriodicHealthCheck()">⏰ Start Periodic Check</button>
-                <button class="btn btn-warning" onclick="stopPeriodicHealthCheck()">⏹️ Stop Periodic Check</button>
-            </div>
-            <div class="health-results" id="healthResults">
-                <!-- Health check results will be displayed here -->
-            </div>
-        </div>
-
-        <!-- Node-RED Management Section -->
-        <div class="nodered-section">
-            <h2>🔴 Node-RED Flow Management</h2>
+        <!-- Agent Flow Management Section -->
+        <div class="nodered-section" style="display: none;">
+            <h2>🔴 Agent Flow Management</h2>
             
-            <!-- Node-RED Service Info -->
+            <!-- Agent Flow Service Info -->
             <div class="nodered-info" id="noderedInfo" style="background: var(--gray-50); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; border: 2px solid var(--gray-200);">
                 <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
                     <strong style="color: var(--gray-700);">🌐 Service Address:</strong>
@@ -1496,7 +1484,7 @@
             <div class="modal" id="flowUploadModal">
                 <div class="modal-content">
                     <span class="close" onclick="closeFlowUpload()">&times;</span>
-                    <h3>📤 Upload Node-RED Flow</h3>
+                    <h3>📤 Upload Agent Flow</h3>
                     <div class="upload-area" id="uploadArea">
                         <p>📁 Drag & drop your flow JSON file here or click to select</p>
                         <input type="file" id="flowFileInput" accept=".json" style="display: none;">
@@ -1563,6 +1551,18 @@
                         <span style="font-size: 2rem;">💎</span>
                         <span style="font-weight: 600;">Google Gemini API Documentation</span>
                         <span style="font-size: 0.9rem; opacity: 0.8;">Multimodal AI, secure conversation, intelligent assistant</span>
+                    </a>
+                    
+                    <a href="/ai-enhanced-scene-api-docs.html" target="_blank" class="btn btn-primary" style="text-decoration: none; text-align: center; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 2rem;">🎬</span>
+                        <span style="font-weight: 600;">AI Enhanced Scene API Documentation</span>
+                        <span style="font-size: 0.9rem; opacity: 0.8;">智能场景管理, 执行/创建/删除场景</span>
+                    </a>
+                    
+                    <a href="/ai-enhanced-automation-api-docs.html" target="_blank" class="btn btn-success" style="text-decoration: none; text-align: center; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 2rem;">🤖</span>
+                        <span style="font-weight: 600;">AI Enhanced Automation API Documentation</span>
+                        <span style="font-size: 0.9rem; opacity: 0.8;">智能自动化管理, AI创建/删除/启用/禁用自动化</span>
                     </a>
                 </div>
             </div>
@@ -2047,7 +2047,7 @@
             checkConnection();
             loadModules();
             loadStatistics();
-            loadNodeRedInfo(); // Load Node-RED service info
+            loadNodeRedInfo(); // Load Agent Flow service info
             setInterval(refreshData, 30000); // Refresh data every 30 seconds
             
             // If Telegram module is available, set up automatic message refresh
@@ -2174,6 +2174,16 @@
                 // Skip agent module - it's not displayed in the UI
                 if (name === 'agent') return;
                 
+                // Hide specific modules from display
+                if (name === 'ai_enhanced_entities' || 
+                    name === 'intention' || 
+                    name === 'communication' || 
+                    name === 'bestMatch' ||
+                    name === 'ai_enhanced_automation' ||
+                    name === 'ai_enhanced_scene') {
+                    return;
+                }
+                
                 const data = moduleData.data || {};
                 const card = createModuleCard(name, data);
                 grid.appendChild(card);
@@ -2191,14 +2201,14 @@
             card.className = 'module-card fade-in';
             card.id = `module-${name}`;
             
-            const iconLetter = name.charAt(0).toUpperCase();
+            const logoPath = getModuleLogo(name);
             const isEnabled = data.enabled || false;
             const isInitialized = data.initialized || false;
             
             card.innerHTML = `
                 <div class="module-header">
                     <div class="module-title">
-                        <div class="module-icon">${iconLetter}</div>
+                        <div class="module-icon">${logoPath ? `<img src="${logoPath}" alt="${capitalizeFirst(name)}">` : name.charAt(0).toUpperCase()}</div>
                         ${capitalizeFirst(name)}
                     </div>
                     <div class="module-status">
@@ -2227,14 +2237,11 @@
                     </div>
                     ` : ''}
                     <div class="module-actions">
-                        <button class="btn ${isEnabled ? 'btn-warning' : 'btn-success'}" 
-                                onclick="toggleModule('${name}', ${!isEnabled})">
-                            ${isEnabled ? 'Disable' : 'Enable'}
-                        </button>
                         <button class="btn btn-primary" onclick="validateModule('${name}')">Validate</button>
                         <button class="btn btn-primary" onclick="testConnection('${name}')">Test Connection</button>
                         <button class="btn btn-warning" onclick="reloadModule('${name}')">Reload</button>
                         <button class="btn btn-danger" onclick="clearCache('${name}')">Clear Cache</button>
+                        <button class="btn btn-danger" onclick="clearCredentials('${name}')">Clear Credentials</button>
                         ${name === 'telegram' ? '<button class="btn btn-success" onclick="showTelegramMessaging()">Message Management</button>' : ''}
                     </div>
                     <div id="result-${name}"></div>
@@ -2312,32 +2319,65 @@
             const creds = existingCreds || {};
             
             Object.entries(schema.properties).forEach(([field, definition]) => {
-                const value = creds[field] || '';
+                const value = creds[field] || definition.default || '';
                 const isRequired = requiredFields.includes(field) || definition.required;
-                const inputType = definition.sensitive ? 'password' : 
-                                 definition.ui?.widget === 'url' ? 'url' : 
-                                 definition.ui?.widget === 'password' ? 'password' : 'text';
                 const placeholder = definition.ui?.placeholder || definition.example || '';
                 const help = definition.ui?.help || definition.description || '';
                 
-                console.log(`[GenerateForm] ${moduleName}.${field}: type=${inputType}, required=${isRequired}, placeholder=${placeholder}`);
+                // Check if this should be a select dropdown
+                const isSelect = (definition.ui?.widget === 'select' || definition.enum) && definition.enum;
                 
-                formHTML += `
-                    <div class="form-group">
-                        <label for="${moduleName}-${field}">
-                            ${definition.title || capitalizeFirst(field)}
-                            ${isRequired ? '*' : ''}
-                        </label>
-                        <input type="${inputType}" 
-                               id="${moduleName}-${field}" 
-                               name="${field}"
-                               value="${value}" 
-                               placeholder="${placeholder}"
-                               ${isRequired ? 'required' : ''}
-                               title="${help}">
-                        ${help ? `<small style="color: var(--gray-500); font-size: 0.8rem;">${help}</small>` : ''}
-                    </div>
-                `;
+                if (isSelect) {
+                    // Generate select dropdown
+                    console.log(`[GenerateForm] ${moduleName}.${field}: type=select, options=${definition.enum.length}, value=${value}`);
+                    
+                    let optionsHTML = placeholder ? `<option value="">${placeholder}</option>` : '';
+                    definition.enum.forEach(option => {
+                        const selected = value === option ? 'selected' : '';
+                        optionsHTML += `<option value="${option}" ${selected}>${option}</option>`;
+                    });
+                    
+                    formHTML += `
+                        <div class="form-group">
+                            <label for="${moduleName}-${field}">
+                                ${definition.title || capitalizeFirst(field)}
+                                ${isRequired ? '*' : ''}
+                            </label>
+                            <select id="${moduleName}-${field}" 
+                                   name="${field}"
+                                   ${isRequired ? 'required' : ''}
+                                   title="${help}"
+                                   style="width: 100%; padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 0.375rem; font-size: 0.95rem;">
+                                ${optionsHTML}
+                            </select>
+                            ${help ? `<small style="color: var(--gray-500); font-size: 0.8rem;">${help}</small>` : ''}
+                        </div>
+                    `;
+                } else {
+                    // Generate input field
+                    const inputType = definition.sensitive ? 'password' : 
+                                     definition.ui?.widget === 'url' ? 'url' : 
+                                     definition.ui?.widget === 'password' ? 'password' : 'text';
+                    
+                    console.log(`[GenerateForm] ${moduleName}.${field}: type=${inputType}, required=${isRequired}, placeholder=${placeholder}`);
+                    
+                    formHTML += `
+                        <div class="form-group">
+                            <label for="${moduleName}-${field}">
+                                ${definition.title || capitalizeFirst(field)}
+                                ${isRequired ? '*' : ''}
+                            </label>
+                            <input type="${inputType}" 
+                                   id="${moduleName}-${field}" 
+                                   name="${field}"
+                                   value="${value}" 
+                                   placeholder="${placeholder}"
+                                   ${isRequired ? 'required' : ''}
+                                   title="${help}">
+                            ${help ? `<small style="color: var(--gray-500); font-size: 0.8rem;">${help}</small>` : ''}
+                        </div>
+                    `;
+                }
             });
             
             formHTML += `
@@ -2353,7 +2393,7 @@
         // Save credentials
         async function saveCredentials(moduleName) {
             const formContainer = document.getElementById(`credentials-${moduleName}`);
-            const inputs = formContainer.querySelectorAll('input[name]');
+            const inputs = formContainer.querySelectorAll('input[name], select[name]');
             const credentials = {};
             
             inputs.forEach(input => {
@@ -2530,6 +2570,50 @@
             }
         }
 
+        // Clear credentials from form and server
+        async function clearCredentials(moduleName) {
+            const formContainer = document.getElementById(`credentials-${moduleName}`);
+            if (!formContainer) {
+                showToast('Form not found', 'error');
+                return;
+            }
+            
+            // Confirm before clearing
+            if (!confirm(`Are you sure you want to clear all credentials for ${capitalizeFirst(moduleName)}? This action cannot be undone.`)) {
+                return;
+            }
+            
+            try {
+                // Delete credentials from server
+                const response = await fetch(`/api/credentials/${moduleName}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Clear form inputs
+                    const inputs = formContainer.querySelectorAll('input[name], select[name]');
+                    inputs.forEach(input => {
+                        if (input.tagName === 'SELECT') {
+                            input.selectedIndex = 0;
+                        } else if (input.type === 'checkbox') {
+                            input.checked = false;
+                        } else {
+                            input.value = '';
+                        }
+                    });
+                    
+                    showToast(`${capitalizeFirst(moduleName)} credentials cleared successfully`, 'success');
+                } else {
+                    showToast(`Clear failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Failed to clear credentials:', error);
+                showToast('Failed to clear credentials', 'error');
+            }
+        }
+
         // Display validation result
         function displayValidationResult(moduleName, result) {
             const resultContainer = document.getElementById(`result-${moduleName}`);
@@ -2600,11 +2684,30 @@
         // Capitalize first letter
         function capitalizeFirst(str) {
             // Special handling for certain module names
-            if (str === 'nodered') return 'Node-RED';
+            if (str === 'nodered') return 'Agent Flow';
             if (str === 'home_assistant') return 'Home Assistant';
             if (str === 'openai') return 'OpenAI';
             if (str === 'deepseek') return 'DeepSeek';
             return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+        
+        // Get module logo path
+        function getModuleLogo(moduleName) {
+            const logoMap = {
+                'home_assistant': '/data/symbols/Home_Assistant_logo.svg',
+                'gemini': '/data/symbols/Google-gemini-icon.svg',
+                'claude': '/data/symbols/Claude_AI_symbol.svg',
+                'nodered': '/data/symbols/node-red-icon.png',
+                'openai': '/data/symbols/OpenAI-symbol.svg',
+                'deepseek': '/data/symbols/Deepseek-logo-icon.svg',
+                'ai_enhanced_automation': '/data/symbols/Home_Assistant_logo.svg',
+                'ai_enhanced_entities': '/data/symbols/Home_Assistant_logo.svg',
+                'ai_enhanced_scene': '/data/symbols/Home_Assistant_logo.svg',
+                'bestMatch': '/data/symbols/Home_Assistant_logo.svg',
+                'communication': '/data/symbols/Home_Assistant_logo.svg',
+                'intention': '/data/symbols/Home_Assistant_logo.svg'
+            };
+            return logoMap[moduleName] || '';
         }
         
         // Format file size
@@ -4498,7 +4601,7 @@
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 0.75rem;">
                                             <span style="color: var(--gray-600); font-size: 0.875rem;">${nodeCount} nodes</span>
-                                            <button class="btn btn-sm btn-danger" onclick="deleteNodeRedFlow('${flow.id}', '${(flow.label || flow.id).replace(/'/g, "\\'")}')">🗑️ Delete</button>
+                                            <button class="btn btn-sm btn-danger" onclick="deleteNodeRedFlow('${flow.id}', '${(flow.label || flow.id).replace(/'/g, "\\'")}');" style="display: none;">🗑️ Delete</button>
                                         </div>
                                     </div>
                                     ${flow.info ? `<div style="margin-top: 0.25rem; font-size: 0.875rem; color: var(--gray-600);">${flow.info.substring(0, 100)}${flow.info.length > 100 ? '...' : ''}</div>` : ''}
@@ -4519,7 +4622,7 @@
             }
         }
 
-        // Load Node-RED service info
+        // Load Agent Flow service info
         async function loadNodeRedInfo() {
             try {
                 // Get Node-RED credentials to fetch service URL
@@ -4575,7 +4678,7 @@
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                                     <span style="color: var(--gray-600); font-size: 0.85rem; white-space: nowrap;">${nodeCount} nodes</span>
-                                    <button class="btn btn-sm btn-danger" onclick="deleteNodeRedFlow('${flow.id}', '${(flow.label || flow.id).replace(/'/g, "\\'")}')">🗑️ Delete</button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteNodeRedFlow('${flow.id}', '${(flow.label || flow.id).replace(/'/g, "\\'")}');" style="display: none;">🗑️ Delete</button>
                                 </div>
                             </div>
                         `;
@@ -4650,13 +4753,13 @@
             }
         }
         
-        // Open Node-RED service in new tab
+        // Open Agent Flow service in new tab
         function openNodeRedService() {
             const serviceUrl = document.getElementById('noderedServiceUrl').textContent;
             if (serviceUrl && serviceUrl !== 'Loading...' && serviceUrl !== 'Not configured') {
                 window.open(serviceUrl, '_blank');
             } else {
-                showToast('Node-RED service URL not configured', 'warning');
+                showToast('Agent Flow service URL not configured', 'warning');
             }
         }
 

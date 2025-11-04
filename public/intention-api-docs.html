@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Intention API 测试文档</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-dark: #7c3aed;
+            --secondary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --light: #f5f5f5;
+            --dark: #1f2937;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+        .panel {
+            background: var(--white);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-error {
+            background: var(--danger);
+            color: white;
+        }
+
+        .status-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #2563eb;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--light);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        textarea.form-control {
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid var(--info);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .success-box {
+            background: #f0fdf4;
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .warning-box {
+            background: #fffbeb;
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .error-box {
+            background: #fef2f2;
+            border-left: 4px solid var(--danger);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .code-block {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            margin: 1rem 0;
+            line-height: 1.6;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .api-endpoint {
+            background: var(--light);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .api-method {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-weight: bold;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+        }
+
+        .method-get {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .method-post {
+            background: #10b981;
+            color: white;
+        }
+
+        .method-put {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .method-delete {
+            background: #ef4444;
+            color: white;
+        }
+
+        .api-path {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #6b7280;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab:hover {
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .provider-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .provider-card {
+            background: var(--light);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .provider-card.selected {
+            border-color: var(--primary);
+            background: #f5f3ff;
+        }
+
+        .provider-card.available {
+            opacity: 1;
+        }
+
+        .provider-card.unavailable {
+            opacity: 0.5;
+        }
+
+        .history-item {
+            background: var(--light);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .history-time {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎯 Intention API</h1>
+            <p>智能意图识别与处理平台</p>
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="totalRequests">-</span>
+                    <span class="stat-label">总处理次数</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="currentProvider">-</span>
+                    <span class="stat-label">当前 AI 提供商</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="lastProcessed">-</span>
+                    <span class="stat-label">最后处理时间</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="panel">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('process')">🚀 处理意图</button>
+                <button class="tab" onclick="switchTab('classify')">🎯 意图分类</button>
+                <button class="tab" onclick="switchTab('prompt')">📝 系统提示词</button>
+                <button class="tab" onclick="switchTab('provider')">🤖 AI 提供商</button>
+                <button class="tab" onclick="switchTab('history')">📜 历史记录</button>
+                <button class="tab" onclick="switchTab('docs')">📚 API 文档</button>
+            </div>
+
+            <!-- Process Tab -->
+            <div id="tab-process" class="tab-content active">
+                <div class="panel-header">
+                    <h2 class="panel-title">🚀 处理用户意图</h2>
+                </div>
+
+                <div class="info-box">
+                    <strong>ℹ️ 功能说明：</strong>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>接收用户自然语言指令</li>
+                        <li>自动选择可用的 AI 提供商</li>
+                        <li>解析意图并转换为 Home Assistant 服务调用</li>
+                        <li>返回结构化的设备控制指令</li>
+                    </ul>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <!-- Left Panel - Input -->
+                    <div style="background: #f9fafb; padding: 1.5rem; border-radius: 0.5rem; border: 2px solid #e5e7eb;">
+                        <h3 style="margin-bottom: 1rem; color: var(--primary); font-size: 1.25rem;">📝 输入意图</h3>
+                        
+                        <div class="form-group">
+                            <label class="form-label">意图类型</label>
+                            <select id="intentType" class="form-control">
+                                <option value="message">message</option>
+                                <option value="command">command</option>
+                                <option value="query">query</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">用户输入内容</label>
+                            <textarea id="intentContent" class="form-control" placeholder="例如：打开所有灯" style="min-height: 300px;">打开所有灯</textarea>
+                        </div>
+
+                        <button class="btn btn-primary" onclick="processIntention()" style="width: 100%;">
+                            ▶️ 处理意图
+                        </button>
+                    </div>
+
+                    <!-- Right Panel - Output -->
+                    <div style="background: #f9fafb; padding: 1.5rem; border-radius: 0.5rem; border: 2px solid #e5e7eb;">
+                        <h3 style="margin-bottom: 1rem; color: var(--success); font-size: 1.25rem;">✨ AI 输出结果</h3>
+                        
+                        <div id="processResult" style="min-height: 400px;">
+                            <div style="text-align: center; padding: 3rem 1rem; color: #6b7280;">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">🤖</div>
+                                <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">等待处理...</p>
+                                <p style="font-size: 0.875rem;">点击左侧"处理意图"按钮开始</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Classify Tab -->
+            <div id="tab-classify" class="tab-content">
+                <div class="panel-header">
+                    <h2 class="panel-title">🎯 意图分类</h2>
+                    <span id="classifyPromptStatus" class="status-badge"></span>
+                </div>
+
+                <div class="info-box">
+                    <strong>ℹ️ 功能说明：</strong>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>只做意图分类，不提取设备信息</li>
+                        <li>分类为6种意图类型：查询设备状态、控制设备、场景控制、设定场景、设定自动化、其他</li>
+                        <li>快速返回意图类型和置信度</li>
+                        <li>可用于意图路由和决策</li>
+                    </ul>
+                </div>
+
+                <!-- Prompt Management Section -->
+                <div style="background: #f0f9ff; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #bfdbfe; margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                        <h3 style="color: var(--secondary); font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            📚 分类提示词管理
+                        </h3>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-success" onclick="saveClassificationPrompt()" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                                💾 保存
+                            </button>
+                            <button class="btn btn-danger" onclick="resetClassificationPrompt()" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                                🔄 重置
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <textarea id="classificationPromptText" class="form-control" placeholder="加载中..." style="min-height: 300px; font-size: 0.875rem;"></textarea>
+                    </div>
+                    
+                    <div id="classificationPromptResult" class="hidden" style="margin-top: 1rem;"></div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <!-- Left Panel - Input -->
+                    <div style="background: #f9fafb; padding: 1.5rem; border-radius: 0.5rem; border: 2px solid #e5e7eb;">
+                        <h3 style="margin-bottom: 1rem; color: var(--primary); font-size: 1.25rem;">📝 输入文本</h3>
+                        
+                        <div class="form-group">
+                            <label class="form-label">用户输入内容</label>
+                            <textarea id="classifyInput" class="form-control" placeholder="例如：客厅温度和湿度是多少" style="min-height: 200px;">客厅温度和湿度是多少</textarea>
+                        </div>
+
+                        <div class="warning-box" style="font-size: 0.875rem;">
+                            <strong>💡 示例：</strong>
+                            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                                <li>"客厅灯开着吗" → Query Device Status</li>
+                                <li>"打开客厅灯" → Control Device</li>
+                                <li>"启动观影模式" → Control Scene</li>
+                                <li>"创建一个观影场景" → Set Scene</li>
+                                <li>"晚上7点自动开灯" → Set Automation</li>
+                            </ul>
+                        </div>
+
+                        <button class="btn btn-primary" onclick="classifyIntention()" style="width: 100%;">
+                            🎯 分类意图
+                        </button>
+                    </div>
+
+                    <!-- Right Panel - Output -->
+                    <div style="background: #f9fafb; padding: 1.5rem; border-radius: 0.5rem; border: 2px solid #e5e7eb;">
+                        <h3 style="margin-bottom: 1rem; color: var(--success); font-size: 1.25rem;">✨ 分类结果</h3>
+                        
+                        <div id="classifyResult" style="min-height: 400px;">
+                            <div style="text-align: center; padding: 3rem 1rem; color: #6b7280;">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
+                                <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">等待分类...</p>
+                                <p style="font-size: 0.875rem;">点击左侧"分类意图"按钮开始</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prompt Tab -->
+            <div id="tab-prompt" class="tab-content">
+                <div class="panel-header">
+                    <h2 class="panel-title">📝 系统提示词管理</h2>
+                    <span id="promptStatus" class="status-badge"></span>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ 注意：</strong> 修改系统提示词将影响 AI 对用户意图的理解和解析。请确保提示词准确描述了需求。
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">系统提示词</label>
+                    <textarea id="systemPrompt" class="form-control" placeholder="加载中..." style="min-height: 400px;"></textarea>
+                </div>
+
+                <div class="grid-2">
+                    <button class="btn btn-success" onclick="savePrompt()">
+                        💾 保存自定义提示词
+                    </button>
+                    <button class="btn btn-danger" onclick="resetPrompt()">
+                        🔄 恢复默认提示词
+                    </button>
+                </div>
+
+                <div id="promptResult" class="hidden" style="margin-top: 1.5rem;"></div>
+            </div>
+
+            <!-- Provider Tab -->
+            <div id="tab-provider" class="tab-content">
+                <div class="panel-header">
+                    <h2 class="panel-title">🤖 AI 提供商配置</h2>
+                </div>
+
+                <div class="info-box">
+                    <strong>ℹ️ 提供商选择：</strong>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li><strong>自动选择：</strong>系统会自动选择第一个可用的 AI 提供商</li>
+                        <li><strong>手动选择：</strong>可以指定使用某个特定的 AI 提供商</li>
+                        <li><strong>可用性：</strong>只有配置了凭据的提供商才能使用</li>
+                    </ul>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">选择 AI 提供商</label>
+                    <div class="provider-list" id="providerList">
+                        <div class="loading"></div> 加载中...
+                    </div>
+                </div>
+
+                <div id="providerResult" class="hidden" style="margin-top: 1.5rem;"></div>
+            </div>
+
+            <!-- History Tab -->
+            <div id="tab-history" class="tab-content">
+                <div class="panel-header">
+                    <h2 class="panel-title">📜 处理历史记录</h2>
+                    <button class="btn btn-secondary" onclick="loadHistory()">
+                        🔄 刷新
+                    </button>
+                </div>
+
+                <div id="historyContainer">
+                    <p style="text-align: center; color: #6b7280;">点击"刷新"加载历史记录</p>
+                </div>
+            </div>
+
+            <!-- Docs Tab -->
+            <div id="tab-docs" class="tab-content">
+                <div class="panel-header">
+                    <h2 class="panel-title">📚 API 文档</h2>
+                </div>
+
+                <h3 style="margin-bottom: 1rem;">可用的 API 端点</h3>
+
+                <div class="api-endpoint">
+                    <div><span class="api-method method-post">POST</span><span class="api-path">/api/intention/intention/classify</span></div>
+                    <p style="margin-top: 0.5rem; color: #6b7280;">意图分类（仅分类，不提取设备信息）</p>
+                    <div class="code-block">POST /api/intention/intention/classify
+Content-Type: application/json
+
+// 新格式 (推荐)
+{
+  "type": "message",
+  "content": "我回家了",
+  "metadata": {},
+  "timestamp": "2025-10-27T14:43:54.644Z"
+}
+
+// 旧格式 (仍然支持，向后兼容)
+{
+  "user_input": "客厅温度和湿度是多少"
+}
+
+// Response
+{
+  "success": true,
+  "data": {
+    "user_input": "我回家了",
+    "intent": "Control Scene",
+    "confidence": 0.9,
+    "user_responds": "欢迎回家，正在为您执行回家场景",
+    "ai_provider": "gemini",
+    "classified_at": "2025-10-27T15:28:02.000Z",
+    "input_metadata": {
+      "type": "message",
+      "metadata": {},
+      "timestamp": "2025-10-27T14:43:54.644Z"
+    },
+    "performance": {
+      "total_duration_ms": 1250,
+      "ai_call_duration_ms": 1180,
+      "token_usage": {
+        "prompt_tokens": 450,
+        "completion_tokens": 85,
+        "total_tokens": 535
+      }
+    }
+  }
+}</div>
+                </div>
+
+                <div class="api-endpoint">
+                    <div><span class="api-method method-post">POST</span><span class="api-path">/api/intention/intention/process</span></div>
+                    <p style="margin-top: 0.5rem; color: #6b7280;">处理用户意图</p>
+                    <div class="code-block">POST /api/intention/intention/process
+Content-Type: application/json
+
+{
+  "type": "message",
+  "content": "打开所有灯",
+  "metadata": {},
+  "timestamp": "2025-10-25T15:28:01.491Z"
+}
+
+// Response
+{
+  "success": true,
+  "data": {
+    "user_input": "打开所有灯",
+    "intent": "Control Device",
+    "devices": [{
+      "floor_name": "",
+      "floor_name_en": "",
+      "floor_type": "",
+      "room_type": "",
+      "room_name": "",
+      "room_name_en": "",
+      "device_type": "light",
+      "device_name": "",
+      "device_name_en": "",
+      "service": "light.turn_on",
+      "service_data": {}
+    }],
+    "confidence": 0.95,
+    "user_responds": "好的，即将为您打开所有灯光",
+    "ai_provider": "gemini",
+    "processed_at": "2025-10-25T15:28:02.000Z"
+  }
+}</div>
+                </div>
+
+                <div class="api-endpoint">
+                    <div><span class="api-method method-get">GET</span><span class="api-path">/api/intention/intention/history?limit=50</span></div>
+                    <p style="margin-top: 0.5rem; color: #6b7280;">获取处理历史记录</p>
+                    <div class="code-block">GET /api/intention/intention/history?limit=50
+
+// Response
+{
+  "success": true,
+  "data": {
+    "total": 10,
+    "intentions": [...]
+  }
+}</div>
+                </div>
+
+                <div class="api-endpoint">
+                    <div><span class="api-method method-get">GET</span><span class="api-path">/api/intention/intention/prompt</span></div>
+                    <p style="margin-top: 0.5rem; color: #6b7280;">获取当前系统提示词</p>
+                    <div class="code-block">GET /api/intention/intention/prompt
+
+// Response
+{
+  "success": true,
+  "data": {
+    "prompt": "...",
+    "is_custom": false
+  }
+}</div>
+                </div>
+
+                <div class="api-endpoint">
+                    <div><span class="api-method method-put">PUT</span><span class="api-path">/api/intention/intention/prompt</span></div>
+                    <p style="margin-top: 0.5rem; color: #6b7280;">保存自定义系统提示词</p>
+                    <div class="code-block">PUT /api/intention/intention/prompt
+Content-Type: application/json
+
+{
+  "prompt": "Your custom system prompt here..."
+}</div>
+                </div>
+
+                <div class="api-endpoint">
+                    <div><span class="api-method method-delete">DELETE</span><span class="api-path">/api/intention/intention/prompt</span></div>
+                    <p style="margin-top: 0.5rem; color: #6b7280;">删除自定义提示词，恢复默认</p>
+                    <div class="code-block">DELETE /api/intention/intention/prompt</div>
+                </div>
+
+                <div class="api-endpoint">
+                    <div><span class="api-method method-get">GET</span><span class="api-path">/api/intention/intention/ai-provider</span></div>
+                    <p style="margin-top: 0.5rem; color: #6b7280;">获取 AI 提供商配置</p>
+                    <div class="code-block">GET /api/intention/intention/ai-provider
+
+// Response
+{
+  "success": true,
+  "data": {
+    "current": "auto",
+    "available": [
+      {"name": "claude", "available": false},
+      {"name": "openai", "available": true},
+      {"name": "gemini", "available": true},
+      {"name": "deepseek", "available": true}
+    ]
+  }
+}</div>
+                </div>
+
+                <div class="api-endpoint">
+                    <div><span class="api-method method-post">POST</span><span class="api-path">/api/intention/intention/ai-provider</span></div>
+                    <p style="margin-top: 0.5rem; color: #6b7280;">设置 AI 提供商</p>
+                    <div class="code-block">POST /api/intention/intention/ai-provider
+Content-Type: application/json
+
+{
+  "provider": "auto"  // auto | claude | openai | gemini | deepseek
+}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api/intention/intention';
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            // Show selected tab
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            // Load data for specific tabs
+            if (tabName === 'prompt') {
+                loadPrompt();
+            } else if (tabName === 'provider') {
+                loadProviderConfig();
+            } else if (tabName === 'history') {
+                loadHistory();
+            } else if (tabName === 'classify') {
+                loadClassificationPrompt();
+            }
+        }
+
+        // Initialize
+        async function init() {
+            await loadStats();
+        }
+
+        // Load statistics
+        async function loadStats() {
+            try {
+                const [historyRes, providerRes] = await Promise.all([
+                    fetch(`${API_BASE}/history?limit=1`),
+                    fetch(`${API_BASE}/ai-provider`)
+                ]);
+
+                const historyData = await historyRes.json();
+                const providerData = await providerRes.json();
+
+                if (historyData.success && historyData.data) {
+                    document.getElementById('totalRequests').textContent = historyData.data.total || 0;
+                    
+                    if (historyData.data.intentions && historyData.data.intentions.length > 0) {
+                        const lastIntent = historyData.data.intentions[0];
+                        const timestamp = lastIntent.timestamp;
+                        if (timestamp) {
+                            const date = new Date(timestamp);
+                            document.getElementById('lastProcessed').textContent = date.toLocaleString('zh-CN');
+                        } else {
+                            document.getElementById('lastProcessed').textContent = '从未';
+                        }
+                    } else {
+                        document.getElementById('lastProcessed').textContent = '从未';
+                    }
+                }
+
+                if (providerData.success && providerData.data) {
+                    const currentProvider = providerData.data.current || 'auto';
+                    const providerDisplay = currentProvider === 'auto' ? '自动选择' : currentProvider.toUpperCase();
+                    document.getElementById('currentProvider').textContent = providerDisplay;
+                }
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+
+        // Process intention
+        async function processIntention() {
+            const type = document.getElementById('intentType').value;
+            const content = document.getElementById('intentContent').value;
+            const resultDiv = document.getElementById('processResult');
+
+            if (!content.trim()) {
+                resultDiv.innerHTML = `
+                    <div class="error-box">
+                        <strong>❌ 错误：</strong> 请输入用户内容
+                    </div>
+                `;
+                return;
+            }
+
+            resultDiv.innerHTML = `
+                <div style="text-align: center; padding: 3rem 1rem; color: #6b7280;">
+                    <div class="loading" style="display: inline-block; margin-bottom: 1rem;"></div>
+                    <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">🤖 AI 正在思考...</p>
+                    <p style="font-size: 0.875rem;">处理意图并生成结构化数据</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${API_BASE}/process`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type,
+                        content,
+                        metadata: {},
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const result = data.data;
+                    
+                    // Build device cards
+                    let devicesHtml = '';
+                    if (result.devices && result.devices.length > 0) {
+                        devicesHtml = result.devices.map((device, index) => `
+                            <div style="background: white; padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem; border-left: 4px solid var(--primary);">
+                                <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--primary);">
+                                    🔧 设备 ${index + 1}
+                                </div>
+                                <div style="font-size: 0.875rem; line-height: 1.8;">
+                                    ${device.floor_name ? `<div>📍 <strong>楼层:</strong> ${device.floor_name}</div>` : ''}
+                                    ${device.room_name ? `<div>🏠 <strong>房间:</strong> ${device.room_name}</div>` : ''}
+                                    ${device.device_type ? `<div>💡 <strong>设备类型:</strong> ${device.device_type}</div>` : ''}
+                                    ${device.device_name ? `<div>📱 <strong>设备名称:</strong> ${device.device_name}</div>` : ''}
+                                    ${device.service ? `<div>⚙️ <strong>服务:</strong> <code style="background: #f3f4f6; padding: 0.125rem 0.375rem; border-radius: 0.25rem;">${device.service}</code></div>` : ''}
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+
+                    resultDiv.innerHTML = `
+                        <div style="background: #f0fdf4; padding: 1rem; border-radius: 0.5rem; border-left: 4px solid var(--success); margin-bottom: 1rem;">
+                            <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">
+                                ✅ 处理成功
+                            </div>
+                            <div style="font-size: 0.875rem; color: #166534;">
+                                ${result.user_responds || '处理完成'}
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <span class="status-badge status-success">意图: ${result.intent}</span>
+                                <span class="status-badge" style="background: var(--warning); color: white;">置信度: ${(result.confidence * 100).toFixed(0)}%</span>
+                                <span class="status-badge" style="background: var(--info); color: white;">AI: ${result.ai_provider || 'unknown'}</span>
+                            </div>
+                        </div>
+
+                        ${devicesHtml ? `
+                            <div style="margin-bottom: 1rem;">
+                                <div style="font-weight: 600; margin-bottom: 0.75rem; color: var(--dark);">
+                                    🎯 识别的设备 (${result.devices.length}个)
+                                </div>
+                                ${devicesHtml}
+                            </div>
+                        ` : ''}
+
+                        <div style="margin-top: 1rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--dark); display: flex; align-items: center; gap: 0.5rem;">
+                                📋 完整 JSON 数据
+                                <button onclick="copyToClipboard(this)" style="padding: 0.25rem 0.75rem; background: var(--secondary); color: white; border: none; border-radius: 0.25rem; font-size: 0.75rem; cursor: pointer;">
+                                    📋 复制
+                                </button>
+                            </div>
+                            <div class="code-block" style="max-height: 400px; overflow-y: auto; font-size: 0.8rem; line-height: 1.6;">
+<pre style="margin: 0;">${syntaxHighlightJson(result)}</pre>
+                            </div>
+                        </div>
+                    `;
+                    
+                    await loadStats();
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error-box">
+                            <strong>❌ 错误：</strong> ${data.error}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error-box">
+                        <strong>❌ 请求失败：</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Classify intention
+        async function classifyIntention() {
+            const userInput = document.getElementById('classifyInput').value;
+            const resultDiv = document.getElementById('classifyResult');
+
+            if (!userInput.trim()) {
+                resultDiv.innerHTML = `
+                    <div class="error-box">
+                        <strong>❌ 错误：</strong> 请输入用户内容
+                    </div>
+                `;
+                return;
+            }
+
+            resultDiv.innerHTML = `
+                <div style="text-align: center; padding: 3rem 1rem; color: #6b7280;">
+                    <div class="loading" style="display: inline-block; margin-bottom: 1rem;"></div>
+                    <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">🎯 正在分类意图...</p>
+                    <p style="font-size: 0.875rem;">AI 正在识别意图类型</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${API_BASE}/classify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_input: userInput })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const result = data.data;
+                    
+                    // Intent icon mapping
+                    const intentIcons = {
+                        'Query Device Status': '❓',
+                        'Control Device': '🎛️',
+                        'Control Scene': '🎬',
+                        'Set Scene': '🎨',
+                        'Set Automation': '⚙️',
+                        'Other': '📝'
+                    };
+
+                    // Intent color mapping
+                    const intentColors = {
+                        'Query Device Status': '#3b82f6',
+                        'Control Device': '#10b981',
+                        'Control Scene': '#8b5cf6',
+                        'Set Scene': '#f59e0b',
+                        'Set Automation': '#ef4444',
+                        'Other': '#6b7280'
+                    };
+
+                    const intentIcon = intentIcons[result.intent] || '📝';
+                    const intentColor = intentColors[result.intent] || '#6b7280';
+
+                    // Performance metrics
+                    const performance = result.performance || {};
+                    const totalDuration = performance.total_duration_ms || 0;
+                    const aiDuration = performance.ai_call_duration_ms || 0;
+                    const tokenUsage = performance.token_usage || {};
+                    const totalTokens = tokenUsage.total_tokens || 0;
+                    const promptTokens = tokenUsage.prompt_tokens || 0;
+                    const completionTokens = tokenUsage.completion_tokens || 0;
+
+                    resultDiv.innerHTML = `
+                        <div style="background: #f0fdf4; padding: 1rem; border-radius: 0.5rem; border-left: 4px solid var(--success); margin-bottom: 1.5rem;">
+                            <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">
+                                ✅ 分类成功
+                            </div>
+                            <div style="font-size: 0.875rem; color: #166534;">
+                                ${result.user_responds || '分类完成'}
+                            </div>
+                        </div>
+
+                        <div style="background: white; padding: 1.5rem; border-radius: 0.75rem; border: 2px solid ${intentColor}; margin-bottom: 1.5rem;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 4rem; margin-bottom: 1rem;">
+                                    ${intentIcon}
+                                </div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: ${intentColor}; margin-bottom: 0.5rem;">
+                                    ${result.intent}
+                                </div>
+                                <div style="font-size: 2rem; font-weight: 600; color: var(--dark);">
+                                    ${(result.confidence * 100).toFixed(0)}%
+                                </div>
+                                <div style="font-size: 0.875rem; color: #6b7280;">
+                                    置信度
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">
+                                <span class="status-badge" style="background: ${intentColor}; color: white;">意图: ${result.intent}</span>
+                                <span class="status-badge" style="background: var(--warning); color: white;">置信度: ${(result.confidence * 100).toFixed(0)}%</span>
+                                <span class="status-badge" style="background: var(--info); color: white;">AI: ${result.ai_provider || 'unknown'}</span>
+                            </div>
+                        </div>
+
+                        <!-- Performance Metrics -->
+                        ${totalDuration > 0 ? `
+                        <div style="background: #fffbeb; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #fde68a; margin-bottom: 1rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem; color: #92400e; font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem;">
+                                ⚡ 性能指标
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.8rem;">
+                                <div style="background: white; padding: 0.4rem 0.6rem; border-radius: 0.375rem; border: 1px solid #e5e7eb; display: flex; align-items: center; gap: 0.4rem;">
+                                    <span style="color: #6b7280;">⏱️</span>
+                                    <span style="font-weight: 600; color: var(--primary);">${totalDuration}ms</span>
+                                    <span style="color: #9ca3af; font-size: 0.75rem;">总耗时</span>
+                                </div>
+                                <div style="background: white; padding: 0.4rem 0.6rem; border-radius: 0.375rem; border: 1px solid #e5e7eb; display: flex; align-items: center; gap: 0.4rem;">
+                                    <span style="color: #6b7280;">🤖</span>
+                                    <span style="font-weight: 600; color: var(--secondary);">${aiDuration}ms</span>
+                                    <span style="color: #9ca3af; font-size: 0.75rem;">AI</span>
+                                </div>
+                                ${totalTokens > 0 ? `
+                                <div style="background: white; padding: 0.4rem 0.6rem; border-radius: 0.375rem; border: 1px solid #e5e7eb; display: flex; align-items: center; gap: 0.4rem;">
+                                    <span style="color: #6b7280;">🎫</span>
+                                    <span style="font-weight: 600; color: var(--success);">${totalTokens}</span>
+                                    <span style="color: #9ca3af; font-size: 0.75rem;">Token</span>
+                                </div>
+                                ` : ''}
+                                ${promptTokens > 0 ? `
+                                <div style="background: white; padding: 0.4rem 0.6rem; border-radius: 0.375rem; border: 1px solid #e5e7eb; display: flex; align-items: center; gap: 0.4rem;">
+                                    <span style="color: #6b7280;">📥</span>
+                                    <span style="font-weight: 600; color: var(--info);">${promptTokens}</span>
+                                    <span style="color: #9ca3af; font-size: 0.75rem;">输入</span>
+                                </div>
+                                ` : ''}
+                                ${completionTokens > 0 ? `
+                                <div style="background: white; padding: 0.4rem 0.6rem; border-radius: 0.375rem; border: 1px solid #e5e7eb; display: flex; align-items: center; gap: 0.4rem;">
+                                    <span style="color: #6b7280;">📤</span>
+                                    <span style="font-weight: 600; color: var(--warning);">${completionTokens}</span>
+                                    <span style="color: #9ca3af; font-size: 0.75rem;">输出</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        <div style="background: #f9fafb; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--dark);">
+                                📝 用户输入
+                            </div>
+                            <div style="font-size: 0.875rem; color: #374151;">
+                                ${result.user_input}
+                            </div>
+                        </div>
+
+                        <!-- Classification Prompt -->
+                        <div style="background: #f0f9ff; padding: 1rem; border-radius: 0.5rem; border: 1px solid #bfdbfe; margin-bottom: 1rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--dark); display: flex; align-items: center; gap: 0.5rem; cursor: pointer;" onclick="toggleClassificationPrompt(this)">
+                                <span id="promptToggleIcon">▶</span>
+                                📚 分类提示词
+                                <span style="font-size: 0.75rem; color: #6b7280; font-weight: normal;">(点击展开/收起)</span>
+                            </div>
+                            <div id="classificationPromptContent" style="display: none; margin-top: 0.75rem;">
+                                <div class="code-block" style="max-height: 400px; overflow-y: auto; font-size: 0.75rem; line-height: 1.6; white-space: pre-wrap;">
+${getClassificationPromptText()}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 1rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--dark); display: flex; align-items: center; gap: 0.5rem;">
+                                📋 完整 JSON 数据
+                                <button onclick="copyToClipboard(this)" style="padding: 0.25rem 0.75rem; background: var(--secondary); color: white; border: none; border-radius: 0.25rem; font-size: 0.75rem; cursor: pointer;">
+                                    📋 复制
+                                </button>
+                            </div>
+                            <div class="code-block" style="max-height: 300px; overflow-y: auto; font-size: 0.8rem; line-height: 1.6;">
+<pre style="margin: 0;">${syntaxHighlightJson(result)}</pre>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error-box">
+                            <strong>❌ 错误：</strong> ${data.error}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error-box">
+                        <strong>❌ 请求失败：</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Load prompt
+        async function loadPrompt() {
+            const textarea = document.getElementById('systemPrompt');
+            const statusBadge = document.getElementById('promptStatus');
+
+            try {
+                const response = await fetch(`${API_BASE}/prompt`);
+                const data = await response.json();
+
+                if (data.success) {
+                    textarea.value = data.data.prompt;
+                    statusBadge.textContent = data.data.is_custom ? '自定义' : '默认';
+                    statusBadge.className = `status-badge ${data.data.is_custom ? 'status-warning' : 'status-success'}`;
+                }
+            } catch (error) {
+                textarea.value = '加载失败: ' + error.message;
+            }
+        }
+
+        // Save prompt
+        async function savePrompt() {
+            const prompt = document.getElementById('systemPrompt').value;
+            const resultDiv = document.getElementById('promptResult');
+
+            if (!prompt.trim()) {
+                resultDiv.className = 'error-box';
+                resultDiv.innerHTML = '<strong>❌ 错误：</strong> 提示词不能为空';
+                resultDiv.classList.remove('hidden');
+                return;
+            }
+
+            resultDiv.className = 'info-box';
+            resultDiv.innerHTML = '<div class="loading"></div> 保存中...';
+            resultDiv.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE}/prompt`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.className = 'success-box';
+                    resultDiv.innerHTML = '<strong>✅ 保存成功！</strong> 自定义提示词已保存。';
+                    await loadPrompt();
+                } else {
+                    resultDiv.className = 'error-box';
+                    resultDiv.innerHTML = `<strong>❌ 错误：</strong> ${data.error}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'error-box';
+                resultDiv.innerHTML = `<strong>❌ 请求失败：</strong> ${error.message}`;
+            }
+        }
+
+        // Reset prompt
+        async function resetPrompt() {
+            if (!confirm('确定要恢复默认提示词吗？这将删除您的自定义提示词。')) {
+                return;
+            }
+
+            const resultDiv = document.getElementById('promptResult');
+            resultDiv.className = 'info-box';
+            resultDiv.innerHTML = '<div class="loading"></div> 重置中...';
+            resultDiv.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE}/prompt`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.className = 'success-box';
+                    resultDiv.innerHTML = '<strong>✅ 重置成功！</strong> 已恢复默认提示词。';
+                    await loadPrompt();
+                } else {
+                    resultDiv.className = 'error-box';
+                    resultDiv.innerHTML = `<strong>❌ 错误：</strong> ${data.error}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'error-box';
+                resultDiv.innerHTML = `<strong>❌ 请求失败：</strong> ${error.message}`;
+            }
+        }
+
+        // Load provider configuration
+        async function loadProviderConfig() {
+            const container = document.getElementById('providerList');
+            container.innerHTML = '<div style="text-align: center;"><div class="loading"></div> 加载中...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/ai-provider`);
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    const { current, available } = data.data;
+                    
+                    let html = `
+                        <div class="provider-card ${current === 'auto' ? 'selected' : 'available'}" onclick="selectProvider('auto')">
+                            <div style="font-size: 2rem;">🤖</div>
+                            <div style="font-weight: 600; margin-top: 0.5rem;">自动选择</div>
+                            ${current === 'auto' ? '<div style="color: var(--primary); font-size: 0.75rem; margin-top: 0.25rem;">✓ 当前</div>' : ''}
+                        </div>
+                    `;
+
+                    const providerIcons = {
+                        'claude': '🧠',
+                        'openai': '🤖',
+                        'gemini': '✨',
+                        'deepseek': '🔍'
+                    };
+
+                    available.forEach(p => {
+                        const isSelected = current === p.name;
+                        const className = `provider-card ${isSelected ? 'selected' : ''} ${p.available ? 'available' : 'unavailable'}`;
+                        html += `
+                            <div class="${className}" onclick="selectProvider('${p.name}')">
+                                <div style="font-size: 2rem;">${providerIcons[p.name] || '🤖'}</div>
+                                <div style="font-weight: 600; margin-top: 0.5rem; text-transform: uppercase;">${p.name}</div>
+                                ${isSelected ? '<div style="color: var(--primary); font-size: 0.75rem; margin-top: 0.25rem;">✓ 当前</div>' : ''}
+                                ${!p.available ? '<div style="color: var(--danger); font-size: 0.75rem; margin-top: 0.25rem;">未配置</div>' : ''}
+                            </div>
+                        `;
+                    });
+
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<div class="error-box">加载失败</div>';
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="error-box">加载失败: ${error.message}</div>`;
+            }
+        }
+
+        // Select provider
+        async function selectProvider(provider) {
+            const resultDiv = document.getElementById('providerResult');
+            resultDiv.className = 'info-box';
+            resultDiv.innerHTML = '<div class="loading"></div> 设置中...';
+            resultDiv.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE}/ai-provider`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ provider })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.className = 'success-box';
+                    resultDiv.innerHTML = `<strong>✅ 设置成功！</strong> AI 提供商已设置为: ${provider}`;
+                    await loadProviderConfig();
+                    await loadStats();
+                } else {
+                    resultDiv.className = 'error-box';
+                    resultDiv.innerHTML = `<strong>❌ 错误：</strong> ${data.error}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'error-box';
+                resultDiv.innerHTML = `<strong>❌ 请求失败：</strong> ${error.message}`;
+            }
+        }
+
+        // Load history
+        async function loadHistory() {
+            const container = document.getElementById('historyContainer');
+            container.innerHTML = '<div style="text-align: center;"><div class="loading"></div> 加载中...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/history?limit=20`);
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    const { total, intentions } = data.data;
+
+                    if (intentions.length === 0) {
+                        container.innerHTML = '<div class="warning-box"><strong>⚠️ 暂无历史记录</strong><br>请先处理一些意图。</div>';
+                        return;
+                    }
+
+                    let html = `
+                        <div class="info-box">
+                            <strong>📊 总计：</strong> ${total} 条记录
+                        </div>
+                    `;
+
+                    intentions.forEach(item => {
+                        const timestamp = new Date(item.timestamp).toLocaleString('zh-CN');
+                        html += `
+                            <div class="history-item">
+                                <div class="history-header">
+                                    <span style="font-weight: 600;">${item.input.content}</span>
+                                    <span class="history-time">${timestamp}</span>
+                                </div>
+                                <div style="margin-top: 0.5rem;">
+                                    <span class="status-badge status-success">意图: ${item.output.intent}</span>
+                                    <span class="status-badge" style="background: var(--info); color: white;">AI: ${item.ai_provider}</span>
+                                    <span class="status-badge" style="background: var(--warning); color: white;">置信度: ${(item.output.confidence * 100).toFixed(0)}%</span>
+                                </div>
+                                <div class="code-block" style="margin-top: 0.75rem; max-height: 300px; overflow-y: auto;">
+${JSON.stringify(item.output, null, 2)}
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<div class="error-box">加载失败</div>';
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="error-box">加载失败: ${error.message}</div>`;
+            }
+        }
+
+        // Syntax highlighting for JSON
+        function syntaxHighlightJson(obj) {
+            const json = JSON.stringify(obj, null, 2);
+
+            return json
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                    let cls = 'json-number';
+                    if (/^"/.test(match)) {
+                        if (/:$/.test(match)) {
+                            cls = 'json-key';
+                        } else {
+                            cls = 'json-string';
+                        }
+                    } else if (/true|false/.test(match)) {
+                        cls = 'json-boolean';
+                    } else if (/null/.test(match)) {
+                        cls = 'json-null';
+                    }
+                    return '<span class="' + cls + '">' + match + '</span>';
+                });
+        }
+
+        // Copy to clipboard
+        function copyToClipboard(button) {
+            const codeBlock = button.parentElement.nextElementSibling;
+            const pre = codeBlock.querySelector('pre');
+            const text = pre ? pre.textContent : codeBlock.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '✅ 已复制';
+                button.style.background = 'var(--success)';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = 'var(--secondary)';
+                }, 2000);
+            }).catch(err => {
+                alert('复制失败: ' + err);
+            });
+        }
+
+        // Toggle classification prompt
+        function toggleClassificationPrompt(element) {
+            const content = document.getElementById('classificationPromptContent');
+            const icon = document.getElementById('promptToggleIcon');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.textContent = '▼';
+            } else {
+                content.style.display = 'none';
+                icon.textContent = '▶';
+            }
+        }
+
+        // Get classification prompt text
+        function getClassificationPromptText() {
+            return `# Home Assistant意图分类专家
+
+将用户的智能家居指令分类为以下6种意图：
+
+## 意图分类
+
+- **Query Device Status**: 查询设备状态（如："客厅灯开着吗"、"温度是多少"）
+- **Control Device**: 控制设备（如："打开客厅灯"、"关闭空调"）
+- **Control Scene**: 场景控制/执行场景（如："启动观影模式"、"执行睡眠场景"、"我回家了"、"离家模式"）
+- **Set Scene**: 设定场景（如："创建一个观影场景"、"设置回家场景"）
+- **Set Automation**: 设定自动化规则（如："晚上7点自动开灯"、"当温度低于20度时打开暖气"）
+- **Other**: 其他
+
+## 重要区分规则
+
+### Control Scene vs Set Automation
+- **Control Scene**: 用户想要**立即执行/触发**一个场景或模式
+  - 关键词：启动、执行、开启、激活、触发、进入、我XX了
+  - 示例：
+    - "启动观影模式" → Control Scene
+    - "我回家了" → Control Scene（触发回家场景）
+    - "离家模式" → Control Scene
+    - "睡眠模式" → Control Scene
+    - "进入会客模式" → Control Scene
+    
+- **Set Automation**: 用户想要**设置/创建**一个自动化规则（通常包含时间/条件）
+  - 关键词：自动、定时、当...时、每天、每周、如果...就
+  - 示例：
+    - "晚上7点自动开灯" → Set Automation
+    - "当温度低于20度时打开暖气" → Set Automation
+    - "每天早上8点打开窗帘" → Set Automation
+    - "回家时自动开灯" → Set Automation（注意：这是设置规则，不是执行）
+
+### Control Device vs Control Scene
+- **Control Device**: 操作单个或多个具体设备
+  - 示例：
+    - "打开客厅灯" → Control Device
+    - "关闭所有灯" → Control Device
+    
+- **Control Scene**: 执行预设的场景模式（通常包含多个设备的协同操作）
+  - 示例：
+    - "观影模式" → Control Scene
+    - "我回来了" → Control Scene
+
+## 输出格式
+\`\`\`json
+{
+  "user_input": "用户原始输入",
+  "intent": "意图类型",
+  "confidence": 0.0-1.0,
+  "user_responds": "简短回应，语言与输入一致"
+}
+\`\`\`
+
+## 示例
+
+**输入**: "客厅温度和湿度是多少"
+\`\`\`json
+{
+  "user_input": "客厅温度和湿度是多少",
+  "intent": "Query Device Status",
+  "confidence": 0.9,
+  "user_responds": "好的，我帮您查看客厅的温度和湿度"
+}
+\`\`\`
+
+**输入**: "打开客厅灯"
+\`\`\`json
+{
+  "user_input": "打开客厅灯",
+  "intent": "Control Device",
+  "confidence": 0.95,
+  "user_responds": "好的，正在为您打开客厅灯"
+}
+\`\`\`
+
+**输入**: "启动观影模式"
+\`\`\`json
+{
+  "user_input": "启动观影模式",
+  "intent": "Control Scene",
+  "confidence": 0.95,
+  "user_responds": "好的，正在为您启动观影模式"
+}
+\`\`\`
+
+**输入**: "我回家了"
+\`\`\`json
+{
+  "user_input": "我回家了",
+  "intent": "Control Scene",
+  "confidence": 0.9,
+  "user_responds": "欢迎回家，正在为您执行回家场景"
+}
+\`\`\`
+
+**输入**: "离家模式"
+\`\`\`json
+{
+  "user_input": "离家模式",
+  "intent": "Control Scene",
+  "confidence": 0.9,
+  "user_responds": "好的，正在为您启动离家模式"
+}
+\`\`\`
+
+**输入**: "晚上7点自动开灯"
+\`\`\`json
+{
+  "user_input": "晚上7点自动开灯",
+  "intent": "Set Automation",
+  "confidence": 0.95,
+  "user_responds": "好的，我帮您设置晚上7点自动开灯"
+}
+\`\`\`
+
+**输入**: "回家时自动开灯"
+\`\`\`json
+{
+  "user_input": "回家时自动开灯",
+  "intent": "Set Automation",
+  "confidence": 0.9,
+  "user_responds": "好的，我帮您设置回家时自动开灯的规则"
+}
+\`\`\`
+
+**输入**: "创建一个观影场景"
+\`\`\`json
+{
+  "user_input": "创建一个观影场景",
+  "intent": "Set Scene",
+  "confidence": 0.95,
+  "user_responds": "好的，我帮您创建观影场景"
+}
+\`\`\`
+
+请只返回JSON格式的结果，不要添加其他说明文字。`;
+        }
+
+        // Load classification prompt
+        async function loadClassificationPrompt() {
+            const textarea = document.getElementById('classificationPromptText');
+            const statusBadge = document.getElementById('classifyPromptStatus');
+
+            try {
+                const response = await fetch(`${API_BASE}/classification-prompt`);
+                const data = await response.json();
+
+                if (data.success) {
+                    textarea.value = data.data.prompt;
+                    statusBadge.textContent = data.data.is_custom ? '自定义' : '默认';
+                    statusBadge.className = `status-badge ${data.data.is_custom ? 'status-warning' : 'status-success'}`;
+                }
+            } catch (error) {
+                textarea.value = '加载失败: ' + error.message;
+            }
+        }
+
+        // Save classification prompt
+        async function saveClassificationPrompt() {
+            const prompt = document.getElementById('classificationPromptText').value;
+            const resultDiv = document.getElementById('classificationPromptResult');
+
+            if (!prompt.trim()) {
+                resultDiv.className = 'error-box';
+                resultDiv.innerHTML = '<strong>❌ 错误：</strong> 提示词不能为空';
+                resultDiv.classList.remove('hidden');
+                return;
+            }
+
+            resultDiv.className = 'info-box';
+            resultDiv.innerHTML = '<div class="loading"></div> 保存中...';
+            resultDiv.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE}/classification-prompt`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.className = 'success-box';
+                    resultDiv.innerHTML = '<strong>✅ 保存成功！</strong> 自定义分类提示词已保存。';
+                    await loadClassificationPrompt();
+                } else {
+                    resultDiv.className = 'error-box';
+                    resultDiv.innerHTML = `<strong>❌ 错误：</strong> ${data.error}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'error-box';
+                resultDiv.innerHTML = `<strong>❌ 请求失败：</strong> ${error.message}`;
+            }
+        }
+
+        // Reset classification prompt
+        async function resetClassificationPrompt() {
+            if (!confirm('确定要恢复默认分类提示词吗？这将删除您的自定义提示词。')) {
+                return;
+            }
+
+            const resultDiv = document.getElementById('classificationPromptResult');
+            resultDiv.className = 'info-box';
+            resultDiv.innerHTML = '<div class="loading"></div> 重置中...';
+            resultDiv.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE}/classification-prompt`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.className = 'success-box';
+                    resultDiv.innerHTML = '<strong>✅ 重置成功！</strong> 已恢复默认分类提示词。';
+                    await loadClassificationPrompt();
+                } else {
+                    resultDiv.className = 'error-box';
+                    resultDiv.innerHTML = `<strong>❌ 错误：</strong> ${data.error}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'error-box';
+                resultDiv.innerHTML = `<strong>❌ 请求失败：</strong> ${error.message}`;
+            }
+        }
+
+        // Initialize on page load
+        init();
+    </script>
+</body>
+</html>
+

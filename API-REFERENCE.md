@@ -313,20 +313,18 @@ Anthropic Claude 聊天接口。
 
 ## WebSocket 实时接口
 
-### Telegram 消息推送
-**端点**: `ws://localhost:8080`
+### Communication 模块
+**端点**: `ws://localhost:8082`
 
-实时接收 Telegram 新消息，语音消息自动转录。
+实时通信和消息推送。
 
 **连接示例**:
 ```javascript
-const ws = new WebSocket('ws://localhost:8080');
+const ws = new WebSocket('ws://localhost:8082');
 
 ws.on('message', (data) => {
   const message = JSON.parse(data);
-  console.log('新消息:', message);
-  // message.text - 文本内容（语音已转录）
-  // message.isTranscribed - 是否为转录消息
+  console.log('收到消息:', message);
 });
 ```
 

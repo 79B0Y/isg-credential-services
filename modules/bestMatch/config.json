@@ -1,0 +1,22 @@
+{
+  "pythonPath": "python3",
+  "timeout": 30000,
+  "maxHistorySize": 200,
+  "enableLLMFallback": true,
+  "autoUpdateAliases": true,
+  "weights": {
+    "F": 0.15,
+    "R": 0.40,
+    "N": 0.30,
+    "T": 0.15
+  },
+  "thresholds": {
+    "floor": 0.70,
+    "room": 0.70,
+    "type": 0.65,
+    "name": 0.45
+  },
+  "topK": 100,
+  "disambiguationGap": 0.08
+}
+

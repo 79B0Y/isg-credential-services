@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 AI Enhanced Automation API 测试文档</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-dark: #7c3aed;
+            --secondary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --light: #f5f5f5;
+            --dark: #1f2937;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .panel {
+            background: var(--white);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-error {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-info {
+            background: var(--info);
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #0891b2;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #2563eb;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--light);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        textarea.form-control {
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        .result-box {
+            background: var(--dark);
+            color: #00ff00;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--light);
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--dark);
+            opacity: 0.6;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            opacity: 0.8;
+        }
+
+        .tab.active {
+            opacity: 1;
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .info-box {
+            background: #f0f9ff;
+            border-left: 4px solid var(--info);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .warning-box {
+            background: #fffbeb;
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .example-box {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .example-title {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        code {
+            background: #f3f4f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .panel {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .tabs {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI Enhanced Automation API</h1>
+            <p>智能自动化管理 - 使用AI创建和管理Home Assistant自动化</p>
+        </div>
+
+        <!-- API Tester -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span>🧪</span>
+                    <span>API 测试工具</span>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('create')">创建自动化</button>
+                <button class="tab" onclick="switchTab('list')">列出自动化</button>
+                <button class="tab" onclick="switchTab('available')">查看可用自动化</button>
+                <button class="tab" onclick="switchTab('get')">获取自动化</button>
+                <button class="tab" onclick="switchTab('delete')">删除自动化</button>
+                <button class="tab" onclick="switchTab('enable')">启用自动化</button>
+                <button class="tab" onclick="switchTab('disable')">禁用自动化</button>
+                <button class="tab" onclick="switchTab('prompts')">提示词管理</button>
+            </div>
+
+            <!-- Create Automation -->
+            <div id="tab-create" class="tab-content active">
+                <div class="info-box">
+                    <strong>🎯 创建自动化</strong><br>
+                    使用AI智能分析用户输入和设备匹配结果，自动生成Home Assistant自动化配置。
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">📝 输入数据示例（来自用户提供）</div>
+                    <pre style="font-size: 0.85rem; overflow-x: auto;">
+{
+  "intent": "Set Automation",
+  "user_input": "电视房没人的时候把灯关了",
+  "matched_devices": [
+    {
+      "entity_id": "binary_sensor.motion_sensor_1",
+      "service": "binary_sensor.state",
+      "service_data": {"state": "off"},
+      "automation": "trigger"
+    },
+    {
+      "entity_id": "light.color_light_3",
+      "service": "light.turn_off",
+      "service_data": {},
+      "automation": "action"
+    }
+  ],
+  "automation": {
+    "automation_name": "电视房无人关灯",
+    "automation_name_en": "tv_room_no_one_turn_off_lights",
+    "operation": "add",
+    "description": "当电视房没人的时候自动关灯"
+  }
+}</pre>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">输入数据 (JSON)</label>
+                    <textarea id="createInput" class="form-control" placeholder='粘贴或输入JSON数据...'>{
+  "intent": "Set Automation",
+  "user_input": "电视房没人的时候把灯关了",
+  "matched_devices": [
+    {
+      "entity_id": "binary_sensor.motion_sensor_1",
+      "service": "binary_sensor.state",
+      "service_data": {"state": "off"},
+      "automation": "trigger"
+    },
+    {
+      "entity_id": "light.color_light_3",
+      "service": "light.turn_off",
+      "service_data": {},
+      "automation": "action"
+    }
+  ],
+  "automation": {
+    "automation_name": "电视房无人关灯",
+    "automation_name_en": "tv_room_no_one_turn_off_lights",
+    "operation": "add",
+    "description": "当电视房没人的时候自动关灯"
+  }
+}</textarea>
+                </div>
+
+                <button class="btn btn-primary" onclick="createAutomation()">
+                    <span>✨</span>
+                    <span>创建自动化</span>
+                </button>
+
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label class="form-label">响应结果</label>
+                    <div id="createResult" class="result-box">等待API调用...</div>
+                </div>
+            </div>
+
+            <!-- List Automations -->
+            <div id="tab-list" class="tab-content">
+                <div class="info-box">
+                    <strong>📋 列出所有自动化</strong><br>
+                    获取Home Assistant中所有自动化的列表，包括状态、触发器、条件和动作信息。
+                </div>
+
+                <button class="btn btn-info" onclick="listAutomations()">
+                    <span>📋</span>
+                    <span>获取自动化列表</span>
+                </button>
+
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label class="form-label">响应结果</label>
+                    <div id="listResult" class="result-box">等待API调用...</div>
+                </div>
+            </div>
+
+            <!-- Available Automations -->
+            <div id="tab-available" class="tab-content">
+                <div class="info-box">
+                    <strong>🔍 查看所有可用自动化</strong><br>
+                    智能查看所有可用的自动化，支持中英文输出，返回格式化的消息内容。输出语言会自动根据用户输入识别。
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">📝 输入数据示例</div>
+                    <pre style="font-size: 0.85rem; overflow-x: auto;">
+// 简单格式（Simple Format）
+{
+  "user_input": "查看所有自动化"
+}
+
+// 包装格式（Wrapped Format - 来自 BestMatch）
+{
+  "success": true,
+  "data": {
+    "intent": "Set Automation",
+    "user_input": "有哪些自动化",
+    "actions": [],
+    "matched_devices": [],
+    "scene": {},
+    "automation": {
+      "automation_name": "",
+      "automation_name_en": "",
+      "operation": "list",
+      "operation_type": "query",
+      "description": "查询当前已配置的自动化规则"
+    }
+  }
+}
+
+// 英文输入（English Input）
+{
+  "user_input": "show all automations"
+}</pre>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">用户输入 (JSON)</label>
+                    <textarea id="availableInput" class="form-control" style="min-height: 100px;" placeholder='输入JSON数据...'>
+{
+  "user_input": "查看所有自动化"
+}</textarea>
+                </div>
+
+                <button class="btn btn-success" onclick="getAvailableAutomations()">
+                    <span>🔍</span>
+                    <span>查看可用自动化</span>
+                </button>
+
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label class="form-label">响应结果</label>
+                    <div id="availableResult" class="result-box">等待API调用...</div>
+                </div>
+
+                <div class="example-box" style="margin-top: 1rem;">
+                    <div class="example-title">💡 输出消息格式</div>
+                    <pre style="font-size: 0.85rem; overflow-x: auto;">
+{
+  "success": true,
+  "data": {
+    "automations": [...],
+    "count": 10,
+    "message": {
+      "type": "notification",
+      "content": "找到10个自动化：自动化1、自动化2、自动化3...",
+      "source": "external_system"
+    }
+  }
+}</pre>
+                </div>
+            </div>
+
+            <!-- Get Automation -->
+            <div id="tab-get" class="tab-content">
+                <div class="info-box">
+                    <strong>🔍 获取自动化详情</strong><br>
+                    根据自动化ID获取详细配置信息。
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">自动化ID</label>
+                    <input type="text" id="getAutomationId" class="form-control" placeholder="例如: tv_room_no_one_turn_off_lights">
+                </div>
+
+                <button class="btn btn-secondary" onclick="getAutomation()">
+                    <span>🔍</span>
+                    <span>获取自动化</span>
+                </button>
+
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label class="form-label">响应结果</label>
+                    <div id="getResult" class="result-box">等待API调用...</div>
+                </div>
+            </div>
+
+            <!-- Delete Automation -->
+            <div id="tab-delete" class="tab-content">
+                <div class="warning-box">
+                    <strong>⚠️ 删除自动化</strong><br>
+                    此操作将永久删除自动化配置，请谨慎操作！支持两种方式：通过ID删除或通过名称删除（带消息格式）。
+                </div>
+
+                <div class="tabs" style="border-bottom: 1px solid #e5e7eb; margin-bottom: 1rem;">
+                    <button class="tab active" onclick="switchDeleteMode('id')" style="font-size: 0.9rem;">通过ID删除</button>
+                    <button class="tab" onclick="switchDeleteMode('message')" style="font-size: 0.9rem;">通过名称删除（带消息）</button>
+                </div>
+
+                <!-- Delete by ID -->
+                <div id="delete-id-mode">
+                    <div class="form-group">
+                        <label class="form-label">自动化ID</label>
+                        <input type="text" id="deleteAutomationId" class="form-control" placeholder="例如: automation.tv_room_no_one_turn_off_lights">
+                    </div>
+
+                    <button class="btn btn-danger" onclick="deleteAutomation()">
+                        <span>🗑️</span>
+                        <span>删除自动化</span>
+                    </button>
+                </div>
+
+                <!-- Delete with Message -->
+                <div id="delete-message-mode" style="display: none;">
+                    <div class="example-box">
+                        <div class="example-title">📝 输入数据示例</div>
+                        <pre style="font-size: 0.85rem; overflow-x: auto;">{
+  "success": true,
+  "data": {
+    "intent": "Set Automation",
+    "user_input": "删除电视房温度控制自动化",
+    "automation": {
+      "automation_name": "电视房温度控制",
+      "automation_name_en": "tv_room_temperature_control",
+      "operation": "delete",
+      "operation_type": "setup",
+      "description": "删除电视房温度控制自动化"
+    }
+  }
+}</pre>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">输入数据 (JSON)</label>
+                        <textarea id="deleteInput" class="form-control" placeholder='粘贴或输入JSON数据...' rows="8">{
+  "success": true,
+  "data": {
+    "intent": "Set Automation",
+    "user_input": "删除电视房温度控制自动化",
+    "automation": {
+      "automation_name": "电视房温度控制",
+      "automation_name_en": "tv_room_temperature_control",
+      "operation": "delete"
+    }
+  }
+}</textarea>
+                    </div>
+
+                    <button class="btn btn-danger" onclick="deleteAutomationWithMessage()">
+                        <span>🗑️</span>
+                        <span>删除自动化（带消息）</span>
+                    </button>
+                </div>
+
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label class="form-label">响应结果</label>
+                    <div id="deleteResult" class="result-box">等待API调用...</div>
+                </div>
+            </div>
+
+            <!-- Enable Automation -->
+            <div id="tab-enable" class="tab-content">
+                <div class="info-box">
+                    <strong>✅ 启用自动化</strong><br>
+                    启用已禁用的自动化，使其开始工作。支持两种方式：通过ID启用或通过名称启用（带消息格式）。
+                </div>
+
+                <div class="tabs" style="border-bottom: 1px solid #e5e7eb; margin-bottom: 1rem;">
+                    <button class="tab active" onclick="switchEnableMode('id')" style="font-size: 0.9rem;">通过ID启用</button>
+                    <button class="tab" onclick="switchEnableMode('message')" style="font-size: 0.9rem;">通过名称启用（带消息）</button>
+                </div>
+
+                <!-- Enable by ID -->
+                <div id="enable-id-mode">
+                    <div class="form-group">
+                        <label class="form-label">自动化ID</label>
+                        <input type="text" id="enableAutomationId" class="form-control" placeholder="例如: automation.tv_room_no_one_turn_off_lights">
+                    </div>
+
+                    <button class="btn btn-success" onclick="enableAutomation()">
+                        <span>✅</span>
+                        <span>启用自动化</span>
+                    </button>
+                </div>
+
+                <!-- Enable with Message -->
+                <div id="enable-message-mode" style="display: none;">
+                    <div class="example-box">
+                        <div class="example-title">📝 输入数据示例</div>
+                        <pre style="font-size: 0.85rem; overflow-x: auto;">{
+  "success": true,
+  "data": {
+    "intent": "Set Automation",
+    "user_input": "启用电视房温度控制自动化",
+    "automation": {
+      "automation_name": "电视房温度控制",
+      "automation_name_en": "tv_room_temperature_control",
+      "operation": "enable",
+      "operation_type": "setup",
+      "description": "启用电视房温度控制自动化"
+    }
+  }
+}</pre>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">输入数据 (JSON)</label>
+                        <textarea id="enableInput" class="form-control" placeholder='粘贴或输入JSON数据...' rows="8">{
+  "success": true,
+  "data": {
+    "intent": "Set Automation",
+    "user_input": "启用电视房温度控制自动化",
+    "automation": {
+      "automation_name": "电视房温度控制",
+      "automation_name_en": "tv_room_temperature_control",
+      "operation": "enable"
+    }
+  }
+}</textarea>
+                    </div>
+
+                    <button class="btn btn-success" onclick="enableAutomationWithMessage()">
+                        <span>✅</span>
+                        <span>启用自动化（带消息）</span>
+                    </button>
+                </div>
+
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label class="form-label">响应结果</label>
+                    <div id="enableResult" class="result-box">等待API调用...</div>
+                </div>
+            </div>
+
+            <!-- Disable Automation -->
+            <div id="tab-disable" class="tab-content">
+                <div class="info-box">
+                    <strong>⏸️ 禁用自动化</strong><br>
+                    暂时禁用自动化，但不删除配置。支持两种方式：通过ID禁用或通过名称禁用（带消息格式）。
+                </div>
+
+                <div class="tabs" style="border-bottom: 1px solid #e5e7eb; margin-bottom: 1rem;">
+                    <button class="tab active" onclick="switchDisableMode('id')" style="font-size: 0.9rem;">通过ID禁用</button>
+                    <button class="tab" onclick="switchDisableMode('message')" style="font-size: 0.9rem;">通过名称禁用（带消息）</button>
+                </div>
+
+                <!-- Disable by ID -->
+                <div id="disable-id-mode">
+                    <div class="form-group">
+                        <label class="form-label">自动化ID</label>
+                        <input type="text" id="disableAutomationId" class="form-control" placeholder="例如: automation.tv_room_no_one_turn_off_lights">
+                    </div>
+
+                    <button class="btn btn-warning" onclick="disableAutomation()">
+                        <span>⏸️</span>
+                        <span>禁用自动化</span>
+                    </button>
+                </div>
+
+                <!-- Disable with Message -->
+                <div id="disable-message-mode" style="display: none;">
+                    <div class="example-box">
+                        <div class="example-title">📝 输入数据示例</div>
+                        <pre style="font-size: 0.85rem; overflow-x: auto;">{
+  "success": true,
+  "data": {
+    "intent": "Set Automation",
+    "user_input": "禁用电视房温度控制自动化",
+    "automation": {
+      "automation_name": "电视房温度控制",
+      "automation_name_en": "tv_room_temperature_control",
+      "operation": "disable",
+      "operation_type": "setup",
+      "description": "禁用电视房温度控制自动化"
+    }
+  }
+}</pre>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">输入数据 (JSON)</label>
+                        <textarea id="disableInput" class="form-control" placeholder='粘贴或输入JSON数据...' rows="8">{
+  "success": true,
+  "data": {
+    "intent": "Set Automation",
+    "user_input": "禁用电视房温度控制自动化",
+    "automation": {
+      "automation_name": "电视房温度控制",
+      "automation_name_en": "tv_room_temperature_control",
+      "operation": "disable"
+    }
+  }
+}</textarea>
+                    </div>
+
+                    <button class="btn btn-warning" onclick="disableAutomationWithMessage()">
+                        <span>⏸️</span>
+                        <span>禁用自动化（带消息）</span>
+                    </button>
+                </div>
+
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label class="form-label">响应结果</label>
+                    <div id="disableResult" class="result-box">等待API调用...</div>
+                </div>
+            </div>
+
+            <!-- Prompt Management -->
+            <div id="tab-prompts" class="tab-content">
+                <div class="info-box">
+                    <strong>📝 提示词管理</strong><br>
+                    查看和编辑AI提示词，自定义自动化生成的逻辑和行为。
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ 注意事项</strong><br>
+                    修改提示词会影响AI生成自动化配置的方式。建议先备份原始提示词，并在测试环境中验证修改后的效果。
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <button class="btn btn-info" onclick="loadPrompts()">
+                        <span>🔄</span>
+                        <span>加载提示词</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetPrompts()" style="margin-left: 0.5rem;">
+                        <span>↩️</span>
+                        <span>重置为默认</span>
+                    </button>
+                </div>
+
+                <!-- Create Automation Prompt -->
+                <div class="form-group">
+                    <label class="form-label">
+                        创建自动化提示词 (create_automation)
+                        <button class="btn btn-success" onclick="savePrompt('create_automation')" style="float: right; padding: 0.5rem 1rem; font-size: 0.9rem;">
+                            <span>💾</span>
+                            <span>保存</span>
+                        </button>
+                    </label>
+                    <textarea id="createAutomationPrompt" class="form-control" style="min-height: 300px;" placeholder="加载中..."></textarea>
+                    <div id="createPromptStatus" style="margin-top: 0.5rem; font-size: 0.9rem;"></div>
+                </div>
+
+                <!-- Update Automation Prompt -->
+                <div class="form-group">
+                    <label class="form-label">
+                        更新自动化提示词 (update_automation)
+                        <button class="btn btn-success" onclick="savePrompt('update_automation')" style="float: right; padding: 0.5rem 1rem; font-size: 0.9rem;">
+                            <span>💾</span>
+                            <span>保存</span>
+                        </button>
+                    </label>
+                    <textarea id="updateAutomationPrompt" class="form-control" style="min-height: 300px;" placeholder="加载中..."></textarea>
+                    <div id="updatePromptStatus" style="margin-top: 0.5rem; font-size: 0.9rem;"></div>
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">💡 提示词编写技巧</div>
+                    <ul style="margin-left: 1.5rem; line-height: 1.8;">
+                        <li>清晰定义AI的角色和任务</li>
+                        <li>提供丰富的示例（trigger、condition、action）</li>
+                        <li>说明输入和输出的格式要求</li>
+                        <li>包含边界情况和错误处理的指导</li>
+                        <li>使用结构化的说明，便于AI理解</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Documentation -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span>📚</span>
+                    <span>API 文档</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">基础信息</h3>
+                <p><strong>Base URL:</strong> <code>/api/ai_enhanced_automation/ai_enhanced_automation</code></p>
+                <p><strong>模块名称:</strong> <code>ai_enhanced_automation</code></p>
+                <p><strong>Content-Type:</strong> <code>application/json</code></p>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">1️⃣ 创建自动化</h3>
+                <p><strong>POST</strong> <code>/api/ai_enhanced_automation/ai_enhanced_automation/create</code></p>
+                <p style="margin-top: 0.5rem;">使用AI智能分析并创建自动化。</p>
+                
+                <div class="example-box">
+                    <div class="example-title">请求体示例:</div>
+                    <pre style="font-size: 0.85rem; overflow-x: auto;">{
+  "intent": "Set Automation",
+  "user_input": "电视房没人的时候把灯关了",
+  "matched_devices": [
+    {
+      "entity_id": "binary_sensor.motion_sensor_1",
+      "service": "binary_sensor.state",
+      "service_data": {"state": "off"},
+      "automation": "trigger"
+    },
+    {
+      "entity_id": "light.color_light_3",
+      "service": "light.turn_off",
+      "service_data": {},
+      "automation": "action"
+    }
+  ],
+  "automation": {
+    "automation_name": "电视房无人关灯",
+    "automation_name_en": "tv_room_no_one_turn_off_lights",
+    "operation": "add",
+    "description": "当电视房没人的时候自动关灯"
+  }
+}</pre>
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">响应示例:</div>
+                    <pre style="font-size: 0.85rem; overflow-x: auto;">{
+  "success": true,
+  "data": {
+    "automation_id": "tv_room_no_one_turn_off_lights",
+    "entity_id": "automation.tv_room_no_one_turn_off_lights",
+    "alias": "电视房无人关灯",
+    "created_at": "2025-10-28T12:00:00.000Z",
+    "ai_analysis": {
+      "analysis": "创建了一个基于运动传感器的自动化...",
+      "warnings": []
+    }
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">2️⃣ 列出所有自动化</h3>
+                <p><strong>GET</strong> <code>/api/ai_enhanced_automation/ai_enhanced_automation/list</code></p>
+                <p style="margin-top: 0.5rem;">获取所有自动化列表。</p>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">3️⃣ 查看所有可用自动化 (智能)</h3>
+                <p><strong>POST</strong> <code>/api/ai_enhanced_automation/ai_enhanced_automation/available</code></p>
+                <p style="margin-top: 0.5rem;">智能查看所有可用自动化，支持中英文输出，返回格式化的消息内容。输出语言会自动根据用户输入识别。</p>
+                
+                <div class="example-box">
+                    <div class="example-title">请求体示例（简单格式 - 中文）:</div>
+                    <pre style="font-size: 0.85rem; overflow-x: auto;">{
+  "user_input": "查看所有自动化"
+}</pre>
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">请求体示例（包装格式 - 来自 BestMatch）:</div>
+                    <pre style="font-size: 0.85rem; overflow-x: auto;">{
+  "success": true,
+  "data": {
+    "intent": "Set Automation",
+    "user_input": "有哪些自动化",
+    "actions": [],
+    "matched_devices": [],
+    "scene": {},
+    "automation": {
+      "automation_name": "",
+      "automation_name_en": "",
+      "operation": "list",
+      "operation_type": "query",
+      "description": "查询当前已配置的自动化规则"
+    }
+  }
+}</pre>
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">请求体示例（英文）:</div>
+                    <pre style="font-size: 0.85rem; overflow-x: auto;">{
+  "user_input": "show all automations"
+}</pre>
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">响应示例（中文）:</div>
+                    <pre style="font-size: 0.85rem; overflow-x: auto;">{
+  "success": true,
+  "data": {
+    "automations": [
+      {
+        "entity_id": "automation.tv_room_no_one_turn_off_lights",
+        "state": "on",
+        "attributes": {
+          "friendly_name": "电视房无人关灯",
+          "last_triggered": "2025-10-28T10:30:00.000Z"
+        }
+      }
+    ],
+    "count": 10,
+    "message": {
+      "type": "notification",
+      "content": "找到10个自动化：电视房无人关灯、客厅灯光控制、卧室温度调节等",
+      "source": "external_system"
+    }
+  }
+}</pre>
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">响应示例（英文）:</div>
+                    <pre style="font-size: 0.85rem; overflow-x: auto;">{
+  "success": true,
+  "data": {
+    "automations": [...],
+    "count": 10,
+    "message": {
+      "type": "notification",
+      "content": "Found 10 automations: TV room no one turn off lights, Living room light control, Bedroom temperature control, etc.",
+      "source": "external_system"
+    }
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">4️⃣ 获取自动化详情</h3>
+                <p><strong>GET</strong> <code>/api/ai_enhanced_automation/ai_enhanced_automation/get/:id</code></p>
+                <p style="margin-top: 0.5rem;">获取指定自动化的详细信息。</p>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">5️⃣ 删除自动化</h3>
+                <p><strong>DELETE</strong> <code>/api/ai_enhanced_automation/ai_enhanced_automation/delete/:id</code></p>
+                <p style="margin-top: 0.5rem;">删除指定的自动化。</p>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">6️⃣ 启用自动化</h3>
+                <p><strong>POST</strong> <code>/api/ai_enhanced_automation/ai_enhanced_automation/enable/:id</code></p>
+                <p style="margin-top: 0.5rem;">启用指定的自动化。</p>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">7️⃣ 禁用自动化</h3>
+                <p><strong>POST</strong> <code>/api/ai_enhanced_automation/ai_enhanced_automation/disable/:id</code></p>
+                <p style="margin-top: 0.5rem;">禁用指定的自动化。</p>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">8️⃣ 获取提示词</h3>
+                <p><strong>GET</strong> <code>/api/ai_enhanced_automation/ai_enhanced_automation/prompts</code></p>
+                <p style="margin-top: 0.5rem;">获取所有AI提示词内容。</p>
+                
+                <div class="example-box">
+                    <div class="example-title">响应示例:</div>
+                    <pre style="font-size: 0.85rem; overflow-x: auto;">{
+  "success": true,
+  "data": {
+    "create_automation": "提示词内容...",
+    "update_automation": "提示词内容..."
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">9️⃣ 更新提示词</h3>
+                <p><strong>PUT</strong> <code>/api/ai_enhanced_automation/ai_enhanced_automation/prompt/:type</code></p>
+                <p style="margin-top: 0.5rem;">更新指定类型的AI提示词。</p>
+                <p style="margin-top: 0.5rem;"><strong>类型参数:</strong> <code>create_automation</code> 或 <code>update_automation</code></p>
+                
+                <div class="example-box">
+                    <div class="example-title">请求体示例:</div>
+                    <pre style="font-size: 0.85rem; overflow-x: auto;">{
+  "prompt": "你是一个智能家居自动化创建助手..."
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Curl Examples -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span>💻</span>
+                    <span>Curl 示例</span>
+                </div>
+            </div>
+
+            <div class="example-box">
+                <div class="example-title">创建自动化</div>
+                <pre style="font-size: 0.85rem; overflow-x: auto;">curl -X POST http://localhost:3000/api/ai_enhanced_automation/ai_enhanced_automation/create \
+  -H "Content-Type: application/json" \
+  -d '{
+    "intent": "Set Automation",
+    "user_input": "电视房没人的时候把灯关了",
+    "matched_devices": [
+      {
+        "entity_id": "binary_sensor.motion_sensor_1",
+        "service": "binary_sensor.state",
+        "service_data": {"state": "off"},
+        "automation": "trigger"
+      },
+      {
+        "entity_id": "light.color_light_3",
+        "service": "light.turn_off",
+        "service_data": {},
+        "automation": "action"
+      }
+    ],
+    "automation": {
+      "automation_name": "电视房无人关灯",
+      "automation_name_en": "tv_room_no_one_turn_off_lights",
+      "operation": "add",
+      "description": "当电视房没人的时候自动关灯"
+    }
+  }'</pre>
+            </div>
+
+            <div class="example-box">
+                <div class="example-title">列出所有自动化</div>
+                <pre style="font-size: 0.85rem; overflow-x: auto;">curl -X GET http://localhost:3000/api/ai_enhanced_automation/ai_enhanced_automation/list</pre>
+            </div>
+
+            <div class="example-box">
+                <div class="example-title">查看所有可用自动化（中文）</div>
+                <pre style="font-size: 0.85rem; overflow-x: auto;">curl -X POST http://localhost:3000/api/ai_enhanced_automation/ai_enhanced_automation/available \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_input": "查看所有自动化"
+  }'</pre>
+            </div>
+
+            <div class="example-box">
+                <div class="example-title">查看所有可用自动化（英文）</div>
+                <pre style="font-size: 0.85rem; overflow-x: auto;">curl -X POST http://localhost:3000/api/ai_enhanced_automation/ai_enhanced_automation/available \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_input": "show all automations"
+  }'</pre>
+            </div>
+
+            <div class="example-box">
+                <div class="example-title">删除自动化</div>
+                <pre style="font-size: 0.85rem; overflow-x: auto;">curl -X DELETE http://localhost:3000/api/ai_enhanced_automation/ai_enhanced_automation/delete/tv_room_no_one_turn_off_lights</pre>
+            </div>
+
+            <div class="example-box">
+                <div class="example-title">获取提示词</div>
+                <pre style="font-size: 0.85rem; overflow-x: auto;">curl -X GET http://localhost:3000/api/ai_enhanced_automation/ai_enhanced_automation/prompts</pre>
+            </div>
+
+            <div class="example-box">
+                <div class="example-title">更新提示词</div>
+                <pre style="font-size: 0.85rem; overflow-x: auto;">curl -X PUT http://localhost:3000/api/ai_enhanced_automation/ai_enhanced_automation/prompt/create_automation \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "你是一个智能家居自动化创建助手..."
+  }'</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = '/api/ai_enhanced_automation/ai_enhanced_automation';
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById('tab-' + tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Auto-load prompts when switching to prompts tab
+            if (tabName === 'prompts') {
+                loadPrompts();
+            }
+        }
+
+        async function createAutomation() {
+            const input = document.getElementById('createInput').value;
+            const resultBox = document.getElementById('createResult');
+            
+            try {
+                resultBox.textContent = '正在调用API...';
+                const data = JSON.parse(input);
+                
+                const response = await fetch(`${BASE_URL}/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                resultBox.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultBox.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function listAutomations() {
+            const resultBox = document.getElementById('listResult');
+            
+            try {
+                resultBox.textContent = '正在调用API...';
+                
+                const response = await fetch(`${BASE_URL}/list`);
+                const result = await response.json();
+                resultBox.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultBox.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function getAvailableAutomations() {
+            const input = document.getElementById('availableInput').value;
+            const resultBox = document.getElementById('availableResult');
+            
+            try {
+                resultBox.textContent = '正在调用API...';
+                const data = JSON.parse(input);
+                
+                const response = await fetch(`${BASE_URL}/available`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                resultBox.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultBox.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function getAutomation() {
+            const id = document.getElementById('getAutomationId').value;
+            const resultBox = document.getElementById('getResult');
+            
+            if (!id) {
+                resultBox.textContent = 'Error: 请输入自动化ID';
+                return;
+            }
+            
+            try {
+                resultBox.textContent = '正在调用API...';
+                
+                const response = await fetch(`${BASE_URL}/get/${id}`);
+                const result = await response.json();
+                resultBox.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultBox.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function deleteAutomation() {
+            const id = document.getElementById('deleteAutomationId').value;
+            const resultBox = document.getElementById('deleteResult');
+            
+            if (!id) {
+                resultBox.textContent = 'Error: 请输入自动化ID';
+                return;
+            }
+            
+            if (!confirm(`确定要删除自动化 "${id}" 吗？此操作不可恢复！`)) {
+                return;
+            }
+            
+            try {
+                resultBox.textContent = '正在调用API...';
+                
+                const response = await fetch(`${BASE_URL}/delete/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                resultBox.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultBox.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function deleteAutomationWithMessage() {
+            const input = document.getElementById('deleteInput').value;
+            const resultBox = document.getElementById('deleteResult');
+            
+            try {
+                resultBox.textContent = '正在调用API...';
+                const data = JSON.parse(input);
+                
+                const response = await fetch(`${BASE_URL}/delete`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                resultBox.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultBox.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function enableAutomation() {
+            const id = document.getElementById('enableAutomationId').value;
+            const resultBox = document.getElementById('enableResult');
+            
+            if (!id) {
+                resultBox.textContent = 'Error: 请输入自动化ID';
+                return;
+            }
+            
+            try {
+                resultBox.textContent = '正在调用API...';
+                
+                const response = await fetch(`${BASE_URL}/enable/${id}`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                resultBox.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultBox.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function enableAutomationWithMessage() {
+            const input = document.getElementById('enableInput').value;
+            const resultBox = document.getElementById('enableResult');
+            
+            try {
+                resultBox.textContent = '正在调用API...';
+                const data = JSON.parse(input);
+                
+                const response = await fetch(`${BASE_URL}/enable`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                resultBox.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultBox.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function disableAutomation() {
+            const id = document.getElementById('disableAutomationId').value;
+            const resultBox = document.getElementById('disableResult');
+            
+            if (!id) {
+                resultBox.textContent = 'Error: 请输入自动化ID';
+                return;
+            }
+            
+            try {
+                resultBox.textContent = '正在调用API...';
+                
+                const response = await fetch(`${BASE_URL}/disable/${id}`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                resultBox.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultBox.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function disableAutomationWithMessage() {
+            const input = document.getElementById('disableInput').value;
+            const resultBox = document.getElementById('disableResult');
+            
+            try {
+                resultBox.textContent = '正在调用API...';
+                const data = JSON.parse(input);
+                
+                const response = await fetch(`${BASE_URL}/disable`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                resultBox.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultBox.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // Mode Switch Functions
+        function switchDeleteMode(mode) {
+            const idMode = document.getElementById('delete-id-mode');
+            const messageMode = document.getElementById('delete-message-mode');
+            const tabs = document.querySelectorAll('#tab-delete .tabs .tab');
+            
+            if (mode === 'id') {
+                idMode.style.display = 'block';
+                messageMode.style.display = 'none';
+                tabs[0].classList.add('active');
+                tabs[1].classList.remove('active');
+            } else {
+                idMode.style.display = 'none';
+                messageMode.style.display = 'block';
+                tabs[0].classList.remove('active');
+                tabs[1].classList.add('active');
+            }
+        }
+
+        function switchEnableMode(mode) {
+            const idMode = document.getElementById('enable-id-mode');
+            const messageMode = document.getElementById('enable-message-mode');
+            const tabs = document.querySelectorAll('#tab-enable .tabs .tab');
+            
+            if (mode === 'id') {
+                idMode.style.display = 'block';
+                messageMode.style.display = 'none';
+                tabs[0].classList.add('active');
+                tabs[1].classList.remove('active');
+            } else {
+                idMode.style.display = 'none';
+                messageMode.style.display = 'block';
+                tabs[0].classList.remove('active');
+                tabs[1].classList.add('active');
+            }
+        }
+
+        function switchDisableMode(mode) {
+            const idMode = document.getElementById('disable-id-mode');
+            const messageMode = document.getElementById('disable-message-mode');
+            const tabs = document.querySelectorAll('#tab-disable .tabs .tab');
+            
+            if (mode === 'id') {
+                idMode.style.display = 'block';
+                messageMode.style.display = 'none';
+                tabs[0].classList.add('active');
+                tabs[1].classList.remove('active');
+            } else {
+                idMode.style.display = 'none';
+                messageMode.style.display = 'block';
+                tabs[0].classList.remove('active');
+                tabs[1].classList.add('active');
+            }
+        }
+
+        // Prompt Management Functions
+        async function loadPrompts() {
+            try {
+                const response = await fetch(`${BASE_URL}/prompts`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Load create automation prompt
+                    const createPromptTextarea = document.getElementById('createAutomationPrompt');
+                    createPromptTextarea.value = result.data.create_automation || '';
+                    document.getElementById('createPromptStatus').innerHTML = '<span style="color: var(--success);">✅ 已加载</span>';
+                    
+                    // Load update automation prompt
+                    const updatePromptTextarea = document.getElementById('updateAutomationPrompt');
+                    updatePromptTextarea.value = result.data.update_automation || '';
+                    document.getElementById('updatePromptStatus').innerHTML = '<span style="color: var(--success);">✅ 已加载</span>';
+                    
+                    // Show success message
+                    alert('✅ 提示词加载成功！');
+                } else {
+                    alert('❌ 加载失败: ' + (result.error || '未知错误'));
+                }
+            } catch (error) {
+                alert('❌ 加载失败: ' + error.message);
+            }
+        }
+
+        async function savePrompt(type) {
+            const promptTextarea = document.getElementById(type === 'create_automation' ? 'createAutomationPrompt' : 'updateAutomationPrompt');
+            const statusDiv = document.getElementById(type === 'create_automation' ? 'createPromptStatus' : 'updatePromptStatus');
+            const promptContent = promptTextarea.value;
+            
+            if (!promptContent.trim()) {
+                alert('❌ 提示词内容不能为空！');
+                return;
+            }
+            
+            try {
+                statusDiv.innerHTML = '<span style="color: var(--info);">⏳ 保存中...</span>';
+                
+                const response = await fetch(`${BASE_URL}/prompt/${type}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: promptContent })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    statusDiv.innerHTML = '<span style="color: var(--success);">✅ 保存成功！</span>';
+                    alert('✅ 提示词保存成功！');
+                } else {
+                    statusDiv.innerHTML = '<span style="color: var(--danger);">❌ 保存失败</span>';
+                    alert('❌ 保存失败: ' + (result.error || '未知错误'));
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '<span style="color: var(--danger);">❌ 保存失败</span>';
+                alert('❌ 保存失败: ' + error.message);
+            }
+        }
+
+        function resetPrompts() {
+            if (!confirm('⚠️ 确定要重置为默认提示词吗？当前的修改将会丢失！')) {
+                return;
+            }
+            
+            // Reset create automation prompt to default
+            const createPromptDefault = `你是一个智能家居自动化创建助手。你的任务是根据用户输入和设备匹配信息，创建一个完整的Home Assistant自动化配置。
+
+输入信息：
+1. user_input: 用户的原始输入（例如："电视房没人的时候把灯关了"）
+2. automation: 自动化基本信息（名称、英文名称、描述等）
+3. matched_devices: 已匹配的设备列表，包含trigger和action设备
+
+你需要：
+1. 分析matched_devices中每个设备的automation字段（trigger/condition/action）
+2. 将trigger设备转换为Home Assistant的trigger配置
+3. 将condition设备转换为Home Assistant的condition配置（如果需要）
+4. 将action设备转换为Home Assistant的action配置
+5. 生成完整的自动化配置
+
+Trigger类型示例：
+- binary_sensor状态变化: {"platform": "state", "entity_id": "binary_sensor.motion_sensor_1", "to": "off"}
+- 时间触发: {"platform": "time", "at": "18:00:00"}
+- 设备状态持续: {"platform": "state", "entity_id": "binary_sensor.xxx", "to": "off", "for": {"minutes": 5}}
+
+Condition类型示例：
+- 状态条件: {"condition": "state", "entity_id": "sun.sun", "state": "below_horizon"}
+- 时间条件: {"condition": "time", "after": "18:00:00", "before": "23:00:00"}
+- 数值条件: {"condition": "numeric_state", "entity_id": "sensor.temperature", "below": 20}
+
+Action类型示例：
+- 服务调用: {"service": "light.turn_off", "target": {"entity_id": "light.color_light_3"}}
+- 延迟: {"delay": {"seconds": 5}}
+- 场景激活: {"service": "scene.turn_on", "target": {"entity_id": "scene.xxx"}}
+
+输出格式（JSON）：
+{
+  "success": true,
+  "automation_config": {
+    "id": "自动生成的ID",
+    "alias": "自动化名称",
+    "description": "自动化描述",
+    "trigger": [
+      // trigger配置数组
+    ],
+    "condition": [
+      // condition配置数组（可选）
+    ],
+    "action": [
+      // action配置数组
+    ],
+    "mode": "single"  // single, restart, queued, parallel
+  },
+  "analysis": "对自动化逻辑的分析说明",
+  "warnings": []  // 任何需要注意的警告信息
+}
+
+注意：
+1. trigger至少需要一个
+2. action至少需要一个
+3. condition是可选的
+4. 如果设备信息不完整，在warnings中说明
+5. 所有service调用必须使用正确的domain（如light.turn_off而不是turn_off）
+6. entity_id必须完整（如binary_sensor.motion_sensor_1）
+7. 对于binary_sensor的trigger，通常需要指定to状态（on/off）
+8. 如果用户输入包含"没人"、"无人"等词，通常表示binary_sensor状态为off
+9. 如果用户输入包含"有人"、"检测到"等词，通常表示binary_sensor状态为on
+10. 考虑是否需要添加延迟或持续时间条件，避免误触发`;
+
+            const updatePromptDefault = `你是一个智能家居自动化更新助手。你的任务是根据用户输入更新现有的自动化配置。
+
+输入信息：
+1. user_input: 用户的原始输入
+2. current_automation: 当前自动化的完整配置
+3. update_request: 更新请求的详细信息
+
+你需要：
+1. 分析用户的更新需求
+2. 保留不需要改变的配置
+3. 更新需要改变的部分
+4. 确保更新后的配置仍然有效
+
+输出格式（JSON）：
+{
+  "success": true,
+  "automation_config": {
+    // 完整的更新后配置
+  },
+  "changes": "对修改内容的说明",
+  "warnings": []
+}`;
+
+            document.getElementById('createAutomationPrompt').value = createPromptDefault;
+            document.getElementById('updateAutomationPrompt').value = updatePromptDefault;
+            
+            document.getElementById('createPromptStatus').innerHTML = '<span style="color: var(--warning);">⚠️ 已重置为默认（未保存）</span>';
+            document.getElementById('updatePromptStatus').innerHTML = '<span style="color: var(--warning);">⚠️ 已重置为默认（未保存）</span>';
+            
+            alert('✅ 已重置为默认提示词！请点击"保存"按钮保存到服务器。');
+        }
+
+        // Auto-format JSON on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const createInput = document.getElementById('createInput');
+            try {
+                const formatted = JSON.stringify(JSON.parse(createInput.value), null, 2);
+                createInput.value = formatted;
+            } catch (e) {
+                // Keep original value if parsing fails
+            }
+        });
+    </script>
+</body>
+</html>
+

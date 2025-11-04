@@ -429,7 +429,7 @@ show_help() {
     echo
     echo "Examples:"
     echo "  $0                  Start service with default settings"
-    echo "  $0 -p 8080         Start service on port 8080"
+    echo "  $0 -p 3001         Start service on port 3001"
     echo "  $0 --dev           Start in development mode"
     echo "  $0 --test          Run test suite"
     echo "  $0 --stop          Stop running service"

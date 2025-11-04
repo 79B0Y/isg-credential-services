@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BestMatch Module Configuration",
+  "type": "object",
+  "properties": {
+    "llm_provider": {
+      "type": "string",
+      "title": "LLM Provider",
+      "description": "AI provider for fallback suggestions when no match is found",
+      "enum": ["auto", "gemini", "openai", "claude", "deepseek"],
+      "default": "auto"
+    },
+    "llm_api_key": {
+      "type": "string",
+      "title": "LLM API Key",
+      "description": "API key for LLM provider (optional if using auto-selection)",
+      "format": "password"
+    }
+  },
+  "required": []
+}
+

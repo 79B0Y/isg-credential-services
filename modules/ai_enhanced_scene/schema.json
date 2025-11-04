@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AI Enhanced Scene Module Schema",
+  "type": "object",
+  "properties": {
+    "aiProvider": {
+      "type": "string",
+      "enum": ["auto", "claude", "openai", "gemini", "deepseek"],
+      "default": "auto",
+      "description": "AI provider to use for scene matching and processing"
+    }
+  }
+}
+

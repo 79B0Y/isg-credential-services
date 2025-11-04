@@ -8,6 +8,7 @@ class InfoListModule {
     constructor(logger, baseModule) {
         this.logger = logger;
         this.baseModule = baseModule;
+        this.parentModule = baseModule; // 添加父模块引用，用于访问映射表
 
         // 综合列表缓存系统
         this.enhancedListCache = {
@@ -681,6 +682,17 @@ class InfoListModule {
             // 合并状态信息和设备信息
             const enhancedStates = statesResult.data.states.map(state => {
                 const enhancedInfo = enhancedMap.get(state.entity_id) || {};
+
+                // 优先使用 friendly_name 作为实体名称和设备名称
+                const friendlyName = state.attributes?.friendly_name;
+
+                // name 字段：friendly_name > entity.name > entity_id
+                const entityName = friendlyName || enhancedInfo.name || state.entity_id;
+
+                // device_name 字段：也应该使用实体的 friendly_name，而不是设备的 device.name
+                // 这样用户看到的是实体的友好名称（如 "客厅灯"），而不是设备名称（如 "Philips Hue"）
+                const deviceName = friendlyName || enhancedInfo.name || state.entity_id;
+
                 return {
                     // 基础状态信息
                     entity_id: state.entity_id,
@@ -689,12 +701,13 @@ class InfoListModule {
                     last_changed: state.last_changed,
                     last_updated: state.last_updated,
 
-                    // 从增强列表获取的设备信息
-                    name: enhancedInfo.name || state.entity_id,
+                    // 从增强列表获取的设备信息 (优先使用 friendly_name)
+                    name: entityName,
+                    friendly_name: friendlyName,
                     domain: enhancedInfo.domain || state.entity_id.split('.')[0],
                     device_type: enhancedInfo.device_type || enhancedInfo.domain || state.entity_id.split('.')[0],
                     device_id: enhancedInfo.device_id || null,
-                    device_name: enhancedInfo.device_name || null,
+                    device_name: deviceName,  // 使用实体的 friendly_name
                     device_manufacturer: enhancedInfo.device_manufacturer || null,
                     device_model: enhancedInfo.device_model || null,
                     room_id: enhancedInfo.room_id || null,

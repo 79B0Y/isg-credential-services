@@ -700,11 +700,11 @@
 
             <div class="stats">
                 <div class="stat-card">
-                    <span class="stat-number">7</span>
+                    <span class="stat-number">21</span>
                     <span class="stat-label">API端点</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-number">1</span>
+                    <span class="stat-number">2</span>
                     <span class="stat-label">功能模块</span>
                 </div>
                 <div class="stat-card">
@@ -793,6 +793,16 @@
                             <div class="action-title">批量控制设备</div>
                             <div class="action-description">批量执行设备控制命令</div>
                         </div>
+                        <div class="action-card" onclick="quickTest('scenes')">
+                            <div class="action-icon">🎬</div>
+                            <div class="action-title">场景列表</div>
+                            <div class="action-description">获取所有场景信息</div>
+                        </div>
+                        <div class="action-card" onclick="quickTest('automations')">
+                            <div class="action-icon">⚙️</div>
+                            <div class="action-title">自动化列表</div>
+                            <div class="action-description">获取所有自动化信息</div>
+                        </div>
                     </div>
                 </div>
 
@@ -814,7 +824,7 @@
                 <div class="api-section">
                     <div class="section-header">
                         <h2 class="section-title">📋 Home Assistant API接口</h2>
-                        <span class="section-count">5个接口</span>
+                        <span class="section-count">21个接口</span>
                     </div>
                     <!-- API endpoints will be generated here -->
                 </div>
@@ -903,6 +913,142 @@
                         { name: 'entities', type: 'json-array', required: true, description: '实体ID列表JSON数组。例如：[{"entity_id":"climate.text_ac_01"},{"entity_id":"light.light_test_001"}]' }
                     ],
                     testFunction: 'testBatchStates'
+                },
+                {
+                    method: 'GET',
+                    path: '/api/home_assistant/home_assistant/scenes',
+                    title: '场景列表',
+                    description: '获取Home Assistant中所有已配置的场景列表，包括场景名称、ID和状态信息',
+                    parameters: [],
+                    testFunction: 'testGetScenes'
+                },
+                {
+                    method: 'POST',
+                    path: '/api/home_assistant/home_assistant/scene/activate',
+                    title: '执行场景',
+                    description: '激活并执行指定的场景，使设备状态切换到场景定义的状态',
+                    parameters: [
+                        { name: 'scene_id', type: 'string', required: true, description: '场景ID，例如：scene.romantic_lights。如果不包含scene.前缀将自动添加' }
+                    ],
+                    testFunction: 'testActivateScene'
+                },
+                {
+                    method: 'POST',
+                    path: '/api/home_assistant/home_assistant/scene/create',
+                    title: '创建场景',
+                    description: '创建新场景。支持两种方式：1) 从当前设备状态创建快照（snapshot_entities）；2) 手动指定设备状态（entities）',
+                    parameters: [
+                        { name: 'scene_id', type: 'string', required: false, description: '场景ID（可选，如不指定则自动生成）' },
+                        { name: 'snapshot_entities', type: 'json-array', required: false, description: '要快照的实体ID列表，将保存当前状态。例如：["light.living_room","climate.bedroom"]' },
+                        { name: 'entities', type: 'json-object', required: false, description: '手动指定的实体状态配置。例如：{"light.living_room":{"state":"on","brightness":50}}' }
+                    ],
+                    testFunction: 'testCreateScene'
+                },
+                {
+                    method: 'POST',
+                    path: '/api/home_assistant/home_assistant/scenes/activate',
+                    title: '批量执行场景',
+                    description: '批量激活多个场景，按顺序执行所有指定的场景',
+                    parameters: [
+                        { name: 'scene_ids', type: 'json-array', required: true, description: '场景ID列表JSON数组。例如：["scene.romantic_lights","scene.movie_time"]' }
+                    ],
+                    testFunction: 'testActivateScenes'
+                },
+                {
+                    method: 'DELETE',
+                    path: '/api/home_assistant/home_assistant/scene/:scene_id',
+                    title: '删除场景',
+                    description: '删除指定的场景。⚠️ 注意：只能删除通过API动态创建的场景（scene.create），配置文件中定义的场景无法删除。删除后场景将永久移除',
+                    parameters: [
+                        { name: 'scene_id', type: 'path', required: true, description: '场景ID（路径参数），例如：scene.my_scene。如果不包含scene.前缀将自动添加。支持删除动态创建的场景' }
+                    ],
+                    testFunction: 'testDeleteScene'
+                },
+                {
+                    method: 'POST',
+                    path: '/api/home_assistant/home_assistant/scenes/delete',
+                    title: '批量删除场景',
+                    description: '批量删除多个场景。⚠️ 注意：只能删除通过API动态创建的场景，配置文件中定义的场景无法删除。所有指定的场景将被永久删除',
+                    parameters: [
+                        { name: 'scene_ids', type: 'json-array', required: true, description: '场景ID列表JSON数组。例如：["scene.my_scene_1","scene.my_scene_2"]。支持删除动态创建的场景' }
+                    ],
+                    testFunction: 'testDeleteScenes'
+                },
+                {
+                    method: 'GET',
+                    path: '/api/home_assistant/home_assistant/automations',
+                    title: '获取自动化列表',
+                    description: '获取Home Assistant中所有自动化的列表，包括启用状态、最后触发时间等完整信息',
+                    parameters: [],
+                    testFunction: 'testGetAutomations'
+                },
+                {
+                    method: 'GET',
+                    path: '/api/home_assistant/home_assistant/automation/:automation_id',
+                    title: '获取单个自动化详情',
+                    description: '获取指定自动化的详细信息，包括状态、触发时间、运行模式等',
+                    parameters: [
+                        { name: 'automation_id', type: 'path', required: true, description: '自动化ID（路径参数），例如：automation.morning_lights 或简写为 morning_lights' }
+                    ],
+                    testFunction: 'testGetAutomation'
+                },
+                {
+                    method: 'POST',
+                    path: '/api/home_assistant/home_assistant/automation/create',
+                    title: '创建自动化',
+                    description: '创建新的自动化规则。需要提供触发器（trigger）、条件（condition，可选）和动作（action）',
+                    parameters: [
+                        { name: 'automation_config', type: 'json-object', required: true, description: '自动化配置对象，包含id、alias、trigger、condition、action等字段。例如：{"alias":"晚安灯光","trigger":[{"platform":"time","at":"22:00:00"}],"action":[{"service":"light.turn_off"}]}' }
+                    ],
+                    testFunction: 'testCreateAutomation'
+                },
+                {
+                    method: 'DELETE',
+                    path: '/api/home_assistant/home_assistant/automation/:automation_id',
+                    title: '删除自动化',
+                    description: '删除指定的自动化。⚠️ 注意：删除后自动化将永久移除',
+                    parameters: [
+                        { name: 'automation_id', type: 'path', required: true, description: '自动化ID（路径参数），例如：automation.my_automation 或简写为 my_automation' }
+                    ],
+                    testFunction: 'testDeleteAutomation'
+                },
+                {
+                    method: 'POST',
+                    path: '/api/home_assistant/home_assistant/automation/:automation_id/enable',
+                    title: '启用自动化',
+                    description: '启用一个已禁用的自动化，使其开始响应触发条件',
+                    parameters: [
+                        { name: 'automation_id', type: 'path', required: true, description: '自动化ID（路径参数），例如：automation.morning_lights' }
+                    ],
+                    testFunction: 'testEnableAutomation'
+                },
+                {
+                    method: 'POST',
+                    path: '/api/home_assistant/home_assistant/automation/:automation_id/disable',
+                    title: '禁用自动化',
+                    description: '禁用一个正在运行的自动化，使其停止响应触发条件',
+                    parameters: [
+                        { name: 'automation_id', type: 'path', required: true, description: '自动化ID（路径参数），例如：automation.morning_lights' }
+                    ],
+                    testFunction: 'testDisableAutomation'
+                },
+                {
+                    method: 'POST',
+                    path: '/api/home_assistant/home_assistant/automation/:automation_id/trigger',
+                    title: '触发自动化',
+                    description: '手动触发自动化执行，无需等待触发条件满足',
+                    parameters: [
+                        { name: 'automation_id', type: 'path', required: true, description: '自动化ID（路径参数），例如：automation.morning_lights' }
+                    ],
+                    testFunction: 'testTriggerAutomation'
+                },
+                {
+                    method: 'POST',
+                    path: '/api/home_assistant/home_assistant/automations/reload',
+                    title: '重新加载自动化配置',
+                    description: '重新加载所有自动化的配置，用于在修改配置文件后刷新',
+                    parameters: [],
+                    testFunction: 'testReloadAutomations'
                 }
             ]
         };
@@ -1041,6 +1187,12 @@
                         break;
                     case 'enhanced-entities':
                         endpoint = '/api/home_assistant/home_assistant/enhanced-entities';
+                        break;
+                    case 'scenes':
+                        endpoint = '/api/home_assistant/home_assistant/scenes';
+                        break;
+                    case 'automations':
+                        endpoint = '/api/home_assistant/home_assistant/automations';
                         break;
                     case 'batch-control':
                         endpoint = '/api/home_assistant/home_assistant/batch-control';
@@ -1381,6 +1533,155 @@
             }
         }
 
+        // Scene test functions
+        function testGetScenes() {
+            executeAPITest('testGetScenes', 'GET', '/api/home_assistant/home_assistant/scenes');
+        }
+
+        function testActivateScene() {
+            executeAPITest('testActivateScene', 'POST', '/api/home_assistant/home_assistant/scene/activate', ['scene_id']);
+        }
+
+        function testCreateScene() {
+            try {
+                // 从表单读取数据
+                const sceneIdInput = document.getElementById('testCreateScene-scene_id');
+                const snapshotInput = document.getElementById('testCreateScene-snapshot_entities');
+                const entitiesInput = document.getElementById('testCreateScene-entities');
+
+                const sceneData = {};
+
+                // scene_id
+                if (sceneIdInput && sceneIdInput.value.trim()) {
+                    sceneData.scene_id = sceneIdInput.value.trim();
+                }
+
+                // snapshot_entities (JSON array)
+                if (snapshotInput && snapshotInput.value.trim()) {
+                    try {
+                        sceneData.snapshot_entities = JSON.parse(snapshotInput.value.trim());
+                    } catch (e) {
+                        addLog('snapshot_entities JSON格式错误: ' + e.message, 'error');
+                        return;
+                    }
+                }
+
+                // entities (JSON object)
+                if (entitiesInput && entitiesInput.value.trim()) {
+                    try {
+                        sceneData.entities = JSON.parse(entitiesInput.value.trim());
+                    } catch (e) {
+                        addLog('entities JSON格式错误: ' + e.message, 'error');
+                        return;
+                    }
+                }
+
+                // 验证至少有一个必填字段
+                if (!sceneData.snapshot_entities && !sceneData.entities) {
+                    addLog('必须提供 snapshot_entities 或 entities 中的至少一个', 'error');
+                    return;
+                }
+
+                addLog('准备创建场景', 'info');
+                executeAPITest('testCreateScene', 'POST', '/api/home_assistant/home_assistant/scene/create', sceneData);
+            } catch (error) {
+                addLog('执行错误: ' + error.message, 'error');
+                console.error('Create scene error:', error);
+            }
+        }
+
+        function testActivateScenes() {
+            try {
+                // 从textarea读取JSON数据
+                const sceneIdsInput = document.getElementById('testActivateScenes-scene_ids');
+                if (!sceneIdsInput || !sceneIdsInput.value.trim()) {
+                    addLog('请输入场景ID列表JSON数据', 'error');
+                    return;
+                }
+                
+                // 获取输入值并清理可能的特殊字符
+                let inputValue = sceneIdsInput.value.trim();
+                
+                // 尝试解析JSON
+                let sceneIdsData;
+                try {
+                    sceneIdsData = JSON.parse(inputValue);
+                } catch (parseError) {
+                    addLog('JSON格式错误: ' + parseError.message, 'error');
+                    addLog('提示: 请检查JSON格式是否正确，可以使用"📝 填充示例"按钮查看正确格式', 'info');
+                    return;
+                }
+                
+                // 验证是否为数组
+                if (!Array.isArray(sceneIdsData)) {
+                    addLog('场景ID列表必须是JSON数组格式', 'error');
+                    return;
+                }
+                
+                // 验证数组不为空
+                if (sceneIdsData.length === 0) {
+                    addLog('场景ID列表数组不能为空', 'error');
+                    return;
+                }
+                
+                addLog(`准备激活 ${sceneIdsData.length} 个场景`, 'info');
+                
+                // 执行测试
+                executeAPITest('testActivateScenes', 'POST', '/api/home_assistant/home_assistant/scenes/activate', sceneIdsData);
+            } catch (error) {
+                addLog('执行错误: ' + error.message, 'error');
+                console.error('Activate scenes error:', error);
+            }
+        }
+
+        function testDeleteScene() {
+            executeAPITest('testDeleteScene', 'DELETE', '/api/home_assistant/home_assistant/scene/{scene_id}', ['scene_id']);
+        }
+
+        function testDeleteScenes() {
+            try {
+                // 从textarea读取JSON数据
+                const sceneIdsInput = document.getElementById('testDeleteScenes-scene_ids');
+                if (!sceneIdsInput || !sceneIdsInput.value.trim()) {
+                    addLog('请输入场景ID列表JSON数据', 'error');
+                    return;
+                }
+                
+                // 获取输入值并清理可能的特殊字符
+                let inputValue = sceneIdsInput.value.trim();
+                
+                // 尝试解析JSON
+                let sceneIdsData;
+                try {
+                    sceneIdsData = JSON.parse(inputValue);
+                } catch (parseError) {
+                    addLog('JSON格式错误: ' + parseError.message, 'error');
+                    addLog('提示: 请检查JSON格式是否正确，可以使用"📝 填充示例"按钮查看正确格式', 'info');
+                    return;
+                }
+                
+                // 验证是否为数组
+                if (!Array.isArray(sceneIdsData)) {
+                    addLog('场景ID列表必须是JSON数组格式', 'error');
+                    return;
+                }
+                
+                // 验证数组不为空
+                if (sceneIdsData.length === 0) {
+                    addLog('场景ID列表数组不能为空', 'error');
+                    return;
+                }
+                
+                addLog(`准备删除 ${sceneIdsData.length} 个场景`, 'info');
+                
+                // 执行测试
+                executeAPITest('testDeleteScenes', 'POST', '/api/home_assistant/home_assistant/scenes/delete', sceneIdsData);
+            } catch (error) {
+                addLog('执行错误: ' + error.message, 'error');
+                console.error('Delete scenes error:', error);
+            }
+        }
+
         function testBatchControl() {
             try {
                 // 从textarea读取JSON数据
@@ -1509,6 +1810,81 @@
                             "entity_id": "sensor.temp_01"
                         }
                     ], null, 2)
+                },
+                testActivateScene: {
+                    scene_id: "scene.romantic_lights"
+                },
+                testCreateScene: {
+                    scene_id: "scene.my_custom_scene",
+                    snapshot_entities: JSON.stringify([
+                        "light.living_room",
+                        "light.bedroom",
+                        "climate.living_room"
+                    ], null, 2),
+                    entities: JSON.stringify({
+                        "light.living_room": {
+                            "state": "on",
+                            "brightness": 50,
+                            "rgb_color": [255, 0, 0]
+                        },
+                        "light.bedroom": {
+                            "state": "off"
+                        }
+                    }, null, 2)
+                },
+                testActivateScenes: {
+                    scene_ids: JSON.stringify([
+                        "scene.romantic_lights",
+                        "scene.movie_time",
+                        "scene.good_morning"
+                    ], null, 2)
+                },
+                testDeleteScene: {
+                    scene_id: "scene.test_scene"
+                },
+                testDeleteScenes: {
+                    scene_ids: JSON.stringify([
+                        "scene.test_scene_1",
+                        "scene.test_scene_2"
+                    ], null, 2)
+                },
+                testGetAutomation: {
+                    automation_id: "automation.morning_lights"
+                },
+                testCreateAutomation: {
+                    automation_config: JSON.stringify({
+                        "id": "test_automation_" + Date.now(),
+                        "alias": "测试自动化 - 晚上10点关灯",
+                        "description": "这是一个测试自动化",
+                        "trigger": [
+                            {
+                                "platform": "time",
+                                "at": "22:00:00"
+                            }
+                        ],
+                        "condition": [],
+                        "action": [
+                            {
+                                "service": "light.turn_off",
+                                "target": {
+                                    "entity_id": "light.living_room"
+                                }
+                            }
+                        ],
+                        "mode": "single"
+                    }, null, 2)
+                },
+                testDeleteAutomation: {
+                    automation_id: "automation.test_automation"
+                },
+                testEnableAutomation: {
+                    automation_id: "automation.morning_lights"
+                },
+                testDisableAutomation: {
+                    automation_id: "automation.morning_lights"
+                },
+                testTriggerAutomation: {
+                    automation_id: "automation.morning_lights"
                 }
             };
 
@@ -1539,6 +1915,83 @@
 
         function closeQuickResponse() {
             document.getElementById('quick-response').classList.add('hidden');
+        }
+
+        // Automation test functions
+        function testGetAutomations() {
+            executeAPITest('testGetAutomations', 'GET', '/api/home_assistant/home_assistant/automations');
+        }
+
+        function testGetAutomation() {
+            executeAPITest('testGetAutomation', 'GET', '/api/home_assistant/home_assistant/automation/{automation_id}', ['automation_id']);
+        }
+
+        function testCreateAutomation() {
+            try {
+                // 从textarea读取JSON数据
+                const configInput = document.getElementById('testCreateAutomation-automation_config');
+                if (!configInput || !configInput.value.trim()) {
+                    addLog('请输入自动化配置JSON数据', 'error');
+                    return;
+                }
+                
+                // 获取输入值并清理可能的特殊字符
+                let inputValue = configInput.value.trim();
+                
+                // 尝试解析JSON
+                let automationConfig;
+                try {
+                    automationConfig = JSON.parse(inputValue);
+                } catch (parseError) {
+                    addLog('JSON格式错误: ' + parseError.message, 'error');
+                    addLog('提示: 请检查JSON格式是否正确，可以使用"📝 填充示例"按钮查看正确格式', 'info');
+                    return;
+                }
+                
+                // 验证必填字段
+                if (!automationConfig.alias) {
+                    addLog('自动化配置必须包含 alias 字段（名称）', 'error');
+                    return;
+                }
+                
+                if (!automationConfig.trigger || !Array.isArray(automationConfig.trigger) || automationConfig.trigger.length === 0) {
+                    addLog('自动化配置必须包含至少一个 trigger（触发器）', 'error');
+                    return;
+                }
+                
+                if (!automationConfig.action || !Array.isArray(automationConfig.action) || automationConfig.action.length === 0) {
+                    addLog('自动化配置必须包含至少一个 action（动作）', 'error');
+                    return;
+                }
+                
+                addLog('准备创建自动化: ' + automationConfig.alias, 'info');
+                
+                // 执行测试
+                executeAPITest('testCreateAutomation', 'POST', '/api/home_assistant/home_assistant/automation/create', automationConfig);
+            } catch (error) {
+                addLog('执行错误: ' + error.message, 'error');
+                console.error('Create automation error:', error);
+            }
+        }
+
+        function testDeleteAutomation() {
+            executeAPITest('testDeleteAutomation', 'DELETE', '/api/home_assistant/home_assistant/automation/{automation_id}', ['automation_id']);
+        }
+
+        function testEnableAutomation() {
+            executeAPITest('testEnableAutomation', 'POST', '/api/home_assistant/home_assistant/automation/{automation_id}/enable', ['automation_id']);
+        }
+
+        function testDisableAutomation() {
+            executeAPITest('testDisableAutomation', 'POST', '/api/home_assistant/home_assistant/automation/{automation_id}/disable', ['automation_id']);
+        }
+
+        function testTriggerAutomation() {
+            executeAPITest('testTriggerAutomation', 'POST', '/api/home_assistant/home_assistant/automation/{automation_id}/trigger', ['automation_id']);
+        }
+
+        function testReloadAutomations() {
+            executeAPITest('testReloadAutomations', 'POST', '/api/home_assistant/home_assistant/automations/reload');
         }
 
         // Log management

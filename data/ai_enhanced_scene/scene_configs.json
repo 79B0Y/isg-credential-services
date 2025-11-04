@@ -1,0 +1,308 @@
+{
+  "scenes": {
+    "scene.guest_reception_mode": {
+      "scene_id": "scene.guest_reception_mode",
+      "scene_name": "会客模式",
+      "friendly_name": "会客模式",
+      "mode": "hybrid",
+      "created_at": "2025-10-29T12:14:55.950Z",
+      "created_by": "ai_enhanced_scene",
+      "user_input": "客厅设备当前状态设置为会客模式",
+      "metadata": {
+        "entity_count": 4,
+        "climate_count": 1,
+        "precise_count": 3,
+        "ai_provider": "deepseek"
+      },
+      "entities_config": {
+        "light.light_test_001": {
+          "state": "on",
+          "brightness": 198,
+          "color_temp": 383
+        },
+        "light.color_light_1": {
+          "state": "on",
+          "brightness": 117,
+          "hs_color": [
+            218.906,
+            50.196
+          ]
+        },
+        "light.color_light_4": {
+          "state": "off"
+        }
+      },
+      "climate_snapshot": [
+        "climate.text_ac_01"
+      ],
+      "last_modified": "2025-10-29T12:14:55.951Z"
+    },
+    "scene.reception_mode": {
+      "scene_id": "scene.reception_mode",
+      "scene_name": "会客模式",
+      "friendly_name": "会客模式",
+      "mode": "hybrid",
+      "created_at": "2025-10-30T08:37:18.053Z",
+      "created_by": "ai_enhanced_scene",
+      "user_input": "将客厅设备当前状态设置为会客模式",
+      "metadata": {
+        "entity_count": 4,
+        "climate_count": 1,
+        "precise_count": 3,
+        "ai_provider": "deepseek"
+      },
+      "entities_config": {
+        "light.light_test_001": {
+          "state": "off"
+        },
+        "light.color_light_1": {
+          "state": "on",
+          "brightness": 230,
+          "hs_color": [
+            0,
+            0
+          ]
+        },
+        "light.color_light_4": {
+          "state": "on",
+          "brightness": 230,
+          "hs_color": [
+            0,
+            0
+          ]
+        }
+      },
+      "climate_snapshot": [
+        "climate.text_ac_01"
+      ],
+      "last_modified": "2025-10-30T08:37:18.054Z"
+    },
+    "scene.entertainment_mode": {
+      "scene_id": "scene.entertainment_mode",
+      "scene_name": "会客模式",
+      "friendly_name": "会客模式",
+      "mode": "hybrid",
+      "created_at": "2025-10-29T12:30:08.794Z",
+      "created_by": "ai_enhanced_scene",
+      "user_input": "客厅设备当前状态设置为会客模式",
+      "metadata": {
+        "entity_count": 4,
+        "climate_count": 1,
+        "precise_count": 3,
+        "ai_provider": "deepseek"
+      },
+      "entities_config": {
+        "light.light_test_001": {
+          "state": "on",
+          "brightness": 245,
+          "color_temp": 498
+        },
+        "light.color_light_1": {
+          "state": "on",
+          "brightness": 117,
+          "hs_color": [
+            218.906,
+            50.196
+          ]
+        },
+        "light.color_light_4": {
+          "state": "off"
+        }
+      },
+      "climate_snapshot": [
+        "climate.text_ac_01"
+      ],
+      "last_modified": "2025-10-29T12:30:08.795Z"
+    },
+    "scene.entertaining_mode": {
+      "scene_id": "scene.entertaining_mode",
+      "scene_name": "会客模式",
+      "friendly_name": "会客模式",
+      "mode": "hybrid",
+      "created_at": "2025-10-29T12:18:25.378Z",
+      "created_by": "ai_enhanced_scene",
+      "user_input": "客厅设备当前状态设置为会客模式",
+      "metadata": {
+        "entity_count": 4,
+        "climate_count": 1,
+        "precise_count": 3,
+        "ai_provider": "deepseek"
+      },
+      "entities_config": {
+        "light.light_test_001": {
+          "state": "on",
+          "brightness": 56,
+          "color_temp": 230
+        },
+        "light.color_light_1": {
+          "state": "on",
+          "brightness": 117,
+          "hs_color": [
+            218.906,
+            50.196
+          ]
+        },
+        "light.color_light_4": {
+          "state": "on",
+          "brightness": 191,
+          "hs_color": [
+            0,
+            100
+          ]
+        }
+      },
+      "climate_snapshot": [
+        "climate.text_ac_01"
+      ],
+      "last_modified": "2025-10-29T12:18:25.378Z"
+    },
+    "scene.test_full_attributes_scene": {
+      "scene_id": "scene.test_full_attributes_scene",
+      "scene_name": "测试完整属性场景",
+      "friendly_name": "测试完整属性场景",
+      "mode": "hybrid",
+      "created_at": "2025-10-29T12:27:56.807Z",
+      "created_by": "ai_enhanced_scene",
+      "user_input": "客厅设备当前状态设置为测试场景",
+      "metadata": {
+        "entity_count": 2,
+        "climate_count": 1,
+        "precise_count": 1,
+        "ai_provider": "deepseek"
+      },
+      "entities_config": {
+        "light.color_light_1": {
+          "state": "on",
+          "brightness": 200,
+          "color_temp": 300
+        }
+      },
+      "climate_snapshot": [
+        "climate.text_ac_01"
+      ],
+      "last_modified": "2025-10-29T12:27:56.808Z"
+    },
+    "scene.happy_mode": {
+      "scene_id": "scene.happy_mode",
+      "scene_name": "开心模式",
+      "friendly_name": "开心模式",
+      "mode": "hybrid",
+      "created_at": "2025-10-29T12:35:49.751Z",
+      "created_by": "ai_enhanced_scene",
+      "user_input": "将卧室和书房的设备当前状态设置为开心模式",
+      "metadata": {
+        "entity_count": 4,
+        "climate_count": 2,
+        "precise_count": 2,
+        "ai_provider": "deepseek"
+      },
+      "entities_config": {
+        "light.color_light_10": {
+          "state": "on",
+          "brightness": 204,
+          "hs_color": [
+            349.524,
+            24.706
+          ]
+        },
+        "light.color_light_08": {
+          "state": "on",
+          "brightness": 194,
+          "color_temp": 250
+        }
+      },
+      "climate_snapshot": [
+        "climate.ac_03",
+        "climate.ac_02"
+      ],
+      "last_modified": "2025-10-29T12:35:49.751Z"
+    },
+    "scene.happy_scene": {
+      "scene_id": "scene.happy_scene",
+      "scene_name": "我很开心场景",
+      "friendly_name": "我很开心场景",
+      "mode": "precise",
+      "created_at": "2025-10-29T13:18:42.864Z",
+      "created_by": "ai_enhanced_scene",
+      "user_input": "设置我很开心场景，把家里灯都调成粉红色",
+      "metadata": {
+        "entity_count": 8,
+        "climate_count": 0,
+        "precise_count": 8,
+        "ai_provider": "deepseek"
+      },
+      "entities_config": {
+        "light.light_test_001": {
+          "state": "on",
+          "rgb_color": [
+            255,
+            192,
+            203
+          ]
+        },
+        "light.color_light_1": {
+          "state": "on",
+          "rgb_color": [
+            255,
+            192,
+            203
+          ]
+        },
+        "light.color_light_2": {
+          "state": "on",
+          "rgb_color": [
+            255,
+            192,
+            203
+          ]
+        },
+        "light.color_light_3": {
+          "state": "on",
+          "rgb_color": [
+            255,
+            192,
+            203
+          ]
+        },
+        "light.color_light_4": {
+          "state": "on",
+          "rgb_color": [
+            255,
+            192,
+            203
+          ]
+        },
+        "light.color_light_08": {
+          "state": "on",
+          "rgb_color": [
+            255,
+            192,
+            203
+          ]
+        },
+        "light.color_light_09": {
+          "state": "on",
+          "rgb_color": [
+            255,
+            192,
+            203
+          ]
+        },
+        "light.color_light_10": {
+          "state": "on",
+          "rgb_color": [
+            255,
+            192,
+            203
+          ]
+        }
+      },
+      "last_modified": "2025-10-29T13:18:42.865Z"
+    }
+  },
+  "metadata": {
+    "created_at": "2025-10-29T07:07:21.476Z",
+    "last_updated": "2025-10-30T08:37:18.054Z",
+    "version": "1.0.0"
+  }
+}

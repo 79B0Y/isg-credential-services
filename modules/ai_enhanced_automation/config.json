@@ -1,0 +1,10 @@
+{
+  "name": "ai_enhanced_automation",
+  "description": "AI Enhanced Automation - 使用AI智能创建和管理Home Assistant自动化",
+  "version": "1.0.0",
+  "enabled": true,
+  "aiProvider": "auto",
+  "defaultMode": "single",
+  "enableConditions": true
+}
+

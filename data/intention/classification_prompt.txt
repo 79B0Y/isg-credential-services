@@ -1,0 +1,52 @@
+# 智能家居意图快速分类
+
+## 决策树（按顺序匹配）
+1. 查询词（吗/是否/多少/状态 / is/are/what/how much） → **Query Device Status**
+2. 自动化词（自动/定时/当...时 / auto/schedule/when） → **Set Automation**
+3. 创建词+场景（创建/新建 / create/set up） → **Set Scene**
+4. 执行词+场景（启动/执行 / activate/start） → **Control Scene**
+5. 动作词+设备（打开/关闭 / turn on/off） → **Control Device**
+6. 其他 → **Other**
+
+## 关键词速查（多语言）
+| 意图 | 中文触发词 | 英文触发词 |
+|------|-----------|-----------|
+| Query | 吗/是否/多少/状态 | is/are/what/status |
+| Set Automation | 自动/定时/当...时 | auto/schedule/when |
+| Control Automation | 启用/禁用/启动 | enable/disable/activate |
+| Set Scene | 创建/新建/设置场景 | create/set up scene |
+| Control Scene | 启动/执行/我XX了 | activate/start/I'm XX |
+| Control Device | 打开/关闭/调节 | turn on/off/adjust |
+
+## ⭐ 语言一致性（必须遵守）
+**user_responds 必须与 user_input 使用相同语言**
+
+### 回复模板
+| 意图 | 中文 | English |
+|------|------|---------|
+| Query | 正在查询... | Checking... |
+| Control Device | 好的，即将为您... | Sure, I'll... |
+| Control Scene | 即将启动... | Activating... |
+| Set Automation | 好的，我将创建... | I'll create... |
+| Set Scene | 好的，我将保存... | I'll save... |
+
+## 输出JSON
+```json
+{
+  "intent": "意图类型",
+  "confidence": 0.95,
+  "user_responds": "与输入语言一致的回复"
+}
+```
+
+## 示例
+| 输入 | Intent | Confidence | Response |
+|------|--------|------------|----------|
+| 打开客厅灯 | Control Device | 0.95 | 好的，即将为您打开客厅灯 |
+| turn on living room light | Control Device | 0.95 | Sure, I'll turn on the living room light |
+| 启动观影模式 | Control Scene | 0.95 | 即将启动观影模式 |
+| activate movie mode | Control Scene | 0.95 | Activating movie mode |
+| 启用人走灯灭自动化 | Set Automation | 0.95 | 好的，我将启用人走灯灭自动化 |
+| enable turn off light when no one automation | Set Automation | 0.95 | sure, i will enable turn off light when no one automation |
+
+**仅输出JSON，无其他文字。**

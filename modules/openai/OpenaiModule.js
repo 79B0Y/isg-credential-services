@@ -384,6 +384,36 @@ class OpenaiModule extends BaseCredentialModule {
     }
 
     /**
+     * 获取首选模型
+     */
+    async getPreferredModel(credentials = null) {
+        try {
+            if (!credentials) {
+                const credResult = await this.getCredentials();
+                if (!credResult.success) {
+                    return { success: true, data: { model: 'gpt-3.5-turbo' } }; // 默认模型
+                }
+                credentials = credResult.data;
+            }
+
+            const preferredModel = credentials.preferred_model || 'gpt-3.5-turbo';
+            return { 
+                success: true, 
+                data: { 
+                    model: preferredModel 
+                } 
+            };
+        } catch (error) {
+            return { 
+                success: true, 
+                data: { 
+                    model: 'gpt-3.5-turbo' 
+                } 
+            };
+        }
+    }
+
+    /**
      * 测试API连接性
      */
     async testConnection(credentials = null) {

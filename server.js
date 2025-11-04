@@ -46,6 +46,20 @@ class CredentialService {
             this.moduleManager = new ModuleManager();
             await this.moduleManager.initialize();
             
+            // Auto-enable all modules on startup
+            this.logger.info('Auto-enabling all modules...');
+            const enableResults = await this.moduleManager.batchOperation('enable');
+            let enabledCount = 0;
+            Object.entries(enableResults).forEach(([moduleName, result]) => {
+                if (result.success) {
+                    enabledCount++;
+                    this.logger.info(`✓ Module ${moduleName} enabled`);
+                } else {
+                    this.logger.warn(`✗ Module ${moduleName} could not be enabled: ${result.error}`);
+                }
+            });
+            this.logger.info(`Auto-enabled ${enabledCount} modules`);
+            
             // Set global moduleManager for cross-module access
             global.moduleManager = this.moduleManager;
             
@@ -104,6 +118,7 @@ class CredentialService {
         
         // 静态文件服务
         this.app.use(express.static(path.join(__dirname, 'public')));
+        this.app.use('/data', express.static(path.join(__dirname, 'data')));
     }
 
     /**
@@ -123,6 +138,7 @@ class CredentialService {
         // 凭据管理API
         this.app.get('/api/credentials/:module', this.handleGetCredentials.bind(this));
         this.app.put('/api/credentials/:module', this.handleSetCredentials.bind(this));
+        this.app.delete('/api/credentials/:module', this.handleDeleteCredentials.bind(this));
         this.app.post('/api/credentials/batch', this.handleBatchGetCredentials.bind(this));
         
         // 验证API
@@ -194,6 +210,86 @@ class CredentialService {
         this.app.post('/api/home_assistant/:module/batch-control', this.handleHABatchControl.bind(this));
         this.app.post('/api/home_assistant/:module/batch-states', this.handleHABatchStates.bind(this));
         
+        // Scene management APIs
+        this.app.get('/api/home_assistant/:module/scenes', this.handleGetHAScenes.bind(this));
+        this.app.post('/api/home_assistant/:module/scene/activate', this.handleHAActivateScene.bind(this));
+        this.app.post('/api/home_assistant/:module/scene/create', this.handleHACreateScene.bind(this));
+        this.app.post('/api/home_assistant/:module/scenes/activate', this.handleHAActivateScenes.bind(this));
+        this.app.delete('/api/home_assistant/:module/scene/:scene_id', this.handleHADeleteScene.bind(this));
+        this.app.post('/api/home_assistant/:module/scenes/delete', this.handleHADeleteScenes.bind(this));
+        
+        // Automation management APIs
+        this.app.get('/api/home_assistant/:module/automations', this.handleGetHAAutomations.bind(this));
+        this.app.get('/api/home_assistant/:module/automation/:automation_id', this.handleGetHAAutomation.bind(this));
+        this.app.post('/api/home_assistant/:module/automation/create', this.handleHACreateAutomation.bind(this));
+        this.app.delete('/api/home_assistant/:module/automation/:automation_id', this.handleHADeleteAutomation.bind(this));
+        this.app.post('/api/home_assistant/:module/automation/:automation_id/enable', this.handleHAEnableAutomation.bind(this));
+        this.app.post('/api/home_assistant/:module/automation/:automation_id/disable', this.handleHADisableAutomation.bind(this));
+        this.app.post('/api/home_assistant/:module/automation/:automation_id/trigger', this.handleHATriggerAutomation.bind(this));
+        this.app.post('/api/home_assistant/:module/automations/reload', this.handleHAReloadAutomations.bind(this));
+        
+        // AI Enhanced Entities workflow API
+        this.app.post('/api/ai_enhanced_entities/:module/run', this.handleRunAIEnhancedWorkflow.bind(this));
+        this.app.get('/api/ai_enhanced_entities/:module/saved', this.handleGetAIEnhancedSaved.bind(this));
+        this.app.get('/api/ai_enhanced_entities/:module/prompt', this.handleGetAIEnhancedPrompt.bind(this));
+        this.app.put('/api/ai_enhanced_entities/:module/prompt', this.handleSaveAIEnhancedPrompt.bind(this));
+        this.app.delete('/api/ai_enhanced_entities/:module/prompt', this.handleDeleteAIEnhancedPrompt.bind(this));
+
+        // Intention Module API
+        this.app.post('/api/intention/:module/process', this.handleProcessIntention.bind(this));
+        this.app.post('/api/intention/:module/classify', this.handleClassifyIntention.bind(this));
+        this.app.get('/api/intention/:module/history', this.handleGetIntentionHistory.bind(this));
+        this.app.get('/api/intention/:module/prompt', this.handleGetIntentionPrompt.bind(this));
+        this.app.put('/api/intention/:module/prompt', this.handleSaveIntentionPrompt.bind(this));
+        this.app.delete('/api/intention/:module/prompt', this.handleDeleteIntentionPrompt.bind(this));
+        this.app.get('/api/intention/:module/classification-prompt', this.handleGetClassificationPrompt.bind(this));
+        this.app.put('/api/intention/:module/classification-prompt', this.handleSaveClassificationPrompt.bind(this));
+        this.app.delete('/api/intention/:module/classification-prompt', this.handleDeleteClassificationPrompt.bind(this));
+        this.app.get('/api/intention/:module/ai-provider', this.handleGetIntentionAIProvider.bind(this));
+        this.app.post('/api/intention/:module/ai-provider', this.handleSetIntentionAIProvider.bind(this));
+
+        // BestMatch Module API
+        this.app.post('/api/bestMatch/:module/match', this.handleBestMatchMatch.bind(this));
+        // 向后兼容：旧路径格式
+        this.app.post('/api/modules/bestMatch/match', this.handleBestMatchMatch.bind(this));
+        
+        this.app.get('/api/bestMatch/:module/history', this.handleBestMatchHistory.bind(this));
+        this.app.get('/api/bestMatch/:module/aliases', this.handleBestMatchGetAliases.bind(this));
+        this.app.post('/api/bestMatch/:module/aliases', this.handleBestMatchUpdateAliases.bind(this));
+        this.app.get('/api/bestMatch/:module/stats', this.handleBestMatchStats.bind(this));
+
+        // AI Enhanced Scene Module API
+        this.app.post('/api/ai_enhanced_scene/:module/execute', this.handleAISceneExecute.bind(this));
+        this.app.post('/api/ai_enhanced_scene/:module/create', this.handleAISceneCreate.bind(this));
+        this.app.post('/api/ai_enhanced_scene/:module/delete', this.handleAISceneDelete.bind(this));
+        this.app.post('/api/ai_enhanced_scene/:module/list', this.handleAISceneList.bind(this));
+        this.app.get('/api/ai_enhanced_scene/:module/prompts', this.handleGetAIScenePrompts.bind(this));
+        this.app.put('/api/ai_enhanced_scene/:module/prompt/:type', this.handleUpdateAIScenePrompt.bind(this));
+        this.app.get('/api/ai_enhanced_scene/:module/info', this.handleGetAISceneInfo.bind(this));
+
+        // AI Enhanced Automation Module API
+        this.app.post('/api/ai_enhanced_automation/:module/create', this.handleAIAutomationCreate.bind(this));
+        this.app.get('/api/ai_enhanced_automation/:module/list', this.handleAIAutomationList.bind(this));
+        this.app.post('/api/ai_enhanced_automation/:module/available', this.handleAIAutomationAvailable.bind(this));
+        this.app.get('/api/ai_enhanced_automation/:module/get/:id', this.handleAIAutomationGet.bind(this));
+        this.app.delete('/api/ai_enhanced_automation/:module/delete/:id', this.handleAIAutomationDelete.bind(this));
+        this.app.post('/api/ai_enhanced_automation/:module/delete', this.handleAIAutomationDeleteWithMessage.bind(this));
+        this.app.post('/api/ai_enhanced_automation/:module/enable/:id', this.handleAIAutomationEnable.bind(this));
+        this.app.post('/api/ai_enhanced_automation/:module/enable', this.handleAIAutomationEnableWithMessage.bind(this));
+        this.app.post('/api/ai_enhanced_automation/:module/disable/:id', this.handleAIAutomationDisable.bind(this));
+        this.app.post('/api/ai_enhanced_automation/:module/disable', this.handleAIAutomationDisableWithMessage.bind(this));
+        this.app.get('/api/ai_enhanced_automation/:module/prompts', this.handleGetAIAutomationPrompts.bind(this));
+        this.app.put('/api/ai_enhanced_automation/:module/prompt/:type', this.handleUpdateAIAutomationPrompt.bind(this));
+
+        // Communication Module API
+        this.app.post('/api/communication/:module/send', this.handleCommunicationSend.bind(this));
+        this.app.post('/api/communication/:module/receive', this.handleCommunicationReceive.bind(this));
+        this.app.get('/api/communication/:module/messages', this.handleCommunicationGetMessages.bind(this));
+        this.app.delete('/api/communication/:module/messages', this.handleCommunicationClearMessages.bind(this));
+        this.app.post('/api/communication/:module/websocket/start', this.handleCommunicationStartWebSocket.bind(this));
+        this.app.post('/api/communication/:module/websocket/stop', this.handleCommunicationStopWebSocket.bind(this));
+        this.app.get('/api/communication/:module/websocket/status', this.handleCommunicationWebSocketStatus.bind(this));
+
         // Home Assistant WebSocket API
         this.app.post('/api/home_assistant/:module/websocket/start', this.handleStartHAWebSocket.bind(this));
         this.app.post('/api/home_assistant/:module/websocket/stop', this.handleStopHAWebSocket.bind(this));
@@ -1864,120 +1960,19 @@ class CredentialService {
                 });
             }
 
-            // 验证每个命令的格式
-            for (let i = 0; i < commands.length; i++) {
-                const cmd = commands[i];
-                if (!cmd.entity_id || !cmd.service) {
-                    return res.status(400).json({
-                        success: false,
-                        error: `Command at index ${i} is missing required fields: entity_id and service are required`
-                    });
-                }
-            }
-
-            // 获取凭据
-            const credentials = await module.getCredentials();
-            if (!credentials.success) {
-                return res.status(400).json({ success: false, error: 'No credentials found' });
-            }
-
-            // 检查模块是否支持API调用
-            if (!module.basicInfoModule || typeof module.basicInfoModule.callHomeAssistantAPI !== 'function') {
+            // 检查模块是否支持设备控制
+            if (!module.deviceControlModule || typeof module.deviceControlModule.batchControlDevices !== 'function') {
                 return res.status(400).json({ success: false, error: 'Batch control not supported by this module' });
             }
 
-            // 执行批量控制
-            const results = [];
-            let successCount = 0;
-            let failCount = 0;
+            // 使用 DeviceControlModule 的批量控制方法（支持智能拆分）
+            const result = await module.deviceControlModule.batchControlDevices(commands);
 
-            for (const cmd of commands) {
-                try {
-                    const { entity_id, service, service_data = {} } = cmd;
-
-                    // 解析服务（格式: domain.service）
-                    const [domain, serviceName] = service.includes('.') 
-                        ? service.split('.') 
-                        : [entity_id.split('.')[0], service];
-
-                    // 处理相对值调整（如果有 +/- 符号）
-                    let processedServiceData;
-                    try {
-                        processedServiceData = await this.processRelativeValues(
-                            service_data, 
-                            entity_id, 
-                            credentials.data, 
-                            module
-                        );
-                    } catch (relativeError) {
-                        failCount++;
-                        results.push({
-                            entity_id: entity_id,
-                            service: service,
-                            success: false,
-                            error: `Relative value processing failed: ${relativeError.message}`,
-                            original_service_data: service_data
-                        });
-                        continue;
-                    }
-
-                    // 准备服务数据
-                    const fullServiceData = {
-                        ...processedServiceData,
-                        entity_id: entity_id
-                    };
-
-                    // 调用Home Assistant API
-                    const result = await module.basicInfoModule.callHomeAssistantAPI(
-                        credentials.data.access_token,
-                        credentials.data.base_url,
-                        `/api/services/${domain}/${serviceName}`,
-                        'POST',
-                        fullServiceData
-                    );
-
-                    if (result.error) {
-                        failCount++;
-                        results.push({
-                            entity_id: entity_id,
-                            service: service,
-                            success: false,
-                            error: result.error,
-                            details: result.details || null,
-                            processed_data: fullServiceData
-                        });
-                    } else {
-                        successCount++;
-                        results.push({
-                            entity_id: entity_id,
-                            service: service,
-                            success: true,
-                            data: result,
-                            processed_data: fullServiceData
-                        });
-                    }
-                } catch (error) {
-                    failCount++;
-                    results.push({
-                        entity_id: cmd.entity_id,
-                        service: cmd.service,
-                        success: false,
-                        error: error.message
-                    });
-                }
+            if (!result.success) {
+                return res.status(400).json(result);
             }
 
-            // 返回批量控制结果
-            res.json({
-                success: true,
-                data: {
-                    total: commands.length,
-                    success_count: successCount,
-                    fail_count: failCount,
-                    results: results
-                },
-                executed_at: new Date().toISOString()
-            });
+            res.json(result);
 
         } catch (error) {
             this.logger.error('Home Assistant batch control error:', error);
@@ -2096,6 +2091,446 @@ class CredentialService {
 
         } catch (error) {
             this.logger.error('Home Assistant batch states error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 获取场景列表
+     */
+    async handleGetHAScenes(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const module = this.moduleManager.getModule(moduleName);
+
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            if (!module.getScenes) {
+                return res.status(400).json({ success: false, error: 'Scene management not supported by this module' });
+            }
+
+            const result = await module.getScenes();
+            res.json(result);
+
+        } catch (error) {
+            this.logger.error('Home Assistant get scenes error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 执行场景
+     */
+    async handleHAActivateScene(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const module = this.moduleManager.getModule(moduleName);
+
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            if (!module.activateScene) {
+                return res.status(400).json({ success: false, error: 'Scene management not supported by this module' });
+            }
+
+            const { scene_id } = req.body;
+
+            if (!scene_id) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'scene_id is required'
+                });
+            }
+
+            const result = await module.activateScene(scene_id);
+            res.json(result);
+
+        } catch (error) {
+            this.logger.error('Home Assistant activate scene error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 创建场景
+     */
+    async handleHACreateScene(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const module = this.moduleManager.getModule(moduleName);
+
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            if (!module.createScene) {
+                return res.status(400).json({ success: false, error: 'Scene management not supported by this module' });
+            }
+
+            const sceneData = req.body;
+
+            if (!sceneData || typeof sceneData !== 'object') {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Scene data is required'
+                });
+            }
+
+            const result = await module.createScene(sceneData);
+            res.json(result);
+
+        } catch (error) {
+            this.logger.error('Home Assistant create scene error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 批量执行场景
+     */
+    async handleHAActivateScenes(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const module = this.moduleManager.getModule(moduleName);
+
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            if (!module.activateScenes) {
+                return res.status(400).json({ success: false, error: 'Scene management not supported by this module' });
+            }
+
+            const sceneIds = req.body;
+
+            if (!Array.isArray(sceneIds)) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Request body must be an array of scene IDs'
+                });
+            }
+
+            if (sceneIds.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Scene IDs array cannot be empty'
+                });
+            }
+
+            const result = await module.activateScenes(sceneIds);
+            res.json(result);
+
+        } catch (error) {
+            this.logger.error('Home Assistant activate scenes error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 删除场景
+     */
+    async handleHADeleteScene(req, res) {
+        try {
+            const { module: moduleName, scene_id } = req.params;
+            const module = this.moduleManager.getModule(moduleName);
+
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            if (!module.deleteScene) {
+                return res.status(400).json({ success: false, error: 'Scene management not supported by this module' });
+            }
+
+            if (!scene_id) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'scene_id is required'
+                });
+            }
+
+            const result = await module.deleteScene(scene_id);
+            res.json(result);
+
+        } catch (error) {
+            this.logger.error('Home Assistant delete scene error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 批量删除场景
+     */
+    async handleHADeleteScenes(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const module = this.moduleManager.getModule(moduleName);
+
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            if (!module.deleteScenes) {
+                return res.status(400).json({ success: false, error: 'Scene management not supported by this module' });
+            }
+
+            const sceneIds = req.body;
+
+            if (!Array.isArray(sceneIds)) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Request body must be an array of scene IDs'
+                });
+            }
+
+            if (sceneIds.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Scene IDs array cannot be empty'
+                });
+            }
+
+            const result = await module.deleteScenes(sceneIds);
+            res.json(result);
+
+        } catch (error) {
+            this.logger.error('Home Assistant delete scenes error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    // ================================
+    // Home Assistant Automation API Handlers
+    // ================================
+
+    /**
+     * 获取所有自动化列表
+     */
+    async handleGetHAAutomations(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const module = this.moduleManager.getModule(moduleName);
+
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            if (!module.getAutomations) {
+                return res.status(400).json({ success: false, error: 'Automation management not supported by this module' });
+            }
+
+            const result = await module.getAutomations();
+            res.json(result);
+
+        } catch (error) {
+            this.logger.error('Home Assistant get automations error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 获取单个自动化详情
+     */
+    async handleGetHAAutomation(req, res) {
+        try {
+            const { module: moduleName, automation_id } = req.params;
+            const module = this.moduleManager.getModule(moduleName);
+
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            if (!module.getAutomation) {
+                return res.status(400).json({ success: false, error: 'Automation management not supported by this module' });
+            }
+
+            if (!automation_id) {
+                return res.status(400).json({ success: false, error: 'Automation ID is required' });
+            }
+
+            const result = await module.getAutomation(automation_id);
+            res.json(result);
+
+        } catch (error) {
+            this.logger.error('Home Assistant get automation error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 创建自动化
+     */
+    async handleHACreateAutomation(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const module = this.moduleManager.getModule(moduleName);
+
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            if (!module.createAutomation) {
+                return res.status(400).json({ success: false, error: 'Automation management not supported by this module' });
+            }
+
+            const automationConfig = req.body;
+
+            if (!automationConfig || typeof automationConfig !== 'object') {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Request body must contain automation configuration'
+                });
+            }
+
+            const result = await module.createAutomation(automationConfig);
+            res.json(result);
+
+        } catch (error) {
+            this.logger.error('Home Assistant create automation error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 删除自动化
+     */
+    async handleHADeleteAutomation(req, res) {
+        try {
+            const { module: moduleName, automation_id } = req.params;
+            const module = this.moduleManager.getModule(moduleName);
+
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            if (!module.deleteAutomation) {
+                return res.status(400).json({ success: false, error: 'Automation management not supported by this module' });
+            }
+
+            if (!automation_id) {
+                return res.status(400).json({ success: false, error: 'Automation ID is required' });
+            }
+
+            const result = await module.deleteAutomation(automation_id);
+            res.json(result);
+
+        } catch (error) {
+            this.logger.error('Home Assistant delete automation error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 启用自动化
+     */
+    async handleHAEnableAutomation(req, res) {
+        try {
+            const { module: moduleName, automation_id } = req.params;
+            const module = this.moduleManager.getModule(moduleName);
+
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            if (!module.enableAutomation) {
+                return res.status(400).json({ success: false, error: 'Automation management not supported by this module' });
+            }
+
+            if (!automation_id) {
+                return res.status(400).json({ success: false, error: 'Automation ID is required' });
+            }
+
+            const result = await module.enableAutomation(automation_id);
+            res.json(result);
+
+        } catch (error) {
+            this.logger.error('Home Assistant enable automation error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 禁用自动化
+     */
+    async handleHADisableAutomation(req, res) {
+        try {
+            const { module: moduleName, automation_id } = req.params;
+            const module = this.moduleManager.getModule(moduleName);
+
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            if (!module.disableAutomation) {
+                return res.status(400).json({ success: false, error: 'Automation management not supported by this module' });
+            }
+
+            if (!automation_id) {
+                return res.status(400).json({ success: false, error: 'Automation ID is required' });
+            }
+
+            const result = await module.disableAutomation(automation_id);
+            res.json(result);
+
+        } catch (error) {
+            this.logger.error('Home Assistant disable automation error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 触发自动化（手动执行）
+     */
+    async handleHATriggerAutomation(req, res) {
+        try {
+            const { module: moduleName, automation_id } = req.params;
+            const module = this.moduleManager.getModule(moduleName);
+
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            if (!module.triggerAutomation) {
+                return res.status(400).json({ success: false, error: 'Automation management not supported by this module' });
+            }
+
+            if (!automation_id) {
+                return res.status(400).json({ success: false, error: 'Automation ID is required' });
+            }
+
+            const result = await module.triggerAutomation(automation_id);
+            res.json(result);
+
+        } catch (error) {
+            this.logger.error('Home Assistant trigger automation error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * 重新加载自动化配置
+     */
+    async handleHAReloadAutomations(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const module = this.moduleManager.getModule(moduleName);
+
+            if (!module || moduleName !== 'home_assistant') {
+                return res.status(404).json({ success: false, error: 'Home Assistant module not found' });
+            }
+
+            if (!module.reloadAutomations) {
+                return res.status(400).json({ success: false, error: 'Automation management not supported by this module' });
+            }
+
+            const result = await module.reloadAutomations();
+            res.json(result);
+
+        } catch (error) {
+            this.logger.error('Home Assistant reload automations error:', error);
             res.status(500).json({ success: false, error: error.message });
         }
     }
@@ -3608,6 +4043,30 @@ class CredentialService {
     }
 
     /**
+     * 删除模块凭据
+     */
+    async handleDeleteCredentials(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            
+            const module = this.moduleManager.getModule(moduleName);
+            if (!module) {
+                return res.status(404).json({ success: false, error: 'Module not found' });
+            }
+            
+            const result = await module.deleteCredentials();
+            
+            if (result.success) {
+                res.json(result);
+            } else {
+                res.status(400).json(result);
+            }
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
      * 批量获取凭据
      */
     async handleBatchGetCredentials(req, res) {
@@ -4219,6 +4678,824 @@ class CredentialService {
                 console.error(`[ERROR][Server] ${message}`, ...args);
             }
         };
+    }
+
+    async handleGetAIEnhancedSaved(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_entities') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_entities module not found' });
+            }
+            const saved = await mod.getSaved();
+            res.json(saved);
+        } catch (error) {
+            this.logger.error('Get AI Enhanced Saved error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleRunAIEnhancedWorkflow(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_entities') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_entities module not found' });
+            }
+            const { provider, trigger_source } = req.body || {};
+            const result = await mod.runWorkflow({
+                provider,
+                triggerSource: trigger_source || 'manual'
+            });
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Run AI Enhanced Workflow error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleGetAIEnhancedPrompt(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_entities') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_entities module not found' });
+            }
+            const result = await mod.getSystemPrompt();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Get AI Enhanced Prompt error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleSaveAIEnhancedPrompt(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_entities') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_entities module not found' });
+            }
+            const { prompt } = req.body || {};
+            if (!prompt) {
+                return res.status(400).json({ success: false, error: 'Prompt is required' });
+            }
+            const result = await mod.saveSystemPrompt(prompt);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Save AI Enhanced Prompt error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleDeleteAIEnhancedPrompt(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_entities') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_entities module not found' });
+            }
+            const result = await mod.deleteSystemPrompt();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Delete AI Enhanced Prompt error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    // Intention Module Handlers
+    async handleProcessIntention(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'intention') {
+                return res.status(404).json({ success: false, error: 'intention module not found' });
+            }
+            const intentionData = req.body;
+            const result = await mod.processIntention(intentionData);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Process Intention error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleClassifyIntention(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'intention') {
+                return res.status(404).json({ success: false, error: 'intention module not found' });
+            }
+            
+            // Support both old format (user_input) and new format (content)
+            const { user_input, content, type, metadata, timestamp } = req.body;
+            const userInput = content || user_input; // Prefer new format, fallback to old format
+            
+            // Pass additional metadata if provided
+            const result = await mod.classifyIntention(userInput, {
+                type,
+                metadata,
+                timestamp
+            });
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Classify Intention error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleGetIntentionHistory(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'intention') {
+                return res.status(404).json({ success: false, error: 'intention module not found' });
+            }
+            const limit = parseInt(req.query.limit) || 50;
+            const result = await mod.getHistory(limit);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Get Intention History error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleGetIntentionPrompt(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'intention') {
+                return res.status(404).json({ success: false, error: 'intention module not found' });
+            }
+            const result = await mod.getSystemPrompt();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Get Intention Prompt error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleSaveIntentionPrompt(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'intention') {
+                return res.status(404).json({ success: false, error: 'intention module not found' });
+            }
+            const { prompt } = req.body || {};
+            if (!prompt) {
+                return res.status(400).json({ success: false, error: 'Prompt is required' });
+            }
+            const result = await mod.saveSystemPrompt(prompt);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Save Intention Prompt error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleDeleteIntentionPrompt(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'intention') {
+                return res.status(404).json({ success: false, error: 'intention module not found' });
+            }
+            const result = await mod.deleteSystemPrompt();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Delete Intention Prompt error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleGetClassificationPrompt(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'intention') {
+                return res.status(404).json({ success: false, error: 'intention module not found' });
+            }
+            const result = await mod.getClassificationSystemPrompt();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Get Classification Prompt error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleSaveClassificationPrompt(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'intention') {
+                return res.status(404).json({ success: false, error: 'intention module not found' });
+            }
+            const { prompt } = req.body;
+            const result = await mod.saveClassificationPrompt(prompt);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Save Classification Prompt error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleDeleteClassificationPrompt(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'intention') {
+                return res.status(404).json({ success: false, error: 'intention module not found' });
+            }
+            const result = await mod.deleteClassificationPrompt();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Delete Classification Prompt error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleGetIntentionAIProvider(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'intention') {
+                return res.status(404).json({ success: false, error: 'intention module not found' });
+            }
+            const result = await mod.getAIProviderConfig();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Get Intention AI Provider error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleSetIntentionAIProvider(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'intention') {
+                return res.status(404).json({ success: false, error: 'intention module not found' });
+            }
+            const { provider } = req.body || {};
+            if (!provider) {
+                return res.status(400).json({ success: false, error: 'Provider is required' });
+            }
+            const result = await mod.setAIProvider(provider);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Set Intention AI Provider error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    // BestMatch Module Handlers
+    async handleBestMatchMatch(req, res) {
+        try {
+            // 支持两种路径格式
+            // 1. /api/bestMatch/:module/match (moduleName 从 params 获取)
+            // 2. /api/modules/bestMatch/match (旧格式，直接使用 'bestMatch')
+            const moduleName = req.params.module || 'bestMatch';
+            const mod = this.moduleManager.getModule(moduleName);
+            
+            if (!mod || moduleName !== 'bestMatch') {
+                return res.status(404).json({ success: false, error: 'bestMatch module not found' });
+            }
+            
+            const body = req.body || {};
+            
+            // 支持多种输入格式
+            let intentionResult, userQuery;
+            
+            // 格式1: 最新格式 - 直接传入 intention 对象（推荐）
+            // 输入: {"success":true,"data":{"user_input":"...","devices":[...],...}}
+            if (body.success !== undefined && body.data) {
+                intentionResult = body;
+                userQuery = '';
+            }
+            // 格式2: 旧格式 - intention_result 包装格式
+            else if (body.intention_result) {
+                intentionResult = body.intention_result;
+                userQuery = '';
+            }
+            // 格式3: 最旧格式 - 直接传数组
+            else if (body.intent_devices) {
+                intentionResult = body.intent_devices || [];
+                userQuery = body.user_query || '';
+            }
+            // 格式4: 无法识别
+            else {
+                return res.status(400).json({ 
+                    success: false, 
+                    error: 'Invalid input format. Expected intention object or intent_devices array' 
+                });
+            }
+            
+            // entities 始终自动获取，不再从请求中接收
+            const result = await mod.matchDevices(intentionResult, null, userQuery);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('BestMatch match error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleBestMatchHistory(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'bestMatch') {
+                return res.status(404).json({ success: false, error: 'bestMatch module not found' });
+            }
+            const limit = parseInt(req.query.limit) || 50;
+            const result = await mod.getHistory(limit);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('BestMatch history error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleBestMatchGetAliases(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'bestMatch') {
+                return res.status(404).json({ success: false, error: 'bestMatch module not found' });
+            }
+            const aliases = await mod.getAliases();
+            res.json({ success: true, data: aliases });
+        } catch (error) {
+            this.logger.error('BestMatch get aliases error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleBestMatchUpdateAliases(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'bestMatch') {
+                return res.status(404).json({ success: false, error: 'bestMatch module not found' });
+            }
+            const newAliases = req.body || {};
+            const result = await mod.updateAliases(newAliases);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('BestMatch update aliases error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleBestMatchStats(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'bestMatch') {
+                return res.status(404).json({ success: false, error: 'bestMatch module not found' });
+            }
+            const result = await mod.getStats();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('BestMatch stats error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    // AI Enhanced Scene Module Handlers
+    async handleAISceneExecute(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_scene') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_scene module not found' });
+            }
+            const inputData = req.body;
+            const result = await mod.executeScene(inputData);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('AI Scene Execute error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleAISceneCreate(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_scene') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_scene module not found' });
+            }
+            const inputData = req.body;
+            const result = await mod.createScene(inputData);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('AI Scene Create error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleAISceneDelete(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_scene') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_scene module not found' });
+            }
+            const inputData = req.body;
+            const result = await mod.deleteScene(inputData);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('AI Scene Delete error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleGetAIScenePrompts(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_scene') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_scene module not found' });
+            }
+            const result = await mod.getAllPrompts();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Get AI Scene Prompts error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleUpdateAIScenePrompt(req, res) {
+        try {
+            const { module: moduleName, type } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_scene') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_scene module not found' });
+            }
+            const { prompt } = req.body;
+            const result = await mod.updatePrompt(type, prompt);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Update AI Scene Prompt error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleGetAISceneInfo(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_scene') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_scene module not found' });
+            }
+            const result = await mod.getInfo();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Get AI Scene Info error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleAISceneList(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_scene') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_scene module not found' });
+            }
+            const inputData = req.body;
+            const result = await mod.listScenes(inputData);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('AI Scene List error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    // AI Enhanced Automation Module Handlers
+    async handleAIAutomationCreate(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_automation') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_automation module not found' });
+            }
+            const inputData = req.body;
+            const result = await mod.createAutomation(inputData);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('AI Automation Create error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleAIAutomationList(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_automation') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_automation module not found' });
+            }
+            const result = await mod.listAutomations();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('AI Automation List error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleAIAutomationGet(req, res) {
+        try {
+            const { module: moduleName, id } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_automation') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_automation module not found' });
+            }
+            const result = await mod.getAutomation(id);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('AI Automation Get error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleAIAutomationDelete(req, res) {
+        try {
+            const { module: moduleName, id } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_automation') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_automation module not found' });
+            }
+            const result = await mod.deleteAutomation(id);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('AI Automation Delete error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleAIAutomationDeleteWithMessage(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_automation') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_automation module not found' });
+            }
+            const result = await mod.deleteAutomationWithMessage(req.body);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('AI Automation Delete with message error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleAIAutomationEnable(req, res) {
+        try {
+            const { module: moduleName, id } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_automation') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_automation module not found' });
+            }
+            const result = await mod.enableAutomation(id);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('AI Automation Enable error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleAIAutomationEnableWithMessage(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_automation') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_automation module not found' });
+            }
+            const result = await mod.enableAutomationWithMessage(req.body);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('AI Automation Enable with message error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleAIAutomationDisable(req, res) {
+        try {
+            const { module: moduleName, id } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_automation') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_automation module not found' });
+            }
+            const result = await mod.disableAutomation(id);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('AI Automation Disable error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleAIAutomationDisableWithMessage(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_automation') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_automation module not found' });
+            }
+            const result = await mod.disableAutomationWithMessage(req.body);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('AI Automation Disable with message error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleAIAutomationAvailable(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_automation') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_automation module not found' });
+            }
+            const inputData = req.body;
+            const result = await mod.listAvailableAutomations(inputData);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('AI Automation Available error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleGetAIAutomationPrompts(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_automation') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_automation module not found' });
+            }
+            const fs = require('fs').promises;
+            const path = require('path');
+            const prompts = {};
+            
+            // Read all prompt files
+            const promptTypes = ['create_automation', 'update_automation'];
+            for (const type of promptTypes) {
+                const promptFile = path.join(mod.dataDir, `${type}_prompt.txt`);
+                try {
+                    prompts[type] = await fs.readFile(promptFile, 'utf-8');
+                } catch (e) {
+                    prompts[type] = '';
+                }
+            }
+            
+            res.json({ success: true, data: prompts });
+        } catch (error) {
+            this.logger.error('Get AI Automation Prompts error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleUpdateAIAutomationPrompt(req, res) {
+        try {
+            const { module: moduleName, type } = req.params;
+            const { prompt } = req.body;
+            
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'ai_enhanced_automation') {
+                return res.status(404).json({ success: false, error: 'ai_enhanced_automation module not found' });
+            }
+            
+            if (!prompt) {
+                return res.status(400).json({ success: false, error: 'Prompt content is required' });
+            }
+            
+            const fs = require('fs').promises;
+            const path = require('path');
+            const promptFile = path.join(mod.dataDir, `${type}_prompt.txt`);
+            
+            await fs.writeFile(promptFile, prompt, 'utf-8');
+            
+            res.json({ 
+                success: true, 
+                message: `Prompt ${type} updated successfully`,
+                data: { type, prompt }
+            });
+        } catch (error) {
+            this.logger.error('Update AI Automation Prompt error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    // Communication Module Handlers
+    async handleCommunicationSend(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'communication') {
+                return res.status(404).json({ success: false, error: 'communication module not found' });
+            }
+            const result = await mod.sendMessage(req.body);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Communication send error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleCommunicationReceive(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'communication') {
+                return res.status(404).json({ success: false, error: 'communication module not found' });
+            }
+            const result = await mod.receiveMessage(req.body);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Communication receive error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleCommunicationGetMessages(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'communication') {
+                return res.status(404).json({ success: false, error: 'communication module not found' });
+            }
+            const options = {
+                direction: req.query.direction,
+                type: req.query.type,
+                limit: req.query.limit ? parseInt(req.query.limit) : undefined
+            };
+            const result = await mod.getMessages(options);
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Communication get messages error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleCommunicationClearMessages(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'communication') {
+                return res.status(404).json({ success: false, error: 'communication module not found' });
+            }
+            const result = await mod.clearMessages();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Communication clear messages error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleCommunicationStartWebSocket(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'communication') {
+                return res.status(404).json({ success: false, error: 'communication module not found' });
+            }
+            const result = await mod.startWebSocketServer();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Communication start WebSocket error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleCommunicationStopWebSocket(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'communication') {
+                return res.status(404).json({ success: false, error: 'communication module not found' });
+            }
+            const result = await mod.stopWebSocketServer();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Communication stop WebSocket error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async handleCommunicationWebSocketStatus(req, res) {
+        try {
+            const { module: moduleName } = req.params;
+            const mod = this.moduleManager.getModule(moduleName);
+            if (!mod || moduleName !== 'communication') {
+                return res.status(404).json({ success: false, error: 'communication module not found' });
+            }
+            const result = mod.getWebSocketStatus();
+            res.json(result);
+        } catch (error) {
+            this.logger.error('Communication WebSocket status error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
     }
 }
 

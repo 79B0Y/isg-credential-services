@@ -1,0 +1,229 @@
+{
+  "rooms": {
+    "living_room": [
+      "客厅",
+      "客厅房间",
+      "keting",
+      "living",
+      "livingroom",
+      "living_room",
+      "living room",
+      "lounge"
+    ],
+    "bedroom": [
+      "卧室",
+      "卧室房间",
+      "woshi",
+      "bedroom",
+      "bed_room",
+      "bed room"
+    ],
+    "master_bedroom": [
+      "主卧",
+      "主卧室",
+      "主卧房间",
+      "zhuwo",
+      "master",
+      "masterbedroom",
+      "master_bedroom",
+      "master bedroom"
+    ],
+    "kitchen": [
+      "厨房",
+      "厨房房间",
+      "chufang",
+      "kitchen"
+    ],
+    "bathroom": [
+      "浴室",
+      "浴室房间",
+      "卫生间",
+      "卫生间房间",
+      "yushi",
+      "weishengjian",
+      "bathroom",
+      "bath_room",
+      "bath room"
+    ],
+    "study": [
+      "书房",
+      "书房房间",
+      "shufang",
+      "study",
+      "study room",
+      "office"
+    ],
+    "dining_room": [
+      "餐厅",
+      "餐厅房间",
+      "canting",
+      "dining",
+      "diningroom",
+      "dining_room",
+      "dining room"
+    ],
+    "garage": [
+      "车库",
+      "车库房间",
+      "cheku",
+      "garage"
+    ],
+    "garden": [
+      "花园",
+      "花园房间",
+      "后院",
+      "huayuan",
+      "houyuan",
+      "garden",
+      "backyard",
+      "back_yard",
+      "back yard"
+    ],
+    "balcony": [
+      "阳台",
+      "阳台房间",
+      "yangtai",
+      "balcony"
+    ],
+    "tv_room": [
+      "电视房",
+      "电视房间",
+      "影音室",
+      "影音室房间",
+      "tv",
+      "tvroom",
+      "tv_room",
+      "tv room",
+      "media_room",
+      "media room"
+    ],
+    "guest_room": [
+      "客房",
+      "客房房间",
+      "guest",
+      "guestroom",
+      "guest_room",
+      "guest room"
+    ]
+  },
+  "floors": {
+    "1": [
+      "一楼",
+      "1楼",
+      "yilou",
+      "first",
+      "firstfloor",
+      "first_floor"
+    ],
+    "2": [
+      "二楼",
+      "2楼",
+      "erlou",
+      "second",
+      "secondfloor",
+      "second_floor"
+    ],
+    "3": [
+      "三楼",
+      "3楼",
+      "sanlou",
+      "third",
+      "thirdfloor",
+      "third_floor"
+    ],
+    "first_floor": [
+      "一楼",
+      "1楼",
+      "yilou",
+      "first",
+      "firstfloor",
+      "first_floor",
+      "first floor",
+      "ground",
+      "ground_floor",
+      "1"
+    ],
+    "second_floor": [
+      "二楼",
+      "2楼",
+      "erlou",
+      "second",
+      "secondfloor",
+      "second_floor",
+      "second floor",
+      "2"
+    ],
+    "third_floor": [
+      "三楼",
+      "3楼",
+      "sanlou",
+      "third",
+      "thirdfloor",
+      "third_floor",
+      "third floor",
+      "3"
+    ]
+  },
+  "device_types": {
+    "light": [
+      "light",
+      "lights",
+      "lamp",
+      "deng",
+      "灯",
+      "灯光"
+    ],
+    "switch": [
+      "switch",
+      "kaiguan",
+      "开关",
+      "socket",
+      "chazuo",
+      "插座"
+    ],
+    "climate": [
+      "climate",
+      "ac",
+      "aircon",
+      "kongtiao",
+      "空调"
+    ],
+    "fan": [
+      "fan",
+      "fengshan",
+      "风扇"
+    ],
+    "cover": [
+      "cover",
+      "chuanglian",
+      "窗帘"
+    ],
+    "camera": [
+      "camera",
+      "cam",
+      "shexiangtou",
+      "摄像头"
+    ],
+    "sensor": [
+      "sensor",
+      "chuanganqi",
+      "传感器"
+    ]
+  },
+  "device_names": {
+    "Floor light": {
+      "entity_id": "light.light_test_001",
+      "device_type": "light",
+      "user_names": [
+        {
+          "name": "落地灯",
+          "room": "living_room",
+          "confidence": 0.9,
+          "learned_at": "2025-10-27T07:16:10.910Z",
+          "use_count": 15,
+          "last_used": "2025-10-29T04:55:21.187Z"
+        }
+      ]
+    }
+  }
+}

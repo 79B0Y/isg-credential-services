@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Best Match API 测试文档</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-dark: #7c3aed;
+            --secondary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --light: #f5f5f5;
+            --dark: #1f2937;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+        .panel {
+            background: var(--white);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-error {
+            background: var(--danger);
+            color: white;
+        }
+
+        .status-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #2563eb;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--light);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        textarea.form-control {
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+        }
+
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid var(--info);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .success-box {
+            background: #f0fdf4;
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .warning-box {
+            background: #fffbeb;
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .error-box {
+            background: #fef2f2;
+            border-left: 4px solid var(--danger);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .code-block {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            margin: 1rem 0;
+            line-height: 1.6;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .api-endpoint {
+            background: var(--light);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .api-method {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-weight: bold;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+        }
+
+        .method-get {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .method-post {
+            background: #10b981;
+            color: white;
+        }
+
+        .method-put {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .method-delete {
+            background: #ef4444;
+            color: white;
+        }
+
+        .api-path {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #6b7280;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab:hover {
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .feature-desc {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .example-card {
+            background: var(--light);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .example-card:hover {
+            background: #e5e7eb;
+            transform: translateX(4px);
+        }
+
+        .example-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .example-desc {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎯 Best Match API</h1>
+            <p>智能设备匹配系统 - TF-IDF + 余弦相似度算法</p>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="totalMatches">-</span>
+                    <span class="stat-label">总匹配次数</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="successRate">-</span>
+                    <span class="stat-label">成功率</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="avgScore">-</span>
+                    <span class="stat-label">平均得分</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">6</span>
+                    <span class="stat-label">匹配场景</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('test')">🧪 测试匹配</button>
+            <button class="tab" onclick="switchTab('api')">📚 API 文档</button>
+            <button class="tab" onclick="switchTab('examples')">💡 示例场景</button>
+            <button class="tab" onclick="switchTab('aliases')">🔖 别名管理</button>
+            <button class="tab" onclick="switchTab('history')">📊 历史记录</button>
+        </div>
+
+        <!-- Tab: Test -->
+        <div id="tab-test" class="tab-content active">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">🧪 测试智能匹配</div>
+                    <span class="status-badge status-success">Ready</span>
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 提示：</strong> 输入格式与 PDF 示例一致。左侧输入意图数据和实体数据，右侧显示匹配结果。
+                </div>
+
+                <div class="grid-2">
+                    <!-- Left Side: Input -->
+                    <div>
+                        <div class="form-group">
+                            <label class="form-label">📥 输入数据对象 1：意图数据 (Intention Data)</label>
+                            <textarea id="intentionData" class="form-control" style="min-height: 250px;">{
+  "success": true,
+  "data": {
+    "user_input": "打开一楼灯和二楼空调",
+    "intent": "Control Device",
+    "devices": [{
+      "floor_name": "一楼",
+      "floor_name_en": "First Floor",
+      "floor_type": "first_floor",
+      "room_type": "",
+      "room_name": "",
+      "device_type": "light",
+      "device_name": "",
+      "service": "light.turn_on"
+    }, {
+      "floor_name": "二楼",
+      "floor_name_en": "Second Floor",
+      "floor_type": "second_floor",
+      "room_type": "",
+      "room_name": "",
+      "device_type": "climate",
+      "device_name": "",
+      "service": "climate.turn_on"
+    }]
+  }
+}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">📥 输入数据对象 2：实体数据 (Entities Data)</label>
+                            <textarea id="entitiesData" class="form-control" style="min-height: 250px;">{
+  "success": true,
+  "data": {
+    "count": 5,
+    "floors": ["first floor", "二楼"],
+    "rooms": ["客厅", "厨房", "书房"],
+    "entities": [{
+      "entity_id": "light.color_light_1",
+      "friendly_name": "吸顶灯",
+      "device_type": "light",
+      "room_name": "living_room",
+      "floor_name": "first_floor",
+      "level": 1
+    }, {
+      "entity_id": "climate.auto_ac_001",
+      "friendly_name": "HA VT 卧室空调",
+      "device_type": "climate",
+      "room_name": "主卧",
+      "floor_name": "二楼",
+      "level": 2
+    }]
+  }
+}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: Output -->
+                    <div>
+                        <div class="form-group">
+                            <label class="form-label">📤 匹配结果 (Matched Entities)</label>
+                            <div id="matchResults" style="min-height: 520px; border: 2px solid var(--light); border-radius: 0.5rem; padding: 1rem; background: #f9fafb;">
+                                <p style="color: #6b7280; text-align: center; padding: 2rem;">点击"执行匹配"查看结果...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="testMatch()">
+                        <span>🚀 执行匹配</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadExampleData()">
+                        <span>📋 加载示例</span>
+                    </button>
+                    <button class="btn btn-success" onclick="loadPDFExample()">
+                        <span>📄 PDF 示例</span>
+                    </button>
+                    <button class="btn btn-warning" onclick="autoFetchEntities()">
+                        <span>🔄 自动获取实体</span>
+                    </button>
+                    <button class="btn btn-danger" onclick="clearResults()">
+                        <span>🗑️ 清空结果</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: API -->
+        <div id="tab-api" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">📚 API 端点文档</div>
+                </div>
+
+                <div class="api-endpoint">
+                    <div style="margin-bottom: 0.5rem;">
+                        <span class="api-method method-post">POST</span>
+                        <span class="api-path">/api/bestMatch/bestMatch/match</span>
+                    </div>
+                    <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 0.75rem;">执行智能设备匹配</p>
+                    
+                    <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 0.75rem; border-radius: 0.25rem; margin-bottom: 1rem;">
+                        <strong style="color: #1e40af;">⭐ 新格式（推荐）</strong>
+                        <p style="color: #1e3a8a; font-size: 0.875rem; margin-top: 0.5rem; margin-bottom: 0;">
+                            直接传入 Intention 模块返回的完整对象，Entities 数据将自动从 AI Enhanced Entities 模块获取。
+                        </p>
+                    </div>
+                    
+                    <div class="code-block">// ⭐ 新格式请求示例（推荐）
+{
+  "success": true,
+  "data": {
+    "user_input": "打开二楼灯，关闭一楼空调",
+    "intent": "Control Device",
+    "devices": [{
+      "floor_name": "二楼",
+      "floor_name_en": "Second Floor",
+      "floor_type": "second_floor",
+      "room_type": "",
+      "room_name": "",
+      "room_name_en": "",
+      "device_type": "light",
+      "device_name": "",
+      "device_name_en": "",
+      "service": "light.turn_on",
+      "service_data": {}
+    }],
+    "confidence": 0.95,
+    "user_responds": "好的，即将为您打开二楼灯光",
+    "ai_provider": "deepseek",
+    "processed_at": "2025-10-26T01:45:34.329Z"
+  }
+}
+
+// 旧格式（向后兼容）
+{
+  "intent_devices": [{
+    "floor_name": "一楼",
+    "room_name": "客厅",
+    "device_type": "light"
+  }],
+  "entities": [{
+    "entity_id": "light.living_room_light",
+    "friendly_name": "客厅灯",
+    ...
+  }],
+  "user_query": "打开一楼客厅灯"
+}</div>
+                </div>
+
+                <div class="api-endpoint">
+                    <div style="margin-bottom: 0.5rem;">
+                        <span class="api-method method-get">GET</span>
+                        <span class="api-path">/api/modules/bestMatch/history?limit=50</span>
+                    </div>
+                    <p style="color: #6b7280; font-size: 0.875rem;">获取匹配历史记录</p>
+                </div>
+
+                <div class="api-endpoint">
+                    <div style="margin-bottom: 0.5rem;">
+                        <span class="api-method method-get">GET</span>
+                        <span class="api-path">/api/modules/bestMatch/stats</span>
+                    </div>
+                    <p style="color: #6b7280; font-size: 0.875rem;">获取统计信息（总次数、成功率、平均得分）</p>
+                </div>
+
+                <div class="api-endpoint">
+                    <div style="margin-bottom: 0.5rem;">
+                        <span class="api-method method-get">GET</span>
+                        <span class="api-path">/api/modules/bestMatch/aliases</span>
+                    </div>
+                    <p style="color: #6b7280; font-size: 0.875rem;">获取别名字典（楼层、房间、设备类型）</p>
+                </div>
+
+                <div class="api-endpoint">
+                    <div style="margin-bottom: 0.5rem;">
+                        <span class="api-method method-post">POST</span>
+                        <span class="api-path">/api/modules/bestMatch/aliases</span>
+                    </div>
+                    <p style="color: #6b7280; font-size: 0.875rem;">更新别名字典</p>
+                </div>
+
+                <div class="api-endpoint">
+                    <div style="margin-bottom: 0.5rem;">
+                        <span class="api-method method-delete">DELETE</span>
+                        <span class="api-path">/api/modules/bestMatch/history</span>
+                    </div>
+                    <p style="color: #6b7280; font-size: 0.875rem;">清除所有历史记录</p>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">🎯 匹配算法详解</div>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🔍</div>
+                        <div class="feature-title">TF-IDF 算法</div>
+                        <div class="feature-desc">使用文本向量化技术计算相似度</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚖️</div>
+                        <div class="feature-title">加权评分</div>
+                        <div class="feature-desc">楼层15% + 房间40% + 设备名30% + 类型15%</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌐</div>
+                        <div class="feature-title">多语言支持</div>
+                        <div class="feature-desc">中文、英文、拼音全面支持</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔄</div>
+                        <div class="feature-title">模糊匹配</div>
+                        <div class="feature-desc">忽略空格、下划线、大小写</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📍</div>
+                        <div class="feature-title">位置提取</div>
+                        <div class="feature-desc">智能从设备名提取位置信息</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <div class="feature-title">AI 建议</div>
+                        <div class="feature-desc">匹配失败时调用 LLM 提供建议</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Examples -->
+        <div id="tab-examples" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">💡 匹配场景示例</div>
+                </div>
+
+                <div class="example-card" onclick="loadExample('all')">
+                    <div class="example-title">场景1：所有设备模式</div>
+                    <div class="example-desc">查询："打开所有灯" - 返回所有灯光设备</div>
+                </div>
+
+                <div class="example-card" onclick="loadExample('floor')">
+                    <div class="example-title">场景2：楼层模式</div>
+                    <div class="example-desc">查询："打开一楼空调" - 返回一楼所有空调设备</div>
+                </div>
+
+                <div class="example-card" onclick="loadExample('room-generic')">
+                    <div class="example-title">场景3：房间 + 泛指设备</div>
+                    <div class="example-desc">查询："打开客厅灯" - 返回客厅所有灯光设备</div>
+                </div>
+
+                <div class="example-card" onclick="loadExample('room-specific')">
+                    <div class="example-title">场景4：房间 + 具体设备名</div>
+                    <div class="example-desc">查询："打开卧室吸顶灯" - 精确匹配卧室吸顶灯</div>
+                </div>
+
+                <div class="example-card" onclick="loadExample('complete')">
+                    <div class="example-title">场景5：完整匹配</div>
+                    <div class="example-desc">查询："打开一楼客厅吸顶灯" - 最精确的匹配</div>
+                </div>
+
+                <div class="example-card" onclick="loadExample('location')">
+                    <div class="example-title">场景6：智能位置提取</div>
+                    <div class="example-desc">查询："打开backyard开关" - 从设备名提取位置</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Aliases -->
+        <div id="tab-aliases" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">🔖 别名管理</div>
+                    <button class="btn btn-success" onclick="loadAliases()">
+                        <span>🔄 刷新别名</span>
+                    </button>
+                </div>
+
+                <div id="aliasesContent">
+                    <p style="color: #6b7280;">点击"刷新别名"加载当前别名字典...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: History -->
+        <div id="tab-history" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">📊 匹配历史</div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-secondary" onclick="loadHistory()">
+                            <span>🔄 刷新</span>
+                        </button>
+                        <button class="btn btn-danger" onclick="clearHistory()">
+                            <span>🗑️ 清空</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="historyContent">
+                    <p style="color: #6b7280;">点击"刷新"加载历史记录...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Switching
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById('tab-' + tabName).classList.add('active');
+
+            // Load data for certain tabs
+            if (tabName === 'history') {
+                loadHistory();
+            } else if (tabName === 'aliases') {
+                loadAliases();
+            }
+        }
+
+        // Load Statistics
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/bestMatch/bestMatch/stats');
+                const result = await response.json();
+
+                if (result.success) {
+                    const data = result.data;
+                    document.getElementById('totalMatches').textContent = data.requests || 0;
+                    document.getElementById('successRate').textContent =
+                        data.requests > 0
+                            ? Math.round((data.actions_matched / data.requests) * 100) + '%'
+                            : '-';
+                    document.getElementById('avgScore').textContent =
+                        data.avg_score ? data.avg_score.toFixed(2) : '-';
+                }
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+
+        // Test Match
+        async function testMatch() {
+            const resultDiv = document.getElementById('matchResults');
+            resultDiv.innerHTML = '<div class="info-box">⏳ 正在执行匹配...</div>';
+
+            try {
+                // Parse intention object
+                const intentionObj = JSON.parse(document.getElementById('intentionData').value);
+
+                // ⭐ 新格式：直接传入 intention 对象，entities 自动获取
+                const response = await fetch('/api/bestMatch/bestMatch/match', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(intentionObj)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    const userQuery = intentionObj.data?.user_input || '';
+                    displayMatchResult(result.data, userQuery);
+                    loadStats(); // Refresh stats
+                } else {
+                    resultDiv.innerHTML = `<div class="error-box"><strong>❌ 错误：</strong> ${result.error || '未知错误'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error-box"><strong>❌ 解析错误：</strong> ${error.message}<br><small>请检查输入格式是否正确</small></div>`;
+            }
+        }
+
+        // Display Match Result
+        function displayMatchResult(data, userQuery) {
+            const resultDiv = document.getElementById('matchResults');
+            let html = '';
+
+            // Header
+            html += `
+                <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                    <strong>✅ 匹配成功</strong>
+                    ${userQuery ? `<br><small>查询: ${userQuery}</small>` : ''}
+                </div>`;
+
+            if (data.actions && data.actions.length > 0) {
+                let totalMatched = 0;
+                data.actions.forEach((action, index) => {
+                    totalMatched += action.targets.length;
+
+                    html += `
+                        <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                <strong style="color: #047857;">动作 #${index + 1}</strong>
+                                <span style="background: ${action.targets.length > 0 ? '#10b981' : '#f59e0b'}; color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem;">
+                                    ${action.targets.length} 个设备
+                                </span>
+                            </div>`;
+
+                    // Display request info
+                    const req = action.request;
+                    html += `<div style="font-size: 0.875rem; color: #065f46; margin-bottom: 0.5rem;">`;
+                    if (req.floor) html += `<span style="background: #d1fae5; padding: 0.125rem 0.5rem; border-radius: 0.25rem; margin-right: 0.25rem;">🏢 ${req.floor}</span>`;
+                    if (req.room) html += `<span style="background: #d1fae5; padding: 0.125rem 0.5rem; border-radius: 0.25rem; margin-right: 0.25rem;">🚪 ${req.room}</span>`;
+                    if (req.device_type) html += `<span style="background: #d1fae5; padding: 0.125rem 0.5rem; border-radius: 0.25rem; margin-right: 0.25rem;">💡 ${req.device_type}</span>`;
+                    if (req.device_name) html += `<span style="background: #d1fae5; padding: 0.125rem 0.5rem; border-radius: 0.25rem;">📛 ${req.device_name}</span>`;
+                    html += `</div>`;
+
+                    // Display matched entities
+                    if (action.targets.length > 0) {
+                        html += '<div style="margin-top: 0.75rem;">';
+                        action.targets.forEach((target, i) => {
+                            const scoreColor = target.score >= 0.9 ? '#10b981' : target.score >= 0.7 ? '#f59e0b' : '#ef4444';
+                            html += `
+                                <div style="background: white; border: 1px solid #e5e7eb; padding: 0.75rem; border-radius: 0.375rem; margin-bottom: 0.5rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                        <div style="flex: 1;">
+                                            <div style="font-weight: 600; color: #1f2937; margin-bottom: 0.25rem;">
+                                                ${target.device_name || target.entity_id}
+                                            </div>
+                                            <div style="font-size: 0.75rem; color: #6b7280; font-family: monospace;">
+                                                ${target.entity_id}
+                                            </div>
+                                        </div>
+                                        <div style="background: ${scoreColor}; color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600;">
+                                            ${(target.score * 100).toFixed(1)}%
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 0.875rem; color: #6b7280;">
+                                        <span>📍 ${target.floor || '-'} / ${target.room || '-'}</span>
+                                    </div>
+                                </div>`;
+                        });
+                        html += '</div>';
+                    } else if (action.suggestions_if_empty && action.suggestions_if_empty.length > 0) {
+                        html += '<div style="background: #fffbeb; border: 1px solid #fcd34d; padding: 0.75rem; border-radius: 0.375rem; margin-top: 0.75rem;">';
+                        html += '<strong style="color: #d97706;">⚠️ 未找到匹配，AI 建议：</strong><br><br>';
+                        action.suggestions_if_empty.forEach((suggestion, i) => {
+                            html += `
+                                <div style="font-size: 0.875rem; margin-bottom: 0.5rem;">
+                                    <strong>${i + 1}. ${suggestion.entity_id}</strong><br>
+                                    <span style="color: #92400e;">${suggestion.device_name} (${suggestion.room}, ${suggestion.floor})</span>
+                                </div>`;
+                        });
+                        html += '</div>';
+                    } else {
+                        html += '<div style="background: #fee2e2; border: 1px solid #fca5a5; padding: 0.75rem; border-radius: 0.375rem; margin-top: 0.75rem; color: #991b1b;">⚠️ 未找到匹配设备</div>';
+                    }
+
+                    html += '</div>';
+                });
+
+                // Summary
+                html += `
+                    <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                        <strong style="color: #1e40af;">📊 匹配摘要</strong><br>
+                        <div style="margin-top: 0.5rem; font-size: 0.875rem; color: #1e40af;">
+                            总共匹配到 <strong>${totalMatched}</strong> 个设备，来自 <strong>${data.actions.length}</strong> 个动作
+                        </div>
+                    </div>`;
+            } else {
+                html = '<div style="background: #fee2e2; border-left: 4px solid #ef4444; padding: 1rem; border-radius: 0.5rem; color: #991b1b;">❌ 没有匹配结果</div>';
+            }
+
+            resultDiv.innerHTML = html;
+        }
+
+        // Load Example Data
+        function loadExampleData() {
+            // ⭐ 新格式：只需要 intention 对象，entities 自动获取
+            const exampleIntention = {
+                "success": true,
+                "data": {
+                    "user_input": "打开一楼客厅灯",
+                    "intent": "Control Device",
+                    "devices": [{
+                        "floor_name": "一楼",
+                        "floor_name_en": "First Floor",
+                        "floor_type": "first_floor",
+                        "room_name": "客厅",
+                        "room_name_en": "Living Room",
+                        "room_type": "living_room",
+                        "device_type": "light",
+                        "device_name": "",
+                        "device_name_en": "",
+                        "service": "light.turn_on",
+                        "service_data": {}
+                    }],
+                    "confidence": 0.95,
+                    "user_responds": "好的，即将为您打开一楼客厅的灯光",
+                    "ai_provider": "deepseek",
+                    "processed_at": new Date().toISOString()
+                }
+            };
+
+            document.getElementById('intentionData').value = JSON.stringify(exampleIntention, null, 2);
+            
+            // 自动获取 entities（静默模式）
+            autoFetchEntities(true);
+
+            alert('✅ 示例数据已加载！Entities 数据自动获取中...');
+        }
+
+        // Load PDF Example
+        // Auto Fetch Entities from AI Enhanced Entities Module
+        async function autoFetchEntities(silent = false) {
+            const content = document.getElementById('entitiesData');
+            
+            try {
+                content.value = '⏳ 正在从 ai_enhanced_entities 模块获取实体数据...';
+                
+                const response = await fetch('/api/ai_enhanced_entities/ai_enhanced_entities/saved');
+                const result = await response.json();
+                
+                if (result.success) {
+                    content.value = JSON.stringify(result, null, 2);
+                    if (!silent) {
+                        alert(`✅ 成功获取 ${result.data?.entities?.length || 0} 个实体！`);
+                    } else {
+                        console.log(`✅ 页面加载：成功获取 ${result.data?.entities?.length || 0} 个最新实体`);
+                    }
+                } else {
+                    content.value = JSON.stringify(result, null, 2);
+                    if (!silent) {
+                        alert('⚠️ 获取实体失败: ' + (result.error || '未知错误'));
+                    } else {
+                        console.warn('⚠️ 页面加载：获取实体失败', result.error);
+                    }
+                }
+            } catch (error) {
+                content.value = `// 错误: ${error.message}`;
+                if (!silent) {
+                    alert('❌ 获取实体时出错: ' + error.message);
+                } else {
+                    console.error('❌ 页面加载：获取实体时出错', error.message);
+                }
+            }
+        }
+
+        function loadPDFExample() {
+            // ⭐ 使用您提供的新格式示例
+            const pdfIntention = {
+                "success": true,
+                "data": {
+                    "user_input": "打开二楼灯，关闭一楼空调",
+                    "intent": "Control Device",
+                    "devices": [{
+                        "floor_name": "二楼",
+                        "floor_name_en": "Second Floor",
+                        "floor_type": "second_floor",
+                        "room_type": "",
+                        "room_name": "",
+                        "room_name_en": "",
+                        "device_type": "light",
+                        "device_name": "",
+                        "device_name_en": "",
+                        "service": "light.turn_on",
+                        "service_data": {}
+                    }, {
+                        "floor_name": "一楼",
+                        "floor_name_en": "First Floor",
+                        "floor_type": "first_floor",
+                        "room_type": "",
+                        "room_name": "",
+                        "room_name_en": "",
+                        "device_type": "climate",
+                        "device_name": "",
+                        "device_name_en": "",
+                        "service": "climate.turn_off",
+                        "service_data": {}
+                    }],
+                    "confidence": 0.95,
+                    "user_responds": "好的，即将为您打开二楼灯光并关闭一楼空调",
+                    "ai_provider": "deepseek",
+                    "processed_at": "2025-10-26T01:45:34.329Z"
+                }
+            };
+
+            document.getElementById('intentionData').value = JSON.stringify(pdfIntention, null, 2);
+            
+            // 自动获取 entities（静默模式）
+            autoFetchEntities(true);
+
+            alert('📄 PDF 示例数据已加载！Entities 数据自动获取中...');
+        }
+
+        // Clear Results
+        function clearResults() {
+            document.getElementById('matchResults').innerHTML = '<p style="color: #6b7280; text-align: center; padding: 2rem;">点击"执行匹配"查看结果...</p>';
+        }
+
+        // Load Example Scenarios
+        function loadExample(scenario) {
+            // Switch to test tab
+            switchTab('test');
+
+            // TODO: Load specific example based on scenario
+            alert(`正在加载场景: ${scenario}`);
+        }
+
+        // Load Aliases
+        async function loadAliases() {
+            const content = document.getElementById('aliasesContent');
+            content.innerHTML = '<div class="info-box">⏳ 加载中...</div>';
+
+            try {
+                const response = await fetch('/api/bestMatch/bestMatch/aliases');
+                const result = await response.json();
+
+                if (result.success) {
+                    content.innerHTML = '<div class="code-block">' + JSON.stringify(result.data, null, 2) + '</div>';
+                } else {
+                    content.innerHTML = '<div class="error-box">❌ 加载失败: ' + (result.error || '未知错误') + '</div>';
+                }
+            } catch (error) {
+                content.innerHTML = '<div class="error-box">❌ 加载失败: ' + error.message + '</div>';
+            }
+        }
+
+        // Load History
+        async function loadHistory() {
+            const content = document.getElementById('historyContent');
+            content.innerHTML = '<div class="info-box">⏳ 加载中...</div>';
+
+            try {
+                const response = await fetch('/api/bestMatch/bestMatch/history?limit=20');
+                const result = await response.json();
+
+                if (result.success && result.data.history.length > 0) {
+                    let html = '';
+                    result.data.history.forEach((item, index) => {
+                        html += `
+                            <div class="api-endpoint">
+                                <strong>#${index + 1}</strong> - ${new Date(item.timestamp).toLocaleString()}<br>
+                                <small style="color: #6b7280;">查询: ${item.input.userQuery || '无'}</small>
+                            </div>`;
+                    });
+                    content.innerHTML = html;
+                } else {
+                    content.innerHTML = '<div class="warning-box">📭 暂无历史记录</div>';
+                }
+            } catch (error) {
+                content.innerHTML = '<div class="error-box">❌ 加载失败: ' + error.message + '</div>';
+            }
+        }
+
+        // Clear History
+        async function clearHistory() {
+            if (!confirm('确定要清空所有历史记录吗？')) return;
+
+            try {
+                const response = await fetch('/api/bestMatch/bestMatch/history', {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ 历史记录已清空');
+                    loadHistory();
+                    loadStats();
+                } else {
+                    alert('❌ 清空失败: ' + (result.error || '未知错误'));
+                }
+            } catch (error) {
+                alert('❌ 清空失败: ' + error.message);
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadStats();
+            // ⭐ 页面加载时自动获取并展示最新的 entities 数据（静默模式）
+            autoFetchEntities(true);
+        });
+    </script>
+</body>
+</html>
+
+

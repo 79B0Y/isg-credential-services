@@ -1,0 +1,5 @@
+{
+  "websocketPort": 8082,
+  "autoStart": true,
+  "maxMessageHistory": 100
+}

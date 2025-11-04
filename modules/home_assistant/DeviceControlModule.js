@@ -305,10 +305,10 @@ class DeviceControlModule {
     /**
      * 执行单个控制命令
      */
-    async executeControlCommand(command, accessToken, baseUrl) {
+    async executeControlCommand(command, accessToken, baseUrl, schemaMap = null) {
         const { entity_id, service } = command;
         // 新格式优先：service_data，其次向后兼容 data
-        const payloadData = (command.service_data !== undefined) ? (command.service_data || {}) : (command.data || {});
+        let payloadData = (command.service_data !== undefined) ? (command.service_data || {}) : (command.data || {});
 
         if (!entity_id || !service) {
             throw new Error('Missing required fields: entity_id, service');
@@ -326,12 +326,31 @@ class DeviceControlModule {
             }
         }
 
+        // 特殊处理：light.turn_on - 转换 color_name 为 rgb_color
+        if (domain === 'light' && serviceName === 'turn_on' && payloadData.color_name && !payloadData.rgb_color) {
+            const rgbColor = this.colorNameToRGB(payloadData.color_name);
+            if (rgbColor) {
+                this.logger.info(`[DEVICE-CONTROL] 颜色转换: ${payloadData.color_name} -> rgb_color: [${rgbColor.join(', ')}]`);
+                payloadData = { ...payloadData, rgb_color: rgbColor };
+                delete payloadData.color_name; // 移除 color_name
+            } else {
+                this.logger.warn(`[DEVICE-CONTROL] 无法转换颜色名称: ${payloadData.color_name}，将被过滤`);
+            }
+        }
+
+        // 特殊处理：climate.set_temperature 服务
+        // 如果包含不支持的字段（如 fan_mode），则拆分成多个服务调用
+        if (domain === 'climate' && serviceName === 'set_temperature') {
+            return await this.executeClimateSetTemperature(entity_id, payloadData, accessToken, baseUrl);
+        }
+
         // 构建服务调用数据（稍后基于schema过滤不支持的字段）
         let serviceData = { entity_id: entity_id, ...payloadData };
 
         // 尝试根据HA服务schema过滤不支持的字段
+        // 如果传入了schemaMap则使用，否则使用缓存的schemaMap
         try {
-            const filtered = this.filterServiceDataBySchema(domain, serviceName, serviceData);
+            const filtered = this.filterServiceDataBySchema(domain, serviceName, serviceData, schemaMap);
             if (filtered.filtered_out && filtered.filtered_out.length > 0) {
                 this.logger.info(`[DEVICE-CONTROL] 过滤不支持的字段 ${domain}.${serviceName}: ${filtered.filtered_out.join(', ')}`);
             }
@@ -361,6 +380,171 @@ class DeviceControlModule {
             service_data: serviceData,
             result: result
         };
+    }
+
+    /**
+     * 智能处理 climate.set_temperature 服务
+     * 自动拆分不支持的参数到独立的服务调用
+     */
+    async executeClimateSetTemperature(entity_id, payloadData, accessToken, baseUrl) {
+        const results = [];
+        const errors = [];
+
+        // climate.set_temperature 支持的参数
+        const setTemperatureParams = ['temperature', 'target_temp_high', 'target_temp_low', 'hvac_mode'];
+        
+        // 需要单独调用的参数映射
+        const separateServiceParams = {
+            'fan_mode': 'set_fan_mode',
+            'swing_mode': 'set_swing_mode',
+            'preset_mode': 'set_preset_mode',
+            'humidity': 'set_humidity'
+        };
+
+        // 1. 先处理需要单独调用的服务
+        for (const [param, serviceName] of Object.entries(separateServiceParams)) {
+            if (payloadData[param] !== undefined) {
+                this.logger.info(`[DEVICE-CONTROL] 检测到 ${param}，将使用单独的服务 climate.${serviceName}`);
+                try {
+                    const serviceData = {
+                        entity_id: entity_id,
+                        [param]: payloadData[param]
+                    };
+                    
+                    const result = await this.callHomeAssistantAPI(
+                        accessToken,
+                        baseUrl,
+                        `/api/services/climate/${serviceName}`,
+                        'POST',
+                        serviceData
+                    );
+
+                    if (result.error) {
+                        errors.push(`${param}: ${result.error}`);
+                    } else {
+                        results.push({
+                            service: `climate.${serviceName}`,
+                            data: serviceData,
+                            result: result
+                        });
+                    }
+                } catch (error) {
+                    errors.push(`${param}: ${error.message}`);
+                }
+            }
+        }
+
+        // 2. 然后调用 set_temperature（只包含支持的参数）
+        const temperatureData = { entity_id: entity_id };
+        let hasTemperatureParams = false;
+
+        for (const param of setTemperatureParams) {
+            if (payloadData[param] !== undefined) {
+                temperatureData[param] = payloadData[param];
+                hasTemperatureParams = true;
+            }
+        }
+
+        if (hasTemperatureParams) {
+            try {
+                this.logger.info(`[DEVICE-CONTROL] 执行 climate.set_temperature`);
+                const result = await this.callHomeAssistantAPI(
+                    accessToken,
+                    baseUrl,
+                    '/api/services/climate/set_temperature',
+                    'POST',
+                    temperatureData
+                );
+
+                if (result.error) {
+                    errors.push(`set_temperature: ${result.error}`);
+                } else {
+                    results.push({
+                        service: 'climate.set_temperature',
+                        data: temperatureData,
+                        result: result
+                    });
+                }
+            } catch (error) {
+                errors.push(`set_temperature: ${error.message}`);
+            }
+        }
+
+        // 返回结果
+        if (errors.length > 0 && results.length === 0) {
+            throw new Error(`All service calls failed: ${errors.join('; ')}`);
+        }
+
+        return {
+            service_called: 'climate.set_temperature (smart split)',
+            service_data: payloadData,
+            split_calls: results,
+            partial_errors: errors.length > 0 ? errors : undefined,
+            result: results
+        };
+    }
+
+    /**
+     * 将颜色名称转换为RGB数组
+     * 支持中英文颜色名称
+     */
+    colorNameToRGB(colorName) {
+        if (!colorName) return null;
+
+        const colorLower = colorName.toLowerCase().trim();
+        
+        // 颜色映射表（支持中英文）
+        const colorMap = {
+            // 英文
+            'red': [255, 0, 0],
+            'green': [0, 255, 0],
+            'blue': [0, 0, 255],
+            'yellow': [255, 255, 0],
+            'purple': [128, 0, 128],
+            'pink': [255, 192, 203],
+            'orange': [255, 165, 0],
+            'white': [255, 255, 255],
+            'black': [0, 0, 0],
+            'cyan': [0, 255, 255],
+            'magenta': [255, 0, 255],
+            'lime': [0, 255, 0],
+            'indigo': [75, 0, 130],
+            'violet': [238, 130, 238],
+            'brown': [165, 42, 42],
+            'gray': [128, 128, 128],
+            'grey': [128, 128, 128],
+            
+            // 中文
+            '红': [255, 0, 0],
+            '红色': [255, 0, 0],
+            '绿': [0, 255, 0],
+            '绿色': [0, 255, 0],
+            '蓝': [0, 0, 255],
+            '蓝色': [0, 0, 255],
+            '黄': [255, 255, 0],
+            '黄色': [255, 255, 0],
+            '紫': [128, 0, 128],
+            '紫色': [128, 0, 128],
+            '粉': [255, 192, 203],
+            '粉色': [255, 192, 203],
+            '橙': [255, 165, 0],
+            '橙色': [255, 165, 0],
+            '白': [255, 255, 255],
+            '白色': [255, 255, 255],
+            '黑': [0, 0, 0],
+            '黑色': [0, 0, 0],
+            '青': [0, 255, 255],
+            '青色': [0, 255, 255],
+            '品红': [255, 0, 255],
+            '靛': [75, 0, 130],
+            '靛色': [75, 0, 130],
+            '棕': [165, 42, 42],
+            '棕色': [165, 42, 42],
+            '灰': [128, 128, 128],
+            '灰色': [128, 128, 128]
+        };
+
+        return colorMap[colorLower] || null;
     }
 
     /**
@@ -422,12 +606,32 @@ class DeviceControlModule {
      * 按照Schema过滤服务数据中不被支持的字段
      * 若找不到对应schema，则原样返回
      */
-    filterServiceDataBySchema(domain, serviceName, data) {
-        const schemaMap = this.serviceSchemaCache.map;
-        if (!schemaMap || !schemaMap[domain] || !schemaMap[domain][serviceName]) {
+    filterServiceDataBySchema(domain, serviceName, data, schemaMap = null) {
+        // 使用传入的schemaMap或缓存的schemaMap
+        const schema = schemaMap || this.serviceSchemaCache.map;
+        
+        if (!schema || !schema[domain] || !schema[domain][serviceName]) {
+            // 如果没有schema，对于light服务，添加常用字段的白名单
+            if (domain === 'light' && serviceName === 'turn_on') {
+                this.logger.info(`[DEVICE-CONTROL] 未找到 ${domain}.${serviceName} 的schema，使用内置白名单`);
+                return { data, filtered_out: [] }; // 不过滤，直接返回
+            }
             return { data, filtered_out: [] };
         }
-        const allowed = schemaMap[domain][serviceName];
+        
+        const allowed = schema[domain][serviceName];
+        
+        // 对于light.turn_on服务，确保常用的颜色控制字段在白名单中
+        if (domain === 'light' && serviceName === 'turn_on') {
+            const lightColorFields = ['brightness', 'brightness_pct', 'brightness_step', 'brightness_step_pct',
+                                      'color_temp', 'color_temp_kelvin', 'kelvin',
+                                      'rgb_color', 'rgbw_color', 'rgbww_color',
+                                      'hs_color', 'xy_color', 
+                                      'color_name', 'white', 
+                                      'profile', 'flash', 'effect', 'transition'];
+            lightColorFields.forEach(field => allowed.add(field));
+        }
+        
         const filtered = { entity_id: data.entity_id }; // 始终保留 entity_id
         const removed = [];
         for (const [k, v] of Object.entries(data)) {

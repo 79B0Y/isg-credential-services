@@ -25,6 +25,12 @@ class NodeRedModule extends BaseCredentialModule {
         // 请求清理
         this.activeRequests = new Set();
         this.requestCleanupTimer = null;
+        
+        // 自动更新定时器
+        this.autoUpdateTimer = null;
+        // dataDir 是 /Users/bo/credential-services/data/nodered
+        // 需要回到项目根目录，然后进入 data/agent_flow
+        this.agentFlowDir = path.join(this.dataDir, '../agent_flow');
     }
 
     /**
@@ -39,6 +45,9 @@ class NodeRedModule extends BaseCredentialModule {
         
         // 设置请求清理定时器
         this.setupRequestCleanup();
+        
+        // 启动自动更新检查
+        await this.startAutoUpdate();
         
         this.logger.info('Node-RED module initialized');
     }
@@ -158,6 +167,15 @@ class NodeRedModule extends BaseCredentialModule {
     async getFlows(credentials) {
         try {
             const { base_url, username, password, api_key } = credentials;
+            
+            // 确保 base_url 存在
+            if (!base_url) {
+                return {
+                    success: false,
+                    error: 'base_url is required in credentials'
+                };
+            }
+            
             const url = new URL('/flows', base_url);
             
             const options = {
@@ -230,7 +248,8 @@ class NodeRedModule extends BaseCredentialModule {
 
             const response = await this.makeRequest(url, options, JSON.stringify(flows));
             
-            if (response.statusCode === 200) {
+            // Node-RED 可能返回 200 或 204 (No Content)
+            if (response.statusCode === 200 || response.statusCode === 204) {
                 return {
                     success: true,
                     message: 'Flows deployed successfully',
@@ -571,11 +590,302 @@ class NodeRedModule extends BaseCredentialModule {
     }
 
     /**
+     * 启动自动更新检查
+     */
+    async startAutoUpdate() {
+        try {
+            // 检查是否启用自动更新
+            const autoUpdateEnabled = this.config.flowManagement?.autoUpdate !== false;
+            if (!autoUpdateEnabled) {
+                this.logger.info('Auto-update is disabled in config');
+                return;
+            }
+            
+            this.logger.info('Starting auto-update check...');
+            
+            // 立即执行一次检查
+            await this.checkAndUpdateFlows();
+            
+            // 获取更新间隔（默认3分钟）
+            const updateInterval = this.config.flowManagement?.autoUpdateInterval || 180000;
+            
+            // 设置定时器
+            this.autoUpdateTimer = setInterval(async () => {
+                try {
+                    await this.checkAndUpdateFlows();
+                } catch (error) {
+                    this.logger.error('Auto-update check failed:', error);
+                }
+            }, updateInterval);
+            
+            this.logger.info(`Auto-update check started (interval: ${updateInterval / 1000} seconds)`);
+        } catch (error) {
+            this.logger.error('Failed to start auto-update:', error);
+        }
+    }
+    
+    /**
+     * 检查并更新flows
+     */
+    async checkAndUpdateFlows() {
+        try {
+            this.logger.info('Checking for flow updates...');
+            
+            // 获取凭据
+            const credentialsResult = await this.getCredentials();
+            if (!credentialsResult.success || !credentialsResult.data) {
+                this.logger.warn('No credentials found, skipping auto-update');
+                return;
+            }
+            
+            const credentials = credentialsResult.data;
+            this.logger.info('Credentials loaded, base_url:', credentials.base_url);
+            
+            // 读取agent_flow目录中的所有flow文件
+            const flowFiles = await this.getAgentFlowFiles();
+            if (flowFiles.length === 0) {
+                this.logger.info('No flow files found in agent_flow directory');
+                return;
+            }
+            
+            this.logger.info(`Found ${flowFiles.length} flow file(s):`, flowFiles.join(', '));
+            
+            // 获取Node-RED中现有的flows
+            const currentFlowsResult = await this.getFlows(credentials);
+            if (!currentFlowsResult.success) {
+                this.logger.error('Failed to get current flows:', currentFlowsResult.error);
+                return;
+            }
+            
+            const currentFlows = currentFlowsResult.data;
+            
+            // 检查每个flow文件
+            for (const flowFile of flowFiles) {
+                await this.checkAndUpdateSingleFlow(credentials, flowFile, currentFlows);
+            }
+            
+        } catch (error) {
+            this.logger.error('Error checking for flow updates:', error);
+        }
+    }
+    
+    /**
+     * 获取agent_flow目录中的所有flow文件
+     */
+    async getAgentFlowFiles() {
+        try {
+            const files = await fs.readdir(this.agentFlowDir);
+            return files.filter(f => f.endsWith('.json'));
+        } catch (error) {
+            this.logger.error('Error reading agent_flow directory:', error);
+            return [];
+        }
+    }
+    
+    /**
+     * 检查并更新单个flow
+     */
+    async checkAndUpdateSingleFlow(credentials, flowFileName, currentFlows) {
+        try {
+            const flowFilePath = path.join(this.agentFlowDir, flowFileName);
+            const flowFileContent = await fs.readFile(flowFilePath, 'utf8');
+            const localFlow = JSON.parse(flowFileContent);
+            
+            // 提取版本信息
+            const localVersion = this.extractFlowVersion(localFlow, flowFileName);
+            if (!localVersion) {
+                this.logger.warn(`Could not extract version from ${flowFileName}`);
+                return;
+            }
+            
+            // 查找Node-RED中对应的flow
+            const existingFlowInfo = this.findMatchingFlow(currentFlows, localVersion.name);
+            
+            if (!existingFlowInfo) {
+                // Node-RED中没有这个flow，添加它
+                this.logger.info(`Flow "${localVersion.name}" not found in Node-RED, adding...`);
+                await this.addFlowToNodeRed(credentials, localFlow, localVersion);
+            } else {
+                // 对比版本号
+                const currentVersion = this.extractFlowVersion(currentFlows, existingFlowInfo.tabLabel);
+                
+                if (this.isVersionNewer(localVersion.version, currentVersion?.version)) {
+                    this.logger.info(`Local flow "${localVersion.name}" (v${localVersion.version}) is newer than Node-RED version (v${currentVersion?.version || 'unknown'}), updating...`);
+                    await this.updateFlowInNodeRed(credentials, localFlow, currentFlows, existingFlowInfo.tabId);
+                } else {
+                    this.logger.info(`Flow "${localVersion.name}" is up to date (v${localVersion.version})`);
+                }
+            }
+        } catch (error) {
+            this.logger.error(`Error processing flow file ${flowFileName}:`, error);
+        }
+    }
+    
+    /**
+     * 提取flow的版本信息
+     */
+    extractFlowVersion(flow, fallbackName = '') {
+        try {
+            // 查找tab节点
+            const tabNode = Array.isArray(flow) ? flow.find(node => node.type === 'tab') : null;
+            
+            if (tabNode && tabNode.label) {
+                // 从label中提取版本号，例如 "Home Automation v1.0.1"
+                const match = tabNode.label.match(/^(.*?)\s+v?(\d+\.\d+\.\d+)$/i);
+                if (match) {
+                    return {
+                        name: match[1].trim(),
+                        version: match[2],
+                        label: tabNode.label
+                    };
+                }
+                return {
+                    name: tabNode.label,
+                    version: '0.0.0',
+                    label: tabNode.label
+                };
+            }
+            
+            // 从文件名提取，例如 "Home-Automation-v1.0.1.json"
+            if (typeof fallbackName === 'string') {
+                const match = fallbackName.match(/^(.*?)-v?(\d+\.\d+\.\d+)\.json$/i);
+                if (match) {
+                    return {
+                        name: match[1].replace(/-/g, ' '),
+                        version: match[2],
+                        label: `${match[1].replace(/-/g, ' ')} v${match[2]}`
+                    };
+                }
+            }
+            
+            return null;
+        } catch (error) {
+            this.logger.error('Error extracting flow version:', error);
+            return null;
+        }
+    }
+    
+    /**
+     * 在Node-RED的flows中查找匹配的flow
+     */
+    findMatchingFlow(flows, flowName) {
+        try {
+            const tabNode = flows.find(node => {
+                if (node.type !== 'tab') return false;
+                
+                // 完全匹配
+                if (node.label === flowName) return true;
+                
+                // 去掉版本号后匹配
+                const labelWithoutVersion = node.label.replace(/\s+v?\d+\.\d+\.\d+$/i, '').trim();
+                const nameWithoutVersion = flowName.replace(/\s+v?\d+\.\d+\.\d+$/i, '').trim();
+                
+                return labelWithoutVersion === nameWithoutVersion;
+            });
+            
+            if (tabNode) {
+                return {
+                    tabId: tabNode.id,
+                    tabLabel: tabNode.label
+                };
+            }
+            
+            return null;
+        } catch (error) {
+            this.logger.error('Error finding matching flow:', error);
+            return null;
+        }
+    }
+    
+    /**
+     * 比较版本号
+     */
+    isVersionNewer(newVersion, oldVersion) {
+        if (!oldVersion) return true;
+        
+        const newParts = newVersion.split('.').map(Number);
+        const oldParts = oldVersion.split('.').map(Number);
+        
+        for (let i = 0; i < 3; i++) {
+            const newPart = newParts[i] || 0;
+            const oldPart = oldParts[i] || 0;
+            
+            if (newPart > oldPart) return true;
+            if (newPart < oldPart) return false;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * 添加新flow到Node-RED
+     */
+    async addFlowToNodeRed(credentials, localFlow, versionInfo) {
+        try {
+            // 获取当前flows
+            const currentFlowsResult = await this.getFlows(credentials);
+            if (!currentFlowsResult.success) {
+                this.logger.error('Failed to get current flows for adding');
+                return;
+            }
+            
+            // 合并flows
+            const mergedFlows = [...currentFlowsResult.data, ...localFlow];
+            
+            // 部署
+            const deployResult = await this.deployFlows(credentials, mergedFlows);
+            
+            if (deployResult.success) {
+                this.logger.info(`Successfully added flow "${versionInfo.name}" v${versionInfo.version}`);
+            } else {
+                this.logger.error(`Failed to add flow: ${deployResult.error}`);
+            }
+        } catch (error) {
+            this.logger.error('Error adding flow to Node-RED:', error);
+        }
+    }
+    
+    /**
+     * 更新Node-RED中的flow
+     */
+    async updateFlowInNodeRed(credentials, localFlow, currentFlows, tabId) {
+        try {
+            // 找出所有属于这个tab的节点
+            const nodesToReplace = localFlow;
+            const otherNodes = currentFlows.filter(node => {
+                if (node.type === 'tab' && node.id === tabId) return false;
+                if (node.z === tabId) return false;
+                return true;
+            });
+            
+            // 合并flows
+            const mergedFlows = [...otherNodes, ...nodesToReplace];
+            
+            // 部署
+            const deployResult = await this.deployFlows(credentials, mergedFlows);
+            
+            if (deployResult.success) {
+                const versionInfo = this.extractFlowVersion(localFlow);
+                this.logger.info(`Successfully updated flow "${versionInfo?.name}" to v${versionInfo?.version}`);
+            } else {
+                this.logger.error(`Failed to update flow: ${deployResult.error}`);
+            }
+        } catch (error) {
+            this.logger.error('Error updating flow in Node-RED:', error);
+        }
+    }
+    
+    /**
      * 清理资源
      */
     async cleanup() {
         if (this.requestCleanupTimer) {
             clearInterval(this.requestCleanupTimer);
+        }
+        
+        if (this.autoUpdateTimer) {
+            clearInterval(this.autoUpdateTimer);
+            this.logger.info('Auto-update timer stopped');
         }
         
         // 取消所有活跃请求

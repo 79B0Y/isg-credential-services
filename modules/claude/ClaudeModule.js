@@ -211,6 +211,11 @@ class ClaudeModule extends BaseCredentialModule {
             data: {
                 supported_models: [
                     {
+                        name: "claude-3-5-sonnet-20241022",
+                        description: "Most intelligent model - best for complex tasks",
+                        context_window: 200000
+                    },
+                    {
                         name: "claude-3-opus-20240229",
                         description: "Most powerful model for highly complex tasks",
                         context_window: 200000
@@ -230,6 +235,111 @@ class ClaudeModule extends BaseCredentialModule {
                 retrieved_at: new Date().toISOString()
             }
         };
+    }
+
+    /**
+     * 发送聊天消息
+     */
+    async sendChatMessage(messages, options = {}, credentials = null) {
+        try {
+            if (!credentials) {
+                const credResult = await this.getCredentials();
+                if (!credResult.success) {
+                    return { success: false, error: 'No credentials found' };
+                }
+                credentials = credResult.data;
+            }
+
+            const { api_key } = credentials;
+            if (!api_key) {
+                return { success: false, error: 'API key is required' };
+            }
+
+            // 构建请求体
+            const requestBody = {
+                model: options.model || 'claude-3-5-sonnet-20241022',
+                max_tokens: options.max_tokens || 1024,
+                messages: messages
+            };
+
+            // 添加可选参数
+            if (options.temperature !== undefined) {
+                requestBody.temperature = options.temperature;
+            }
+            if (options.top_p !== undefined) {
+                requestBody.top_p = options.top_p;
+            }
+            if (options.system) {
+                requestBody.system = options.system;
+            }
+
+            this.logger.info('Sending chat message to Claude API...');
+            const result = await this.callClaudeAPI(api_key, '/v1/messages', 'POST', requestBody);
+
+            if (result.error) {
+                return {
+                    success: false,
+                    error: result.error.message || 'API call failed',
+                    details: result.error
+                };
+            }
+
+            // 提取响应内容
+            const content = result.content && result.content[0] ? result.content[0].text : '';
+
+            return {
+                success: true,
+                data: {
+                    id: result.id,
+                    model: result.model,
+                    message: {
+                        role: result.role,
+                        content: content
+                    },
+                    response_text: content,
+                    content: content,
+                    usage: result.usage ? {
+                        input_tokens: result.usage.input_tokens,
+                        output_tokens: result.usage.output_tokens,
+                        total_tokens: (result.usage.input_tokens || 0) + (result.usage.output_tokens || 0),
+                        prompt_tokens: result.usage.input_tokens,
+                        completion_tokens: result.usage.output_tokens
+                    } : null,
+                    stop_reason: result.stop_reason,
+                    retrieved_at: new Date().toISOString()
+                }
+            };
+        } catch (error) {
+            this.logger.error('Claude chat error:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * 发送简单聊天消息（系统提示词 + 用户提示词）
+     */
+    async sendSimpleChat(systemPrompt, userPrompt, options = {}, credentials = null) {
+        const messages = [];
+        
+        // Claude 支持系统提示词作为单独的参数
+        if (userPrompt && userPrompt.trim()) {
+            messages.push({
+                role: 'user',
+                content: userPrompt.trim()
+            });
+        }
+
+        if (messages.length === 0) {
+            return { success: false, error: 'User prompt is required' };
+        }
+
+        // 如果有系统提示词，将其添加到 options 中
+        const chatOptions = { ...options };
+        if (systemPrompt && systemPrompt.trim()) {
+            chatOptions.system = systemPrompt.trim();
+        }
+
+        return await this.sendChatMessage(messages, chatOptions, credentials);
     }
 
     /**
