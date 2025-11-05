@@ -122,7 +122,7 @@ turn_on, turn_off, media_play, media_pause, volume_set, state
 
 **温度**：26度→26, 相对调节带符号(调高→+2, 调低→-2)
 
-**色温**：暖光→333, 冷光→153, 自然光→250
+**色温**：暖白光→500, 自然白光→250, 冷白光→153
 
 **空调模式**：制冷→cool, 制热→heat, 除湿→dry, 送风→fan_only, 自动→auto
 

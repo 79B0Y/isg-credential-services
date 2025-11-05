@@ -1,5 +1,489 @@
 [
   {
+    "timestamp": "2025-11-05T17:45:53.715Z",
+    "input": {
+      "type": "message",
+      "content": "is there anyone in TV room",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "is there anyone in TV room",
+      "intent": "Query Device Status",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "tv_room",
+          "room_name": "TV room",
+          "room_name_en": "tv_room",
+          "device_type": "occupancy",
+          "device_name": "occupancy sensor",
+          "device_name_en": "occupancy_sensor",
+          "service": "binary_sensor.state",
+          "service_data": {}
+        },
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "tv_room",
+          "room_name": "TV room",
+          "room_name_en": "tv_room",
+          "device_type": "motion",
+          "device_name": "motion sensor",
+          "device_name_en": "motion_sensor",
+          "service": "binary_sensor.state",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "I'll check the occupancy and motion sensors in the TV room to see if anyone is there"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-11-05T17:13:12.509Z",
+    "input": {
+      "type": "message",
+      "content": "is there anyone in TV room",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "is there anyone in TV room",
+      "intent": "Query Device Status",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "tv_room",
+          "room_name": "TV room",
+          "room_name_en": "tv_room",
+          "device_type": "occupancy",
+          "device_name": "occupancy sensor",
+          "device_name_en": "occupancy_sensor",
+          "service": "binary_sensor.state",
+          "service_data": {}
+        },
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "tv_room",
+          "room_name": "TV room",
+          "room_name_en": "tv_room",
+          "device_type": "motion",
+          "device_name": "motion sensor",
+          "device_name_en": "motion_sensor",
+          "service": "binary_sensor.state",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "I'll check the occupancy and motion sensors in the TV room to see if anyone is there."
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-11-05T17:12:24.934Z",
+    "input": {
+      "type": "message",
+      "content": "set ikea bulb to warm white\n",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "set ikea bulb to warm white",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "device_name": "ikea bulb",
+          "device_name_en": "ikea bulb",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_temp": 500
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "Okay, setting the IKEA bulb to warm white"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-11-05T17:10:31.305Z",
+    "input": {
+      "type": "message",
+      "content": "set ikea bulb to warm white",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "set ikea bulb to warm white",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "device_name": "ikea bulb",
+          "device_name_en": "ikea bulb",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_temp": 500
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "Okay, setting the IKEA bulb to warm white"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-11-05T17:05:30.830Z",
+    "input": {
+      "type": "message",
+      "content": "set ikea bulb to warm white\n",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "set ikea bulb to warm white",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "device_name": "ikea bulb",
+          "device_name_en": "ikea bulb",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_temp": 2700
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "Okay, setting the IKEA bulb to warm white color temperature"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-11-05T17:03:09.784Z",
+    "input": {
+      "type": "message",
+      "content": "set ikea bulb to warm white",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "set ikea bulb to warm white",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "device_name": "ikea bulb",
+          "device_name_en": "ikea bulb",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_temp": 2700
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "Okay, setting the IKEA bulb to warm white color temperature"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-11-05T16:57:59.735Z",
+    "input": {
+      "type": "message",
+      "content": "turn of the strip",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "turn of the strip",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "device_name": "strip",
+          "device_name_en": "strip",
+          "service": "light.turn_off",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "Okay, turning off the strip"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-11-05T16:57:33.583Z",
+    "input": {
+      "type": "message",
+      "content": "turn on kitchen light strip",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "turn on kitchen light strip",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "kitchen",
+          "room_name": "厨房",
+          "room_name_en": "kitchen",
+          "device_type": "light",
+          "device_name": "light strip",
+          "device_name_en": "light strip",
+          "service": "light.turn_on",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.95,
+      "user_responds": "Okay, turning on the kitchen light strip"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-11-05T16:56:31.989Z",
+    "input": {
+      "type": "message",
+      "content": "turn off ikea bulb",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "turn off ikea bulb",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "device_name": "ikea bulb",
+          "device_name_en": "ikea bulb",
+          "service": "light.turn_off",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "Okay, turning off the IKEA bulb"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-11-05T16:55:45.195Z",
+    "input": {
+      "type": "message",
+      "content": "set Tapo bulb to warm white",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "set Tapo bulb to warm white",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "device_name": "Tapo bulb",
+          "device_name_en": "Tapo bulb",
+          "service": "light.turn_on",
+          "service_data": {
+            "color_temp": 333
+          }
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "Okay, setting the Tapo bulb to warm white color temperature"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-11-05T16:55:17.629Z",
+    "input": {
+      "type": "message",
+      "content": "turn on tapo bulb\n",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "turn on tapo bulb",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "device_name": "tapo bulb",
+          "device_name_en": "tapo bulb",
+          "service": "light.turn_on",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "Okay, turning on the tapo bulb"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-11-05T16:44:53.717Z",
+    "input": {
+      "type": "message",
+      "content": "\nturn on tapo bulb\n",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "turn on tapo bulb",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "device_name": "tapo bulb",
+          "device_name_en": "tapo bulb",
+          "service": "light.turn_on",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "Okay, turning on the tapo bulb"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-11-05T16:42:37.515Z",
+    "input": {
+      "type": "message",
+      "content": "turn on ikea bulb\n",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "turn on ikea bulb",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "device_name": "ikea bulb",
+          "device_name_en": "ikea bulb",
+          "service": "light.turn_on",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "Okay, turning on the IKEA bulb"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
+    "timestamp": "2025-11-05T16:41:47.204Z",
+    "input": {
+      "type": "message",
+      "content": "turn on ikea bulb",
+      "metadata": {}
+    },
+    "output": {
+      "user_input": "turn on ikea bulb",
+      "intent": "Control Device",
+      "devices": [
+        {
+          "floor_name": "",
+          "floor_name_en": "",
+          "floor_type": "",
+          "room_type": "",
+          "room_name": "",
+          "room_name_en": "",
+          "device_type": "light",
+          "device_name": "ikea bulb",
+          "device_name_en": "ikea bulb",
+          "service": "light.turn_on",
+          "service_data": {}
+        }
+      ],
+      "scene": {},
+      "automation": {},
+      "confidence": 0.9,
+      "user_responds": "Okay, turning on the IKEA bulb"
+    },
+    "ai_provider": "deepseek"
+  },
+  {
     "timestamp": "2025-11-05T13:28:26.784Z",
     "input": {
       "type": "message",
@@ -3007,397 +3491,6 @@
       "automation": {},
       "confidence": 0.9,
       "user_responds": "好的，已将卧室灯调成最暖色调"
-    },
-    "ai_provider": "deepseek"
-  },
-  {
-    "timestamp": "2025-10-30T05:58:16.483Z",
-    "input": {
-      "type": "message",
-      "content": "卧室灯冷色\n",
-      "metadata": {}
-    },
-    "output": {
-      "user_input": "卧室灯冷色",
-      "intent": "Control Device",
-      "devices": [
-        {
-          "room_type": "bedroom",
-          "room_name": "卧室",
-          "room_name_en": "bedroom",
-          "device_type": "light",
-          "service": "light.turn_on",
-          "service_data": {
-            "color_temp": 153
-          }
-        }
-      ],
-      "scene": {},
-      "automation": {},
-      "confidence": 0.9,
-      "user_responds": "好的，已将卧室灯调整为冷色"
-    },
-    "ai_provider": "deepseek"
-  },
-  {
-    "timestamp": "2025-10-30T05:46:22.537Z",
-    "input": {
-      "type": "message",
-      "content": "卧室灯调成暖色",
-      "metadata": {}
-    },
-    "output": {
-      "user_input": "卧室灯调成暖色",
-      "intent": "Control Device",
-      "devices": [
-        {
-          "room_type": "bedroom",
-          "room_name": "卧室",
-          "room_name_en": "bedroom",
-          "device_type": "light",
-          "service": "light.turn_on",
-          "service_data": {
-            "color_temp": 333
-          }
-        }
-      ],
-      "scene": {},
-      "automation": {},
-      "confidence": 0.9,
-      "user_responds": "好的，已将卧室灯调成暖色"
-    },
-    "ai_provider": "deepseek"
-  },
-  {
-    "timestamp": "2025-10-29T13:45:02.944Z",
-    "input": {
-      "type": "downlink",
-      "content": "有哪些自动化"
-    },
-    "output": {
-      "user_input": "有哪些自动化",
-      "intent": "Set Automation",
-      "devices": [],
-      "scene": {},
-      "automation": {
-        "automation_name": "",
-        "automation_name_en": "",
-        "operation": "list",
-        "operation_type": "query",
-        "description": "查询现有的自动化规则"
-      },
-      "confidence": 0.9,
-      "user_responds": "我将为您列出当前所有的自动化规则"
-    },
-    "ai_provider": "deepseek"
-  },
-  {
-    "timestamp": "2025-10-29T13:42:00.218Z",
-    "input": {
-      "type": "downlink",
-      "content": "删除开心模式"
-    },
-    "output": {
-      "user_input": "删除开心模式",
-      "intent": "Set Scene",
-      "devices": [],
-      "scene": {
-        "scene_name": "开心模式",
-        "scene_name_en": "happy_mode",
-        "operation": "delete",
-        "operation_type": "setup",
-        "description": "删除开心模式场景"
-      },
-      "automation": {},
-      "confidence": 0.9,
-      "user_responds": "好的，即将为您删除开心模式场景"
-    },
-    "ai_provider": "deepseek"
-  },
-  {
-    "timestamp": "2025-10-29T13:41:26.082Z",
-    "input": {
-      "type": "downlink",
-      "content": "有哪些场景"
-    },
-    "output": {
-      "user_input": "有哪些场景",
-      "intent": "Set Scene",
-      "devices": [],
-      "scene": {
-        "scene_name": "场景列表",
-        "scene_name_en": "scene_list",
-        "operation": "list",
-        "operation_type": "query",
-        "description": "查询所有已保存的场景"
-      },
-      "automation": {},
-      "confidence": 0.9,
-      "user_responds": "我将为您查询所有已保存的场景列表"
-    },
-    "ai_provider": "deepseek"
-  },
-  {
-    "timestamp": "2025-10-29T13:40:58.506Z",
-    "input": {
-      "type": "downlink",
-      "content": "空调开制热"
-    },
-    "output": {
-      "user_input": "空调开制热",
-      "intent": "Control Device",
-      "devices": [
-        {
-          "device_type": "climate",
-          "service": "climate.set_hvac_mode",
-          "service_data": {
-            "hvac_mode": "heat"
-          }
-        }
-      ],
-      "scene": {},
-      "automation": {},
-      "confidence": 0.9,
-      "user_responds": "好的，已为您将空调设置为制热模式"
-    },
-    "ai_provider": "deepseek"
-  },
-  {
-    "timestamp": "2025-10-29T13:40:41.117Z",
-    "input": {
-      "type": "downlink",
-      "content": "卧室热么"
-    },
-    "output": {
-      "user_input": "卧室热么",
-      "intent": "Query Device Status",
-      "devices": [
-        {
-          "room_type": "bedroom",
-          "room_name": "卧室",
-          "room_name_en": "bedroom",
-          "device_type": "temperature",
-          "device_name": "温度传感器",
-          "device_name_en": "temperature_sensor",
-          "service": "sensor.state",
-          "service_data": {}
-        }
-      ],
-      "scene": {},
-      "automation": {},
-      "confidence": 0.9,
-      "user_responds": "我来帮您查看卧室的温度"
-    },
-    "ai_provider": "deepseek"
-  },
-  {
-    "timestamp": "2025-10-29T13:40:05.076Z",
-    "input": {
-      "type": "downlink",
-      "content": "热么"
-    },
-    "output": {
-      "user_input": "热么",
-      "intent": "Query Device Status",
-      "devices": [
-        {
-          "device_type": "temperature",
-          "service": "sensor.state",
-          "service_data": {}
-        }
-      ],
-      "confidence": 0.8,
-      "user_responds": "我来帮您查看当前的温度情况"
-    },
-    "ai_provider": "deepseek"
-  },
-  {
-    "timestamp": "2025-10-29T13:39:53.373Z",
-    "input": {
-      "type": "downlink",
-      "content": "书房灯开了"
-    },
-    "output": {
-      "user_input": "书房灯开了",
-      "intent": "Query Device Status",
-      "devices": [
-        {
-          "room_type": "study",
-          "room_name": "书房",
-          "room_name_en": "study",
-          "device_type": "light",
-          "service": "light.state",
-          "service_data": {}
-        }
-      ],
-      "scene": {},
-      "automation": {},
-      "confidence": 0.9,
-      "user_responds": "好的，我来查询书房灯的状态"
-    },
-    "ai_provider": "deepseek"
-  },
-  {
-    "timestamp": "2025-10-29T13:39:30.845Z",
-    "input": {
-      "type": "downlink",
-      "content": "温度多少"
-    },
-    "output": {
-      "user_input": "温度多少",
-      "intent": "Query Device Status",
-      "devices": [
-        {
-          "device_type": "temperature",
-          "device_name": "温度传感器",
-          "device_name_en": "temperature_sensor",
-          "service": "sensor.state",
-          "service_data": {}
-        }
-      ],
-      "scene": {},
-      "automation": {},
-      "confidence": 0.9,
-      "user_responds": "好的，我来查询当前温度"
-    },
-    "ai_provider": "deepseek"
-  },
-  {
-    "timestamp": "2025-10-29T13:39:14.354Z",
-    "input": {
-      "type": "downlink",
-      "content": "书房灯和空调关了"
-    },
-    "output": {
-      "user_input": "书房灯和空调关了",
-      "intent": "Control Device",
-      "devices": [
-        {
-          "room_type": "study",
-          "room_name": "书房",
-          "room_name_en": "study",
-          "device_type": "light",
-          "service": "light.turn_off",
-          "service_data": {}
-        },
-        {
-          "room_type": "study",
-          "room_name": "书房",
-          "room_name_en": "study",
-          "device_type": "climate",
-          "service": "climate.turn_off",
-          "service_data": {}
-        }
-      ],
-      "scene": {},
-      "automation": {},
-      "confidence": 0.95,
-      "user_responds": "好的，已为您关闭书房的灯和空调"
-    },
-    "ai_provider": "deepseek"
-  },
-  {
-    "timestamp": "2025-10-29T13:38:31.205Z",
-    "input": {
-      "type": "downlink",
-      "content": "电视房空调制冷25，卧室灯关了"
-    },
-    "output": {
-      "user_input": "电视房空调制冷25，卧室灯关了",
-      "intent": "Control Device",
-      "devices": [
-        {
-          "room_type": "tv_room",
-          "room_name": "电视房",
-          "room_name_en": "tv_room",
-          "device_type": "climate",
-          "service": "climate.set_temperature",
-          "service_data": {
-            "temperature": 25,
-            "hvac_mode": "cool"
-          }
-        },
-        {
-          "room_type": "bedroom",
-          "room_name": "卧室",
-          "room_name_en": "bedroom",
-          "device_type": "light",
-          "service": "light.turn_off",
-          "service_data": {}
-        }
-      ],
-      "scene": {},
-      "automation": {},
-      "confidence": 0.9,
-      "user_responds": "好的，电视房空调设为制冷25度，卧室灯已关闭"
-    },
-    "ai_provider": "deepseek"
-  },
-  {
-    "timestamp": "2025-10-29T13:35:50.489Z",
-    "input": {
-      "type": "downlink",
-      "content": "家里灯调成开心的颜色"
-    },
-    "output": {
-      "user_input": "家里灯调成开心的颜色",
-      "intent": "Control Device",
-      "devices": [
-        {
-          "floor_name": "",
-          "floor_name_en": "",
-          "floor_type": "",
-          "room_type": "",
-          "room_name": "",
-          "room_name_en": "",
-          "device_type": "light",
-          "device_name": "",
-          "device_name_en": "",
-          "service": "light.turn_on",
-          "service_data": {
-            "brightness_pct": 90,
-            "color_name": "white"
-          }
-        }
-      ],
-      "scene": {},
-      "automation": {},
-      "confidence": 0.75,
-      "user_responds": "好的，已为您将家中所有灯光调至开心的明亮白色"
-    },
-    "ai_provider": "deepseek"
-  },
-  {
-    "timestamp": "2025-10-29T13:35:10.986Z",
-    "input": {
-      "type": "downlink",
-      "content": "我不开心，家里灯调成蓝色"
-    },
-    "output": {
-      "user_input": "我不开心，家里灯调成蓝色",
-      "intent": "Control Device",
-      "devices": [
-        {
-          "floor_name": "",
-          "floor_name_en": "",
-          "floor_type": "",
-          "room_type": "",
-          "room_name": "",
-          "room_name_en": "",
-          "device_type": "light",
-          "device_name": "",
-          "device_name_en": "",
-          "service": "light.turn_on",
-          "service_data": {
-            "color_name": "blue",
-            "brightness_pct": 55
-          }
-        }
-      ],
-      "scene": {},
-      "automation": {},
-      "confidence": 0.75,
-      "user_responds": "好的，我理解您的心情，已将家中所有灯光调成柔和的蓝色，希望能让您感觉好一些"
     },
     "ai_provider": "deepseek"
   }

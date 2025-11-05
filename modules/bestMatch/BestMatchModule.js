@@ -1520,7 +1520,10 @@ class BestMatchModule extends BaseCredentialModule {
             'cover': ['cover', 'chuanglian', '窗帘'],
             'camera': ['camera', 'cam', 'shexiangtou', '摄像头'],
             'sensor': ['sensor', 'chuanganqi', '传感器'],
-            'binary_sensor': ['binary_sensor', 'binarysensor', 'occupancy', 'motion', 'presence', 'occupied', '占用', '占用传感器', '运动', '运动传感器', '人体传感器', '存在', '在家']
+            'binary_sensor': ['binary_sensor', 'binarysensor', 'presence', '存在', '在家'],
+            // ⭐ occupancy 和 motion 作为独立的设备类型
+            'occupancy': ['occupancy', 'occupied', '占用', '占用传感器'],
+            'motion': ['motion', '运动', '运动传感器', '人体传感器']
         };
         
         for (const [domain, aliases] of Object.entries(HA_DOMAIN_ALIASES)) {
@@ -1627,7 +1630,27 @@ class BestMatchModule extends BaseCredentialModule {
                     const eDomain = e.entity_id ? e.entity_id.split('.')[0] : '';
                     const eType = (e.device_type || '').toLowerCase();
                     const normalizedEDomain = this.normalizeDomain(eDomain);
-                    return normalizedEDomain === normalizedTypeQ || this.normalizeText(eType) === this.normalizeText(typeQ);
+                    const normalizedEType = this.normalizeDomain(eType);
+                    
+                    // ⭐ 优先匹配精确的 device_type，如果没有再匹配域名
+                    // 例如：occupancy 和 motion 都是 binary_sensor 域，但它们的 device_type 不同
+                    if (normalizedTypeQ === normalizedEType || this.normalizeText(typeQ) === this.normalizeText(eType)) {
+                        return true;  // device_type 精确匹配
+                    }
+                    
+                    // 如果 device_type 不匹配，检查域名是否匹配
+                    // 但如果查询的类型有独立定义（如 occupancy, motion），则不应匹配到其他类型
+                    if (normalizedTypeQ === normalizedEDomain) {
+                        // 检查查询类型是否是独立类型（非通用域名）
+                        const isIndependentType = ['occupancy', 'motion'].includes(normalizedTypeQ);
+                        if (isIndependentType) {
+                            // 独立类型必须精确匹配 device_type
+                            return normalizedTypeQ === normalizedEType || this.normalizeText(typeQ) === this.normalizeText(eType);
+                        }
+                        return true;  // 通用域名匹配
+                    }
+                    
+                    return false;
                 });
                 const typeFilterTime = Date.now() - typeFilterStart;
                 this.logger.info(`  [1.1] 设备类型筛选: ${entities.length} → ${step1Pool.length} (${typeFilterTime}ms)`);
@@ -1817,7 +1840,7 @@ class BestMatchModule extends BaseCredentialModule {
             }
             
             // 构建 targets
-            const targets = topK.map(item => ({
+            let targets = topK.map(item => ({
                 entity_id: item.e.entity_id,
                 device_type: (item.e.device_type || '').toLowerCase(),
                 device_name: item.e.device_name || (item.e.attributes && item.e.attributes.friendly_name) || '',
@@ -1832,11 +1855,22 @@ class BestMatchModule extends BaseCredentialModule {
                 }
             }));
             
+            // ⭐ 方案3：完全匹配优先 - 如果有设备名称完全匹配(score=1.0)，过滤掉其他低分设备
+            if (nameQ && !this.isGenericName(nameQ) && targets.length > 1) {
+                const perfectMatches = targets.filter(t => t.matched.device_name.score === 1.0);
+                if (perfectMatches.length > 0) {
+                    const filteredCount = targets.length - perfectMatches.length;
+                    if (filteredCount > 0) {
+                        this.logger.info(`\n✨ [完全匹配优先] 发现 ${perfectMatches.length} 个设备名称完全匹配，过滤掉 ${filteredCount} 个低分设备`);
+                        targets = perfectMatches;
+                    }
+                }
+            }
+            
             // 显示最终结果
-            this.logger.info(`\n📊 [最终结果] Top ${Math.min(topK.length, 5)} 匹配实体:`);
-            topK.slice(0, 5).forEach((item, i) => {
-                const name = item.e.device_name || (item.e.attributes && item.e.attributes.friendly_name) || '未知';
-                this.logger.info(`  ${i + 1}. ${item.e.entity_id} - ${name} (得分: ${item.score.toFixed(3)})`);
+            this.logger.info(`\n📊 [最终结果] Top ${Math.min(targets.length, 5)} 匹配实体:`);
+            targets.slice(0, 5).forEach((t, i) => {
+                this.logger.info(`  ${i + 1}. ${t.entity_id} - ${t.device_name} (得分: ${t.score}, 名称匹配: ${t.matched.device_name.score.toFixed(3)})`);
             });
             
             // 总时长统计

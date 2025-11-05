@@ -92,7 +92,11 @@ HA_DOMAIN_ALIASES = {
     "fan": ["fan", "fengshan", "风扇"],
     "cover": ["cover", "chuanglian", "窗帘"],
     "camera": ["camera", "cam", "shexiangtou", "摄像头"],
-    "sensor": ["sensor", "chuanganqi", "传感器"]
+    "sensor": ["sensor", "chuanganqi", "传感器"],
+    "binary_sensor": ["binary_sensor", "binarysensor", "presence", "存在", "在家"],
+    # ⭐ occupancy 和 motion 作为独立的设备类型
+    "occupancy": ["occupancy", "occupied", "占用", "占用传感器"],
+    "motion": ["motion", "运动", "运动传感器", "人体传感器"]
 }
 
 
@@ -443,13 +447,22 @@ def score_entity(device: Dict[str, Any], entity: Dict[str, Any]) -> Dict[str, An
 
     norm_type_q = normalize_domain(type_q)
     norm_e_domain = normalize_domain(e_domain)
+    norm_e_type = normalize_domain(e_type)
 
     type_score = 0.0
     if norm_type_q:
-        if (norm_type_q == norm_e_domain or
-            norm_type_q == normalize_text(e_type) or
-            fuzzy_match(type_q, e_domain) or
-            fuzzy_match(type_q, e_type)):
+        # ⭐ 优先匹配精确的 device_type
+        if (norm_type_q == norm_e_type or
+            normalize_text(type_q) == normalize_text(e_type)):
+            type_score = 1.0
+        # 对于独立类型（如 occupancy, motion），不应该只匹配域名
+        elif norm_type_q in ['occupancy', 'motion']:
+            # 独立类型必须精确匹配 device_type
+            type_score = 0.0
+        # 通用类型可以匹配域名
+        elif (norm_type_q == norm_e_domain or
+              fuzzy_match(type_q, e_domain) or
+              fuzzy_match(type_q, e_type)):
             type_score = 1.0
         else:
             # 相似度匹配
@@ -458,7 +471,7 @@ def score_entity(device: Dict[str, Any], entity: Dict[str, Any]) -> Dict[str, An
 
     ev["device_type"] = {
         "text": type_q,
-        "hit": (norm_e_domain or e_type) if type_score >= 0.9 else "",
+        "hit": (norm_e_type or norm_e_domain or e_type) if type_score >= 0.9 else "",
         "score": type_score
     }
 
@@ -574,9 +587,24 @@ def match_entities(intent_data: Dict[str, Any], entities: List[Dict[str, Any]]) 
             e_domain = e.get("entity_id", "").split(".")[0] if e.get("entity_id") else ""
             e_type = (e.get("device_type") or "").lower()
             norm_e_domain = normalize_domain(e_domain)
-            return (norm_e_domain == norm_svc_domain or
-                    bool(device.get("device_name")) or
-                    bool(device.get("device_name_en")))
+            norm_e_type = normalize_domain(e_type)
+            
+            # ⭐ 优先匹配精确的 device_type
+            if norm_svc_domain == norm_e_type or normalize_text(svc_domain) == normalize_text(e_type):
+                return True  # device_type 精确匹配
+            
+            # 如果 device_type 不匹配，检查域名是否匹配
+            # 但如果查询的类型有独立定义（如 occupancy, motion），则不应匹配到其他类型
+            if norm_svc_domain == norm_e_domain:
+                # 检查查询类型是否是独立类型（非通用域名）
+                is_independent_type = norm_svc_domain in ['occupancy', 'motion']
+                if is_independent_type:
+                    # 独立类型必须精确匹配 device_type
+                    return norm_svc_domain == norm_e_type or normalize_text(svc_domain) == normalize_text(e_type)
+                return True  # 通用域名匹配
+            
+            # 如果有设备名称，也允许通过
+            return bool(device.get("device_name")) or bool(device.get("device_name_en"))
 
         entity_pool = [e for e in entities if entity_filter(e)]
 

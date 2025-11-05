@@ -1,5 +1,441 @@
 [
   {
+    "id": "1762364764449_o80h3fxzh",
+    "timestamp": "2025-11-05T17:46:04.449Z",
+    "type": "notification",
+    "content": "• HA VT Motion 1 — off",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762364756055_age1ivqgo",
+    "timestamp": "2025-11-05T17:45:56.055Z",
+    "type": "notification",
+    "content": "Checking...",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762364753715_ugdgzfg3p",
+    "timestamp": "2025-11-05T17:45:53.715Z",
+    "type": "message",
+    "content": "is there anyone in TV room",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762364739954_5xghgrw7d",
+    "timestamp": "2025-11-05T17:45:39.954Z",
+    "type": "notification",
+    "content": {
+      "success": false,
+      "error": "Invalid input: content or user_input is required"
+    },
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762362803053_844unlrhj",
+    "timestamp": "2025-11-05T17:13:23.053Z",
+    "type": "notification",
+    "content": "• HA VT Motion 1 — off\n• HA VT Motion 1 — off",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762362795187_qgrmh7ivx",
+    "timestamp": "2025-11-05T17:13:15.187Z",
+    "type": "notification",
+    "content": "Checking...",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762362792509_0c775ojhv",
+    "timestamp": "2025-11-05T17:13:12.509Z",
+    "type": "message",
+    "content": "is there anyone in TV room",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762362752678_3r1raheno",
+    "timestamp": "2025-11-05T17:12:32.678Z",
+    "type": "notification",
+    "content": "• IKEA Bulb — on · 100% · Extra Warm Light",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762362748379_j1yj42rdo",
+    "timestamp": "2025-11-05T17:12:28.379Z",
+    "type": "notification",
+    "content": "Sure, I'll set the Ikea bulb to warm white",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762362744934_y88qhy1uq",
+    "timestamp": "2025-11-05T17:12:24.934Z",
+    "type": "message",
+    "content": "set ikea bulb to warm white\n",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762362639334_c7ff06bn9",
+    "timestamp": "2025-11-05T17:10:39.334Z",
+    "type": "notification",
+    "content": "• IKEA Bulb — on · 100% · Extra Warm Light",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762362634358_v5bt9bndr",
+    "timestamp": "2025-11-05T17:10:34.358Z",
+    "type": "notification",
+    "content": "Sure, I'll set the Ikea bulb to warm white",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762362631305_xcgpoqbxf",
+    "timestamp": "2025-11-05T17:10:31.305Z",
+    "type": "message",
+    "content": "set ikea bulb to warm white",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762362337472_ui1pjnlqp",
+    "timestamp": "2025-11-05T17:05:37.472Z",
+    "type": "notification",
+    "content": "• IKEA Bulb — on · 100% · Extra Warm Light",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762362333628_m8lekmit4",
+    "timestamp": "2025-11-05T17:05:33.628Z",
+    "type": "notification",
+    "content": "Sure, I'll set the Ikea bulb to warm white",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762362330830_7z2fsulj7",
+    "timestamp": "2025-11-05T17:05:30.830Z",
+    "type": "message",
+    "content": "set ikea bulb to warm white\n",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762362301846_8nqs7wxhu",
+    "timestamp": "2025-11-05T17:05:01.846Z",
+    "type": "notification",
+    "content": {
+      "success": false,
+      "error": "Invalid input: content or user_input is required"
+    },
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762362197610_x3ghub4rv",
+    "timestamp": "2025-11-05T17:03:17.610Z",
+    "type": "notification",
+    "content": "• IKEA Bulb — on · 100% · Extra Warm Light",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762362192294_h70hbm45i",
+    "timestamp": "2025-11-05T17:03:12.294Z",
+    "type": "notification",
+    "content": "Sure, I'll set the Ikea bulb to warm white",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762362189784_u21fx4peq",
+    "timestamp": "2025-11-05T17:03:09.784Z",
+    "type": "message",
+    "content": "set ikea bulb to warm white",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762361887687_uh4vhk5j5",
+    "timestamp": "2025-11-05T16:58:07.687Z",
+    "type": "notification",
+    "content": "• Light Strip — off",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762361883771_c6kbp3vb2",
+    "timestamp": "2025-11-05T16:58:03.771Z",
+    "type": "notification",
+    "content": "Sure, I'll turn off the strip",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762361879735_bayuclhza",
+    "timestamp": "2025-11-05T16:57:59.735Z",
+    "type": "message",
+    "content": "turn of the strip",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762361861010_5xnitsx4r",
+    "timestamp": "2025-11-05T16:57:41.010Z",
+    "type": "notification",
+    "content": "• Light Strip — on · 30% · Blue",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762361856050_53yuuud2m",
+    "timestamp": "2025-11-05T16:57:36.050Z",
+    "type": "notification",
+    "content": "Sure, I'll turn on the kitchen light strip",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762361853583_kembwdgsg",
+    "timestamp": "2025-11-05T16:57:33.583Z",
+    "type": "message",
+    "content": "turn on kitchen light strip",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762361799603_1rjot269a",
+    "timestamp": "2025-11-05T16:56:39.603Z",
+    "type": "notification",
+    "content": "• IKEA Bulb — off",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762361799120_ypu7zzn0b",
+    "timestamp": "2025-11-05T16:56:39.120Z",
+    "type": "notification",
+    "content": "Sure, I'll turn off the ikea bulb",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762361791989_dtyo2wlbv",
+    "timestamp": "2025-11-05T16:56:31.989Z",
+    "type": "message",
+    "content": "turn off ikea bulb",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762361753311_sigob2ohq",
+    "timestamp": "2025-11-05T16:55:53.311Z",
+    "type": "notification",
+    "content": "• Tapo Bulb — on · 100% · Natural White",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762361748150_bd184emhq",
+    "timestamp": "2025-11-05T16:55:48.150Z",
+    "type": "notification",
+    "content": "Sure, I'll set Tapo bulb to warm white",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762361745195_wes3359ig",
+    "timestamp": "2025-11-05T16:55:45.195Z",
+    "type": "message",
+    "content": "set Tapo bulb to warm white",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762361726387_l551gyth4",
+    "timestamp": "2025-11-05T16:55:26.387Z",
+    "type": "notification",
+    "content": "• Tapo Bulb — on · 100% · Cool White",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762361719965_o6ajwq3v7",
+    "timestamp": "2025-11-05T16:55:19.965Z",
+    "type": "notification",
+    "content": "Sure, I'll turn on the tapo bulb",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762361717629_ab8fcmve3",
+    "timestamp": "2025-11-05T16:55:17.629Z",
+    "type": "message",
+    "content": "turn on tapo bulb\n",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762361613254_04kedzdc0",
+    "timestamp": "2025-11-05T16:53:33.254Z",
+    "type": "notification",
+    "content": {
+      "success": false,
+      "error": "Authentication Fails, Your api key: ****e270 is invalid"
+    },
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762361612434_r06yid2ft",
+    "timestamp": "2025-11-05T16:53:32.434Z",
+    "type": "message",
+    "content": "turn on tapo bulb",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762361570957_b99jvvltm",
+    "timestamp": "2025-11-05T16:52:50.957Z",
+    "type": "notification",
+    "content": {
+      "success": false,
+      "error": "Invalid input: content or user_input is required"
+    },
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762361102419_izw7jgl7y",
+    "timestamp": "2025-11-05T16:45:02.419Z",
+    "type": "notification",
+    "content": "• Tapo Bulb — on · 100% · Cool White\n• IKEA Bulb — on · 100% · Cool White",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762361096643_arg9w2rpc",
+    "timestamp": "2025-11-05T16:44:56.643Z",
+    "type": "notification",
+    "content": "Sure, I'll turn on tapo bulb",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762361093717_lcvbjbrzg",
+    "timestamp": "2025-11-05T16:44:53.717Z",
+    "type": "message",
+    "content": "\nturn on tapo bulb\n",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762360965350_foqrzxp8n",
+    "timestamp": "2025-11-05T16:42:45.350Z",
+    "type": "message",
+    "metadata": {},
+    "source": "api",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762360964341_oyt86ylkz",
+    "timestamp": "2025-11-05T16:42:44.341Z",
+    "type": "notification",
+    "content": "Sorry, device not found",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762360959874_n7i82fhqm",
+    "timestamp": "2025-11-05T16:42:39.874Z",
+    "type": "notification",
+    "content": "Sure, I'll turn on ikea bulb",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762360957515_so4aa2wuz",
+    "timestamp": "2025-11-05T16:42:37.515Z",
+    "type": "message",
+    "content": "turn on ikea bulb\n",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762360916986_ipu6mqy1r",
+    "timestamp": "2025-11-05T16:41:56.986Z",
+    "type": "message",
+    "metadata": {},
+    "source": "api",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762360915979_ap1tec5f1",
+    "timestamp": "2025-11-05T16:41:55.979Z",
+    "type": "notification",
+    "content": "Sorry, device not found",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762360909646_lmqnguipb",
+    "timestamp": "2025-11-05T16:41:49.646Z",
+    "type": "notification",
+    "content": "Sure, I'll turn on ikea bulb",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762360907204_495ab21bw",
+    "timestamp": "2025-11-05T16:41:47.204Z",
+    "type": "message",
+    "content": "turn on ikea bulb",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
     "id": "1762349313210_adp83jlez",
     "timestamp": "2025-11-05T13:28:33.210Z",
     "type": "notification",
@@ -454,452 +890,5 @@
     "content": "turn on kitchen strip",
     "metadata": {},
     "direction": "outgoing"
-  },
-  {
-    "id": "1762340446439_cedjz29ch",
-    "timestamp": "2025-11-05T11:00:46.439Z",
-    "type": "notification",
-    "content": {
-      "success": false,
-      "error": "Invalid input: content or user_input is required"
-    },
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762340392990_pxc5cugkh",
-    "timestamp": "2025-11-05T10:59:52.990Z",
-    "type": "message",
-    "metadata": {},
-    "source": "api",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762340391981_knz8dt53k",
-    "timestamp": "2025-11-05T10:59:51.981Z",
-    "type": "notification",
-    "content": "Sorry, device not found",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762340387621_ftexjap4v",
-    "timestamp": "2025-11-05T10:59:47.621Z",
-    "type": "notification",
-    "content": "Sure, I'll turn on the kitchen strip",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762340385082_kpfqmpj1f",
-    "timestamp": "2025-11-05T10:59:45.082Z",
-    "type": "message",
-    "content": "turn on kitchen strip",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762339886375_x3dspx0a2",
-    "timestamp": "2025-11-05T10:51:26.375Z",
-    "type": "notification",
-    "content": "• HA VT Motion 1 — off\n• HA VT Motion 2 — on\n• HA VT Motion 3 — on\n• HA VT Motion 4 — on\n• HA VT Motion 5 — off\n• HA VT Motion 1 — off\n• HA VT Motion 2 — on\n• HA VT Motion 3 — on\n• HA VT Motion 4 — on\n• HA VT Motion 5 — off",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762339880764_hmonm3s7a",
-    "timestamp": "2025-11-05T10:51:20.765Z",
-    "type": "notification",
-    "content": "正在查询...",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762339878250_mvfduy6qp",
-    "timestamp": "2025-11-05T10:51:18.250Z",
-    "type": "message",
-    "content": "家里有人么",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762339790778_qmaeo4ufx",
-    "timestamp": "2025-11-05T10:49:50.778Z",
-    "type": "message",
-    "metadata": {},
-    "source": "api",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762339789769_7mngzd2yw",
-    "timestamp": "2025-11-05T10:49:49.769Z",
-    "type": "notification",
-    "content": "Sorry, device not found",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762339785533_0mbvm2pxo",
-    "timestamp": "2025-11-05T10:49:45.533Z",
-    "type": "notification",
-    "content": "Sure, I'll turn off the kitchen strip",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762339782991_ndcm36ip0",
-    "timestamp": "2025-11-05T10:49:42.991Z",
-    "type": "message",
-    "content": "turn off kitchen strip",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762338137739_hvcko7jpu",
-    "timestamp": "2025-11-05T10:22:17.739Z",
-    "type": "notification",
-    "content": {
-      "success": false,
-      "error": "Invalid input: content or user_input is required"
-    },
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762338096756_z5pzxztyx",
-    "timestamp": "2025-11-05T10:21:36.756Z",
-    "type": "notification",
-    "content": {
-      "success": false,
-      "error": "Invalid input: content or user_input is required"
-    },
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762337484502_stvr0z2fz",
-    "timestamp": "2025-11-05T10:11:24.502Z",
-    "type": "message",
-    "metadata": {},
-    "source": "api",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762337483493_yn8irb2to",
-    "timestamp": "2025-11-05T10:11:23.493Z",
-    "type": "notification",
-    "content": "Sorry, device not found",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762337478564_lxkz8sy72",
-    "timestamp": "2025-11-05T10:11:18.564Z",
-    "type": "notification",
-    "content": "正在查询...",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762337475811_9a95puy77",
-    "timestamp": "2025-11-05T10:11:15.811Z",
-    "type": "message",
-    "content": "家里有人么",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762337466925_nmno6bq0o",
-    "timestamp": "2025-11-05T10:11:06.925Z",
-    "type": "notification",
-    "content": {
-      "success": false,
-      "error": "Invalid input: content or user_input is required"
-    },
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762337446016_b5k8r3mqg",
-    "timestamp": "2025-11-05T10:10:46.016Z",
-    "type": "message",
-    "metadata": {},
-    "source": "api",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762337445008_d51gc998p",
-    "timestamp": "2025-11-05T10:10:45.008Z",
-    "type": "notification",
-    "content": "Sorry, device not found",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762337440690_xzinaq6wf",
-    "timestamp": "2025-11-05T10:10:40.690Z",
-    "type": "notification",
-    "content": "正在查询...",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762337437899_s31e2e74q",
-    "timestamp": "2025-11-05T10:10:37.899Z",
-    "type": "message",
-    "content": "家里有人么",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762337407535_1fq9vlc5u",
-    "timestamp": "2025-11-05T10:10:07.535Z",
-    "type": "notification",
-    "content": {
-      "success": false,
-      "error": "Invalid input: content or user_input is required"
-    },
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762337266720_t3a6z9yzd",
-    "timestamp": "2025-11-05T10:07:46.720Z",
-    "type": "notification",
-    "content": "• Floor light — on · 60% · RGB(54 · 255 · 131)\n• 吸顶灯 — on · 100% · Cool White\n• 车库灯 — on · 100% · Cool White\n• 顶灯 — on · 100% · Cool White\n• 氛围灯 — on · 100% · Cool White\n• HA VT color light 8 — on · 100% · Cool White\n• HA VT color light 9 — on · 100% · Cool White\n• HA VT color light 10 — on · 100% · Cool White",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762337263023_ky5gjrl8f",
-    "timestamp": "2025-11-05T10:07:43.023Z",
-    "type": "notification",
-    "content": "好的，即将为您打开所有灯",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762337260674_yex49s31l",
-    "timestamp": "2025-11-05T10:07:40.674Z",
-    "type": "message",
-    "content": "打开所有灯",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762337248644_joi60hx8k",
-    "timestamp": "2025-11-05T10:07:28.644Z",
-    "type": "notification",
-    "content": {
-      "success": false,
-      "error": "Invalid input: content or user_input is required"
-    },
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762337177911_ynt3352o3",
-    "timestamp": "2025-11-05T10:06:17.911Z",
-    "type": "notification",
-    "content": "• Floor light — on · 73% · RGB(158 · 3 · 255)\n• 吸顶灯 — on · 100% · Cool White\n• 车库灯 — on · 100% · Cool White\n• 顶灯 — on · 100% · Cool White\n• 氛围灯 — on · 100% · Cool White\n• HA VT color light 8 — on · 100% · Cool White\n• HA VT color light 9 — on · 100% · Cool White\n• HA VT color light 10 — on · 100% · Cool White",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762337174631_molbxax8t",
-    "timestamp": "2025-11-05T10:06:14.631Z",
-    "type": "notification",
-    "content": "好的，即将为您打开所有灯",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762337172028_xuck7t85w",
-    "timestamp": "2025-11-05T10:06:12.028Z",
-    "type": "message",
-    "content": "打开所有灯",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762337022823_4kro2egy2",
-    "timestamp": "2025-11-05T10:03:42.823Z",
-    "type": "notification",
-    "content": {
-      "success": false,
-      "error": "No AI provider available"
-    },
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762337022812_aom7bkoc4",
-    "timestamp": "2025-11-05T10:03:42.812Z",
-    "type": "message",
-    "content": "打开所有灯",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762336290289_g1yxhfqov",
-    "timestamp": "2025-11-05T09:51:30.289Z",
-    "type": "notification",
-    "content": {
-      "success": false,
-      "error": "Invalid input: content or user_input is required"
-    },
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1761903028386_ossjdla8l",
-    "timestamp": "2025-10-31T09:30:28.386Z",
-    "type": "notification",
-    "content": "• HA VT AC 1 — off",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1761903023050_r5lks8kzk",
-    "timestamp": "2025-10-31T09:30:23.050Z",
-    "type": "notification",
-    "content": "好的，即将为您关掉空调",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1761903020446_pwx7bqhlq",
-    "timestamp": "2025-10-31T09:30:20.446Z",
-    "type": "message",
-    "content": "空调关掉",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1761903015635_iymc5h2tq",
-    "timestamp": "2025-10-31T09:30:15.635Z",
-    "type": "notification",
-    "content": "• 顶灯 — on · 80% · Yellow",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1761903008935_0cuev586j",
-    "timestamp": "2025-10-31T09:30:08.935Z",
-    "type": "notification",
-    "content": "好的，即将为您打开灯",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1761903006779_8vdji82ye",
-    "timestamp": "2025-10-31T09:30:06.779Z",
-    "type": "message",
-    "content": "灯打开",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1761902997347_b42p34zkc",
-    "timestamp": "2025-10-31T09:29:57.347Z",
-    "type": "notification",
-    "content": "• HA VT Motion 1 — on",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1761902988222_9qjdae6lr",
-    "timestamp": "2025-10-31T09:29:48.222Z",
-    "type": "notification",
-    "content": "正在查询电视房是否有人",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1761902986119_4tt26qqt9",
-    "timestamp": "2025-10-31T09:29:46.119Z",
-    "type": "message",
-    "content": "电视房有人么",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1761902951794_3xomq9fve",
-    "timestamp": "2025-10-31T09:29:11.794Z",
-    "type": "message",
-    "metadata": {},
-    "source": "api",
-    "direction": "incoming"
-  },
-  {
-    "id": "1761902950788_m7ftyrpf7",
-    "timestamp": "2025-10-31T09:29:10.788Z",
-    "type": "notification",
-    "content": "Sorry, device not found",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1761902948988_ngdb7ei9d",
-    "timestamp": "2025-10-31T09:29:08.988Z",
-    "type": "notification",
-    "content": "正在查询...",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1761902947447_83x2vy82t",
-    "timestamp": "2025-10-31T09:29:07.447Z",
-    "type": "message",
-    "content": "电视房有人么",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1761902937143_amqqmbnzo",
-    "timestamp": "2025-10-31T09:28:57.143Z",
-    "type": "message",
-    "metadata": {},
-    "source": "api",
-    "direction": "incoming"
-  },
-  {
-    "id": "1761902936138_lo41afmrr",
-    "timestamp": "2025-10-31T09:28:56.138Z",
-    "type": "notification",
-    "content": "Sorry, device not found",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
   }
 ]
