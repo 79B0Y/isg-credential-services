@@ -376,22 +376,30 @@ Action类型示例：
     async getAIModule() {
         const provider = this.config.aiProvider || 'auto';
 
+        // Helper function to check if module has valid credentials
+        const hasCreds = async mod => {
+            try {
+                if (!mod || typeof mod.getCredentials !== 'function') return false;
+                const res = await mod.getCredentials();
+                if (!res.success || !res.data) return false;
+                // Check if has at least one non-empty, non-internal field
+                return Object.entries(res.data).some(([k, v]) => 
+                    !k.startsWith('_') && typeof v === 'string' && v.trim()
+                );
+            } catch { 
+                return false; 
+            }
+        };
+
         if (provider === 'auto') {
-            // Try to get any available AI provider
-            const providers = ['claude', 'deepseek', 'gemini', 'openai'];
+            // Try to get any available AI provider (priority: gemini > openai > deepseek > claude)
+            const providers = ['gemini', 'openai', 'deepseek', 'claude'];
             for (const p of providers) {
                 try {
                     const module = global.moduleManager?.getModule(p);
-                    if (module) {
-                        // Check if module has credentials
-                        const credResult = await module.getCredentials();
-                        if (credResult.success && credResult.data) {
-                            // Check if has sendSimpleChat method
-                            if (typeof module.sendSimpleChat === 'function') {
-                                this.logger.info(`[AI_ENHANCED_AUTOMATION] Using AI provider: ${p}`);
-                                return module;
-                            }
-                        }
+                    if (module && typeof module.sendSimpleChat === 'function' && await hasCreds(module)) {
+                        this.logger.info(`[AI_ENHANCED_AUTOMATION] Using AI provider: ${p}`);
+                        return module;
                     }
                 } catch (e) {
                     // Continue to next provider
@@ -400,15 +408,9 @@ Action类型示例：
             return null;
         } else {
             const module = global.moduleManager?.getModule(provider);
-            if (module) {
-                try {
-                    const credResult = await module.getCredentials();
-                    if (credResult.success && credResult.data) {
-                        return module;
-                    }
-                } catch (e) {
-                    // Return null if error
-                }
+            if (module && typeof module.sendSimpleChat === 'function' && await hasCreds(module)) {
+                this.logger.info(`[AI_ENHANCED_AUTOMATION] Using AI provider: ${provider}`);
+                return module;
             }
             return null;
         }

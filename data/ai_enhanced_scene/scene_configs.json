@@ -298,11 +298,67 @@
         }
       },
       "last_modified": "2025-10-29T13:18:42.865Z"
+    },
+    "scene.guest_mode": {
+      "scene_id": "scene.guest_mode",
+      "scene_name": "访客模式",
+      "friendly_name": "访客模式",
+      "mode": "hybrid",
+      "created_at": "2025-11-05T11:47:41.054Z",
+      "created_by": "ai_enhanced_scene",
+      "user_input": "客厅的设备当前状态设置为访客模式",
+      "metadata": {
+        "entity_count": 4,
+        "climate_count": 1,
+        "precise_count": 3,
+        "ai_provider": "deepseek"
+      },
+      "entities_config": {
+        "light.light_test_001": {
+          "state": "off"
+        },
+        "light.color_light_1": {
+          "state": "off"
+        },
+        "light.color_light_4": {
+          "state": "off"
+        }
+      },
+      "climate_snapshot": [
+        "climate.text_ac_01"
+      ],
+      "last_modified": "2025-11-05T11:47:41.054Z"
+    },
+    "scene.study_mode": {
+      "scene_id": "scene.study_mode",
+      "scene_name": "学习模式",
+      "friendly_name": "学习模式",
+      "mode": "hybrid",
+      "created_at": "2025-11-05T12:08:41.095Z",
+      "created_by": "ai_enhanced_scene",
+      "user_input": "using study room devices status as study mode",
+      "metadata": {
+        "entity_count": 2,
+        "climate_count": 1,
+        "precise_count": 1,
+        "ai_provider": "deepseek"
+      },
+      "entities_config": {
+        "light.color_light_08": {
+          "state": "on",
+          "brightness": 255,
+          "color_temp": 250
+        }
+      },
+      "climate_snapshot": [
+        "climate.ac_02"
+      ],
+      "last_modified": "2025-11-05T12:08:41.096Z"
     }
   },
   "metadata": {
     "created_at": "2025-10-29T07:07:21.476Z",
-    "last_updated": "2025-10-30T08:37:18.054Z",
+    "last_updated": "2025-11-05T13:07:26.174Z",
     "version": "1.0.0"
   }
 }

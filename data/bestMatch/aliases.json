@@ -208,6 +208,20 @@
       "sensor",
       "chuanganqi",
       "传感器"
+    ],
+    "binary_sensor": [
+      "binary_sensor",
+      "occupancy",
+      "motion",
+      "presence",
+      "occupied",
+      "占用",
+      "占用传感器",
+      "运动",
+      "运动传感器",
+      "人体传感器",
+      "存在",
+      "在家"
     ]
   },
   "device_names": {

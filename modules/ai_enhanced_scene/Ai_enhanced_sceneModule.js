@@ -389,25 +389,28 @@ class AiEnhancedSceneModule extends BaseCredentialModule {
      * Auto select AI provider
      */
     async autoSelectAI(preferredProvider = 'auto') {
-        const providers = ['claude', 'deepseek', 'gemini', 'openai'];
-        const targetProviders = preferredProvider === 'auto' ? providers : [preferredProvider];
+        const providers = ['gemini', 'openai', 'deepseek', 'claude'];
+        const targetProviders = preferredProvider === 'auto' ? providers : [preferredProvider, ...providers];
+
+        // Helper function to check if module has valid credentials
+        const hasCreds = async mod => {
+            try {
+                if (!mod || typeof mod.getCredentials !== 'function') return false;
+                const res = await mod.getCredentials();
+                if (!res.success || !res.data) return false;
+                // Check if has at least one non-empty, non-internal field
+                return Object.entries(res.data).some(([k, v]) => 
+                    !k.startsWith('_') && typeof v === 'string' && v.trim()
+                );
+            } catch { 
+                return false; 
+            }
+        };
 
         for (const providerName of targetProviders) {
             const module = global.moduleManager?.getModule(providerName);
-            if (module) {
-                try {
-                    // Check if module has credentials
-                    const credResult = await module.getCredentials();
-                    if (credResult.success && credResult.data) {
-                        // Check if has sendSimpleChat method
-                        if (typeof module.sendSimpleChat === 'function') {
-                            return { success: true, provider: providerName, module };
-                        }
-                    }
-                } catch (error) {
-                    // Skip this provider if error
-                    continue;
-                }
+            if (module && typeof module.sendSimpleChat === 'function' && await hasCreds(module)) {
+                return { success: true, provider: providerName, module };
             }
         }
 
@@ -932,6 +935,13 @@ class AiEnhancedSceneModule extends BaseCredentialModule {
 
             const duration = Date.now() - startTime;
 
+            // 生成包含设备详细参数的消息
+            const detailedMessage = this.generateDetailedSceneMessage(
+                scene.scene_name,
+                matched_devices || [],
+                user_input
+            );
+
             return {
                 success: creationResult?.success || false,
                 data: {
@@ -944,7 +954,7 @@ class AiEnhancedSceneModule extends BaseCredentialModule {
                     climate_count: climateEntities.length,
                     message: {
                         type: "notification",
-                        content: createData.message,
+                        content: detailedMessage,
                         source: "external_system"
                     },
                     creation_result: creationResult,
@@ -997,12 +1007,16 @@ class AiEnhancedSceneModule extends BaseCredentialModule {
                     if (pathResult.success) {
                         const readResult = await haModule.permanentSceneModule.readSceneYaml(pathResult.data.scene_yaml_path);
                         if (readResult.success && readResult.data.scenes) {
-                            yamlScenes = readResult.data.scenes.map(s => ({
-                                entity_id: `scene.${s.id}`,
-                                name: s.name,
-                                friendly_name: s.name,
-                                source: 'yaml'
-                            }));
+                            yamlScenes = readResult.data.scenes.map(s => {
+                                // 修复：如果id已经包含scene.前缀，不要重复添加
+                                const entityId = s.id.startsWith('scene.') ? s.id : `scene.${s.id}`;
+                                return {
+                                    entity_id: entityId,
+                                    name: s.name,
+                                    friendly_name: s.name,
+                                    source: 'yaml'
+                                };
+                            });
                         }
                     }
                 } catch (err) {
@@ -1096,20 +1110,37 @@ class AiEnhancedSceneModule extends BaseCredentialModule {
             // 如果AI匹配到场景，执行完整删除流程
             if (matchResult.matched && matchResult.scene_id) {
                 if (haModule) {
-                    // 1. 删除临时场景（内存中的场景）
-                    if (haModule.sceneModule) {
+                    // ========================================
+                    // 正确的删除顺序（三步法）：
+                    // permanentSceneModule.deletePermanentScene 内部已经按照正确顺序执行：
+                    // 1. 通过 HA API 删除场景（临时场景）
+                    // 2. 从 scenes.yaml 删除场景（永久配置）
+                    // 3. 清理实体注册表（彻底清理）
+                    // 所以这里只需要调用一次即可
+                    // ========================================
+                    
+                    // 删除永久场景（包含完整的三步删除流程）
+                    if (haModule.permanentSceneModule) {
+                        this.logger.info(`[AI Enhanced Scene] 删除场景: ${matchResult.scene_id} (完整删除流程)`);
+                        deletionResults.permanent_scene = await haModule.permanentSceneModule.deletePermanentScene(matchResult.scene_id);
+                        
+                        // permanentSceneModule 已经处理了临时场景删除，所以这里标记为成功
+                        if (deletionResults.permanent_scene?.success) {
+                            deletionResults.temporary_scene = {
+                                success: true,
+                                message: 'Handled by permanent scene module',
+                                included_in_permanent_deletion: true
+                            };
+                        }
+                    }
+                    // 如果 permanentSceneModule 不可用，才使用 sceneModule 删除临时场景
+                    else if (haModule.sceneModule) {
                         this.logger.info(`[AI Enhanced Scene] 删除临时场景: ${matchResult.scene_id}`);
                         deletionResults.temporary_scene = await haModule.sceneModule.deleteScene(matchResult.scene_id);
                     }
-                    
-                    // 2. 删除永久场景（scenes.yaml文件中的场景）
-                    if (haModule.permanentSceneModule) {
-                        this.logger.info(`[AI Enhanced Scene] 删除永久场景: ${matchResult.scene_id}`);
-                        deletionResults.permanent_scene = await haModule.permanentSceneModule.deletePermanentScene(matchResult.scene_id);
-                    }
                 }
                 
-                // 3. 删除本地配置文件中的场景配置
+                // 删除本地配置文件中的场景配置
                 this.logger.info(`[AI Enhanced Scene] 删除本地配置: ${matchResult.scene_id}`);
                 deletionResults.local_config = await this.deleteSceneConfig(matchResult.scene_id);
             }
@@ -1180,6 +1211,188 @@ class AiEnhancedSceneModule extends BaseCredentialModule {
                 details: error.message
             };
         }
+    }
+
+    /**
+     * 生成包含设备详细参数的场景创建消息
+     */
+    generateDetailedSceneMessage(sceneName, matchedDevices, userInput) {
+        // 检测语言
+        const language = this.detectLanguage(userInput);
+        const isChinese = language === 'zh';
+        
+        if (!matchedDevices || matchedDevices.length === 0) {
+            return isChinese 
+                ? `已为您创建'${sceneName}'场景，但未包含任何设备`
+                : `Created '${sceneName}' scene, but no devices included`;
+        }
+        
+        // 按设备类型分组
+        const deviceGroups = {};
+        matchedDevices.forEach(device => {
+            const deviceType = device.entity_id ? device.entity_id.split('.')[0] : 'unknown';
+            if (!deviceGroups[deviceType]) {
+                deviceGroups[deviceType] = [];
+            }
+            deviceGroups[deviceType].push(device);
+        });
+        
+        // 统计设备类型数量
+        const typeCounts = {};
+        const typeNames = {
+            light: isChinese ? '灯光' : 'light',
+            climate: isChinese ? '空调' : 'climate',
+            fan: isChinese ? '风扇' : 'fan',
+            cover: isChinese ? '窗帘' : 'cover',
+            switch: isChinese ? '开关' : 'switch',
+            media_player: isChinese ? '媒体播放器' : 'media player'
+        };
+        
+        Object.keys(deviceGroups).forEach(type => {
+            const name = typeNames[type] || type;
+            const count = deviceGroups[type].length;
+            typeCounts[name] = count;
+        });
+        
+        // 生成设备类型统计文本
+        const typeCountText = Object.entries(typeCounts)
+            .map(([name, count]) => isChinese ? `${count}个${name}` : `${count} ${name}${count > 1 ? 's' : ''}`)
+            .join(isChinese ? '和' : ' and ');
+        
+        // 生成设备详细参数列表
+        const deviceDetails = [];
+        
+        matchedDevices.forEach((device, index) => {
+            if (!device.entity_id || !device.service_data) return;
+            
+            const deviceName = device.device_name || device.entity_id;
+            const serviceData = device.service_data;
+            const deviceType = device.entity_id.split('.')[0];
+            
+            // 根据设备类型格式化参数
+            let params = [];
+            
+            if (deviceType === 'light') {
+                // 灯光设备
+                const state = serviceData.state;
+                const stateText = isChinese 
+                    ? (state === 'on' ? '开启' : state === 'off' ? '关闭' : state)
+                    : state;
+                params.push(isChinese ? `状态: ${stateText}` : `State: ${stateText}`);
+                
+                if (serviceData.brightness !== undefined && serviceData.brightness !== null) {
+                    const brightnessPct = Math.round(serviceData.brightness * 100 / 255);
+                    params.push(isChinese ? `亮度: ${brightnessPct}%` : `Brightness: ${brightnessPct}%`);
+                }
+                
+                if (serviceData.rgb_color) {
+                    const colorStr = Array.isArray(serviceData.rgb_color) 
+                        ? `RGB(${serviceData.rgb_color.join(', ')})` 
+                        : serviceData.rgb_color;
+                    params.push(isChinese ? `颜色: ${colorStr}` : `Color: ${colorStr}`);
+                } else if (serviceData.color_name) {
+                    params.push(isChinese ? `颜色: ${serviceData.color_name}` : `Color: ${serviceData.color_name}`);
+                }
+                
+                if (serviceData.color_temp) {
+                    params.push(isChinese ? `色温: ${serviceData.color_temp}K` : `Color Temp: ${serviceData.color_temp}K`);
+                }
+                
+            } else if (deviceType === 'climate') {
+                // 空调设备
+                const mode = serviceData.hvac_mode;
+                const modeText = isChinese 
+                    ? (mode === 'off' ? '关闭' : mode === 'cool' ? '制冷' : mode === 'heat' ? '制热' : mode === 'auto' ? '自动' : mode)
+                    : mode;
+                params.push(isChinese ? `模式: ${modeText}` : `Mode: ${modeText}`);
+                
+                if (serviceData.temperature !== undefined && serviceData.temperature !== null) {
+                    params.push(isChinese ? `温度: ${serviceData.temperature}°C` : `Temperature: ${serviceData.temperature}°C`);
+                }
+                
+                if (serviceData.fan_mode) {
+                    const fanText = isChinese 
+                        ? (serviceData.fan_mode === 'auto' ? '自动' : serviceData.fan_mode)
+                        : serviceData.fan_mode;
+                    params.push(isChinese ? `风速: ${fanText}` : `Fan: ${fanText}`);
+                }
+                
+            } else if (deviceType === 'fan') {
+                // 风扇设备
+                const state = serviceData.state;
+                const stateText = isChinese 
+                    ? (state === 'on' ? '开启' : state === 'off' ? '关闭' : state)
+                    : state;
+                params.push(isChinese ? `状态: ${stateText}` : `State: ${stateText}`);
+                
+                if (serviceData.percentage !== undefined) {
+                    params.push(isChinese ? `速度: ${serviceData.percentage}%` : `Speed: ${serviceData.percentage}%`);
+                }
+                
+            } else if (deviceType === 'cover') {
+                // 窗帘设备
+                const state = serviceData.state;
+                const stateText = isChinese 
+                    ? (state === 'open' ? '打开' : state === 'closed' ? '关闭' : state)
+                    : state;
+                params.push(isChinese ? `状态: ${stateText}` : `State: ${stateText}`);
+                
+                if (serviceData.position !== undefined) {
+                    params.push(isChinese ? `位置: ${serviceData.position}%` : `Position: ${serviceData.position}%`);
+                }
+                
+            } else if (deviceType === 'switch') {
+                // 开关设备
+                const state = serviceData.state;
+                const stateText = isChinese 
+                    ? (state === 'on' ? '开启' : state === 'off' ? '关闭' : state)
+                    : state;
+                params.push(isChinese ? `状态: ${stateText}` : `State: ${stateText}`);
+                
+            } else if (deviceType === 'media_player') {
+                // 媒体播放器
+                const state = serviceData.state;
+                const stateText = isChinese 
+                    ? (state === 'playing' ? '播放中' : state === 'paused' ? '暂停' : state === 'off' ? '关闭' : state)
+                    : state;
+                params.push(isChinese ? `状态: ${stateText}` : `State: ${stateText}`);
+                
+                if (serviceData.volume_level !== undefined) {
+                    const volumePct = Math.round(serviceData.volume_level * 100);
+                    params.push(isChinese ? `音量: ${volumePct}%` : `Volume: ${volumePct}%`);
+                }
+            } else {
+                // 其他设备类型
+                if (serviceData.state) {
+                    params.push(isChinese ? `状态: ${serviceData.state}` : `State: ${serviceData.state}`);
+                }
+            }
+            
+            // 如果没有提取到任何参数，显示原始数据
+            if (params.length === 0 && Object.keys(serviceData).length > 0) {
+                params.push(JSON.stringify(serviceData));
+            }
+            
+            const paramsText = params.join(', ');
+            deviceDetails.push(`${deviceName} (${paramsText})`);
+        });
+        
+        // 组装最终消息
+        const totalDevices = matchedDevices.length;
+        
+        let message = '';
+        if (isChinese) {
+            message = `已为您创建'${sceneName}'场景，包含${totalDevices}个设备（${typeCountText}）：\n\n`;
+        } else {
+            message = `Created '${sceneName}' scene with ${totalDevices} device${totalDevices !== 1 ? 's' : ''} (${typeCountText}):\n\n`;
+        }
+        
+        // 添加设备详情
+        deviceDetails.forEach((detail, index) => {
+            message += `${index + 1}. ${detail}\n`;
+        });
+        
+        return message.trim();
     }
 
     /**

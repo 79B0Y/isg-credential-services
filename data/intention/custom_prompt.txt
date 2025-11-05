@@ -139,13 +139,13 @@ turn_on, turn_off, media_play, media_pause, volume_set, state
   "devices": [{
     "floor_name": "", "floor_name_en": "", "floor_type": "",
     "room_type": "", "room_name": "", "room_name_en": "",
-    "device_type": "", "device_name": "", "device_name_en": "",
+    "device_type": "", "device_name": "不要翻译成中文，保留用户输入的设备名称", "device_name_en": "",
     "service": "域名.服务名",
     "service_data": {},
     "automation": "trigger|condition|action"
   }],
   "scene": {
-    "scene_name": "", "scene_name_en": "",
+    "scene_name": "不要翻译成中文，保留用户输入的场景名称", "scene_name_en": "",
     "operation": "execute|add|delete|list",
     "operation_type": "control|setup|query",
     "description": ""

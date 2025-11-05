@@ -816,8 +816,11 @@ class PermanentSceneModule {
      * 清理storage中的场景数据（谨慎操作）
      * 只删除与指定场景相关的数据，不影响其他数据
      * 注意：这是备份清理，主要通过 HA API 删除实体
+     * @param {string} sceneId - HA中的场景entity_id (例如: scene.hui_ke_mo_shi)
+     * @param {string} configDir - HA配置目录
+     * @param {string} yamlSceneId - yaml文件中的场景id (例如: scene.reception_mode)，用于匹配unique_id
      */
-    async cleanupStorageForScene(sceneId, configDir) {
+    async cleanupStorageForScene(sceneId, configDir, yamlSceneId = null) {
         const cleanupResults = {
             restore_state: { success: false, cleaned: false },
             entity_registry: { success: false, cleaned: false }
@@ -842,8 +845,8 @@ class PermanentSceneModule {
                     const removedCount = originalCount - newCount;
                     
                     if (removedCount > 0) {
-                        // 更新版本号
-                        restoreState.version = (restoreState.version || 1) + 1;
+                        // ⚠️ 不要修改版本号！让Home Assistant自己管理版本号
+                        // restoreState.version = (restoreState.version || 1) + 1;  // 已删除
                         
                         await fs.writeFile(restoreStatePath, JSON.stringify(restoreState, null, 2), 'utf-8');
                         this.logger.info(`[PERMANENT-SCENE] 从core.restore_state删除 ${removedCount} 条场景状态`);
@@ -882,10 +885,43 @@ class PermanentSceneModule {
                     if (entityRegistry.data && entityRegistry.data.entities) {
                         const originalCount = entityRegistry.data.entities.length;
                         
-                        // 查找要删除的实体
-                        const entitiesToRemove = entityRegistry.data.entities.filter(entity => 
-                            entity.entity_id === sceneId
-                        );
+                        // 规范化场景ID（移除scene.前缀用于匹配unique_id）
+                        const sceneIdForUniqueId = sceneId.startsWith('scene.') 
+                            ? sceneId.substring(6)
+                            : sceneId;
+                        
+                        // 如果提供了yaml场景ID，也准备它的变体
+                        let yamlIdVariants = [];
+                        if (yamlSceneId) {
+                            yamlIdVariants = [
+                                yamlSceneId,
+                                yamlSceneId.startsWith('scene.') ? yamlSceneId.substring(6) : `scene.${yamlSceneId}`
+                            ];
+                        }
+                        
+                        // 查找要删除的实体（支持多种匹配方式）
+                        const entitiesToRemove = entityRegistry.data.entities.filter(entity => {
+                            // 方法1: entity_id 精确匹配
+                            if (entity.entity_id === sceneId) {
+                                return true;
+                            }
+                            
+                            // 方法2: unique_id 匹配（重要！针对从yaml创建的场景）
+                            if (entity.unique_id && entity.entity_id && entity.entity_id.startsWith('scene.')) {
+                                // 匹配 sceneId 的 unique_id
+                                if (entity.unique_id === sceneIdForUniqueId || 
+                                    entity.unique_id === `scene.${sceneIdForUniqueId}`) {
+                                    return true;
+                                }
+                                
+                                // 匹配 yamlSceneId 的 unique_id（关键！）
+                                if (yamlIdVariants.length > 0 && yamlIdVariants.includes(entity.unique_id)) {
+                                    return true;
+                                }
+                            }
+                            
+                            return false;
+                        });
                         
                         if (entitiesToRemove.length > 0) {
                             this.logger.info(`[PERMANENT-SCENE] 找到 ${entitiesToRemove.length} 个匹配的实体，准备删除`);
@@ -895,16 +931,22 @@ class PermanentSceneModule {
                             
                             // ⚠️ 只删除场景实体，保留其他所有实体（空间、设备等）
                             entityRegistry.data.entities = entityRegistry.data.entities.filter(entity => {
-                                return entity.entity_id !== sceneId;
+                                // 排除所有匹配的实体
+                                const shouldRemove = entitiesToRemove.some(e => 
+                                    e.entity_id === entity.entity_id && 
+                                    e.unique_id === entity.unique_id
+                                );
+                                return !shouldRemove;
                             });
                             
                             const newCount = entityRegistry.data.entities.length;
                             const removedCount = originalCount - newCount;
                             
-                            // 更新版本号和修改时间
-                            entityRegistry.version = (entityRegistry.version || 1) + 1;
+                            // ⚠️ 不要修改版本号！让Home Assistant自己管理版本号
+                            // 否则可能导致版本不兼容，HA无法启动
+                            // entityRegistry.version = (entityRegistry.version || 1) + 1;  // 已删除
                             
-                            // 写入文件
+                            // 写入文件（保持原版本号）
                             await fs.writeFile(entityRegistryPath, JSON.stringify(entityRegistry, null, 2), 'utf-8');
                             this.logger.info(`[PERMANENT-SCENE] ✅ 成功从core.entity_registry删除 ${removedCount} 个场景实体`);
                             
@@ -1089,29 +1131,47 @@ class PermanentSceneModule {
             
             const deletedScene = existingScenes[sceneIndex];
             this.logger.info(`[PERMANENT-SCENE] 找到匹配场景（${matchMethod}）: ID=${deletedScene.id}, Name=${deletedScene.name}`);
-            this.logger.info(`[PERMANENT-SCENE] 从scenes.yaml删除场景`);
             
-            existingScenes.splice(sceneIndex, 1);
+            // ========================================
+            // 正确的删除顺序（三步法）：
+            // 1. 通过 HA API 删除场景（临时场景）
+            // 2. 从 scenes.yaml 删除场景（永久配置）
+            // 3. 清理实体注册表（彻底清理）
+            // ========================================
+            
+            // 步骤1: 通过 Home Assistant API 删除临时场景
+            this.logger.info(`[PERMANENT-SCENE] 步骤1: 通过HA API删除场景: ${fullSceneId}`);
+            const entityRemoval = await this.removeEntityFromHA(fullSceneId, credentials);
+            if (entityRemoval.entity_removed?.success) {
+                this.logger.info(`[PERMANENT-SCENE] ✅ HA API删除成功`);
+            } else {
+                this.logger.warn(`[PERMANENT-SCENE] ⚠️  HA API删除失败或场景不在内存中: ${entityRemoval.entity_removed?.message || 'Unknown'}`);
+            }
 
-            // 5. 写入更新后的文件
+            // 步骤2: 从 scenes.yaml 删除场景配置
+            this.logger.info(`[PERMANENT-SCENE] 步骤2: 从scenes.yaml删除场景配置`);
+            existingScenes.splice(sceneIndex, 1);
             const writeResult = await this.writeSceneYaml(sceneYamlPath, existingScenes);
             if (!writeResult.success) {
                 return writeResult;
             }
+            this.logger.info(`[PERMANENT-SCENE] ✅ scenes.yaml删除成功`);
 
-            // 6. 使用 Home Assistant API 删除实体（重要！）
-            this.logger.info(`[PERMANENT-SCENE] 通过API删除实体: ${fullSceneId}`);
-            const entityRemoval = await this.removeEntityFromHA(fullSceneId, credentials);
+            // 步骤3: 清理实体注册表中的场景记录
+            const yamlSceneId = deletedScene.id; // 例如: scene.reception_mode
+            this.logger.info(`[PERMANENT-SCENE] 步骤3: 清理实体注册表中的场景: ${fullSceneId} (yaml_id: ${yamlSceneId})`);
+            const storageCleanup = await this.cleanupStorageForScene(fullSceneId, configDir, yamlSceneId);
+            if (storageCleanup.entity_registry?.cleaned) {
+                this.logger.info(`[PERMANENT-SCENE] ✅ 实体注册表清理成功，删除了 ${storageCleanup.entity_registry.removed_count} 个实体`);
+            } else {
+                this.logger.info(`[PERMANENT-SCENE] ℹ️  实体注册表中未找到场景记录`);
+            }
 
-            // 7. 清理storage中的场景数据（在重载前清理，确保彻底）
-            this.logger.info(`[PERMANENT-SCENE] 清理storage中的场景数据: ${fullSceneId}`);
-            const storageCleanup = await this.cleanupStorageForScene(fullSceneId, configDir);
-
-            // 8. 重载配置以应用更改
+            // 最后: 重载配置以应用更改
             this.logger.info(`[PERMANENT-SCENE] 重载Home Assistant配置`);
             const reloadResult = await this.reloadConfig(credentials);
             if (!reloadResult.success) {
-                this.logger.warn('[PERMANENT-SCENE] 配置重载失败，但场景已从文件中删除');
+                this.logger.warn('[PERMANENT-SCENE] 配置重载失败，但场景已完成删除');
             }
 
             // 记录删除完成

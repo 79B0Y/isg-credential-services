@@ -1406,6 +1406,37 @@ class BestMatchModule extends BaseCredentialModule {
                 return { score: 1.0, hit: cand };
             }
             
+            // ⭐ 子串匹配：如果查询词是候选词的子串
+            if (c.includes(q)) {
+                // 子串匹配得分：基于长度比例，权重更高
+                // 例如: "strip" in "lightstrip" -> 5/10 = 0.50, 0.55 + 0.45*0.5 = 0.775
+                // 如果查询词长度占比超过40%，给予更高分数
+                const lengthRatio = q.length / c.length;
+                let score;
+                if (lengthRatio >= 0.4) {
+                    // 有意义的子串（占比>=40%），基础分更高
+                    score = 0.55 + lengthRatio * 0.45;  // 范围: 0.73-1.0，确保通过0.75阈值
+                } else {
+                    // 较短的子串，基础分较低
+                    score = 0.40 + lengthRatio * 0.50;  // 范围: 0.40-0.60
+                }
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestHit = cand;
+                }
+                continue;
+            }
+            if (q.includes(c)) {
+                // 候选词是查询词的子串（较少见的情况）
+                const lengthRatio = c.length / q.length;
+                const score = 0.40 + lengthRatio * 0.50;
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestHit = cand;
+                }
+                continue;
+            }
+            
             // Jaro-Winkler 相似度
             const score = this.jaroWinkler(q, c);
             if (score > bestScore) {
@@ -1488,7 +1519,8 @@ class BestMatchModule extends BaseCredentialModule {
             'fan': ['fan', 'fengshan', '风扇'],
             'cover': ['cover', 'chuanglian', '窗帘'],
             'camera': ['camera', 'cam', 'shexiangtou', '摄像头'],
-            'sensor': ['sensor', 'chuanganqi', '传感器']
+            'sensor': ['sensor', 'chuanganqi', '传感器'],
+            'binary_sensor': ['binary_sensor', 'binarysensor', 'occupancy', 'motion', 'presence', 'occupied', '占用', '占用传感器', '运动', '运动传感器', '人体传感器', '存在', '在家']
         };
         
         for (const [domain, aliases] of Object.entries(HA_DOMAIN_ALIASES)) {
@@ -1523,7 +1555,10 @@ class BestMatchModule extends BaseCredentialModule {
             'switch','switches','kaiguan','开关','socket','sockets','chazuo','插座','outlet','plug',
             'ac','aircon','kongtiao','空调','冷气','climate',
             'fan','fans','fengshan','风扇',
-            'cover','covers','chuanglian','窗帘','curtain','blind'
+            'cover','covers','chuanglian','窗帘','curtain','blind',
+            'sensor','sensors','chuanganqi','传感器',
+            'binarysensor','occupancysensor','motionsensor','occupancy','motion',
+            '占用传感器','运动传感器','人体传感器','存在传感器'
         ].includes(n);
     }
 
