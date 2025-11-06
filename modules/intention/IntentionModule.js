@@ -621,7 +621,13 @@ table lamp/台灯 → "light" (device_name: "台灯", device_name_en: "table_lam
   {
     "color_name": "red|blue|green|white|yellow|purple|orange|pink",
     "brightness_pct": 1-100,
-    "color_temp": 153-500,  // 冷光6500K=153, 暖光3000K=333
+    "color_temp": 153-500,  // ⚠️ 色温单位为mireds（微倒数度）
+    // 色温映射表（重要）：
+    // - Warm White/暖白/暖光: 333-500 mireds (2000K-3000K)
+    // - Neutral White/中性白: 250 mireds (4000K)
+    // - Cool White/冷白/冷光: 153-250 mireds (4000K-6500K)
+    // 示例：用户说"warm white"时使用 color_temp: 333
+    //       用户说"cool white"时使用 color_temp: 153
     "rgb_color": [255, 0, 0],
     "transition": 秒数
   }

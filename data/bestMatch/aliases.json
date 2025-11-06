@@ -104,6 +104,15 @@
       "guestroom",
       "guest_room",
       "guest room"
+    ],
+    "baby_room": [
+      "婴儿房",
+      "婴儿房间",
+      "宝宝房",
+      "baby",
+      "babyroom",
+      "baby_room",
+      "baby room"
     ]
   },
   "floors": {

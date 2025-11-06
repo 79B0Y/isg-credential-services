@@ -2655,24 +2655,30 @@ class CredentialService {
 
     /**
      * 获取色温的描述
+     * 色温单位：mireds（微倒数度）
+     * 值越大 = 色温越低(K) = 越暖
+     * 值越小 = 色温越高(K) = 越冷
      */
     getColorTempDescription(colorTemp) {
         if (!colorTemp) return null;
         
+        // 正确的色温描述映射（基于 mireds 值）
+        // Warm = 高 mireds (低 Kelvin)
+        // Cool = 低 mireds (高 Kelvin)
         const tempRanges = [
-            { max: 250, desc: "Cool White" },
-            { max: 350, desc: "Natural White" },
-            { max: 450, desc: "Warm White" },
-            { max: 9999, desc: "Extra Warm Light" }
+            { min: 0, max: 200, desc: "Cool White" },        // < 200 mireds (> 5000K)
+            { min: 200, max: 300, desc: "Neutral White" },   // 200-300 mireds (3300K-5000K)
+            { min: 300, max: 400, desc: "Warm White" },      // 300-400 mireds (2500K-3300K)
+            { min: 400, max: 9999, desc: "Extra Warm" }      // > 400 mireds (< 2500K)
         ];
         
         for (const range of tempRanges) {
-            if (colorTemp <= range.max) {
+            if (colorTemp >= range.min && colorTemp <= range.max) {
                 return range.desc;
             }
         }
         
-        return "Warm Light";
+        return "Warm White";
     }
 
     /**

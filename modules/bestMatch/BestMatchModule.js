@@ -57,7 +57,7 @@ class BestMatchModule extends BaseCredentialModule {
             enableLLMFallback: envOptimizations.enableAIFallback ?? true,
             autoUpdateAliases: true,
             weights: { F: 0.15, R: 0.40, N: 0.30, T: 0.15 },
-            thresholds: { floor: 0.70, room: 0.70, type: 0.65, name: 0.80 },
+            thresholds: { floor: 0.70, room: 0.85, type: 0.65, name: 0.80 },
             topK: envOptimizations.topK || 100,
             disambiguationGap: 0.08,
             performanceLogging: envOptimizations.performanceLogging ?? false,
@@ -1485,6 +1485,7 @@ class BestMatchModule extends BaseCredentialModule {
             'living_room': ['客厅', 'keting', 'living', 'livingroom', 'living_room', 'lounge'],
             'bedroom': ['卧室', 'woshi', 'bedroom', 'bed_room'],
             'master_bedroom': ['主卧', 'zhuwo', 'master', 'masterbedroom', 'master_bedroom'],
+            'baby_room': ['婴儿房', '宝宝房', 'baby', 'babyroom', 'baby_room'],
             'kitchen': ['厨房', 'chufang', 'kitchen'],
             'bathroom': ['浴室', '卫生间', 'yushi', 'weishengjian', 'bathroom', 'washroom'],
             'study': ['书房', 'shufang', 'study', 'office'],
@@ -1586,7 +1587,7 @@ class BestMatchModule extends BaseCredentialModule {
         // 配置参数（与 node-red-matcher-complete.js 保持一致）
         const TH = { 
             floor: 0.70,
-            room: 0.70,
+            room: 0.85,
             type: 0.65,
             name: 0.75  // 提高到 0.75
         };

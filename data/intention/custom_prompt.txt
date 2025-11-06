@@ -31,7 +31,8 @@
 
 **房间**：客厅→living_room, 卧室→bedroom, 主卧→master_bedroom, 客卧→guest_bedroom, 书房→study, 厨房→kitchen, 餐厅→dining_room, 卫生间→bathroom, 阳台→balcony，电视房→tv_room
 
-**可控制设备**：灯→light, 空调→climate, 风扇→fan, 电视/音响→media_player, 窗帘→cover, 开关→switch, 门锁→lock
+**可控制设备**：灯→light, "空调/地暖/温控器/暖气/AC/thermostat/heating/HVAC"→climate, "风扇/电扇/吊扇/fan"（无温控功能）→fan, 电视/音响→media_player, 窗帘→cover, 开关→switch, 门锁→lock
+🚨 关键：climate设备的风速控制用climate.set_fan_mode，不是fan.set_percentage
 
 **传感器**：
 - sensor.state: temperature, humidity, illuminance, power, pm25, co2
@@ -75,6 +76,14 @@
    - 都用binary_sensor.state
    - service_data: `{"state": "on"}` (有人) 或 `{"state": "off"}` (没人)
    - automation字段保持一致(都是trigger或都是condition)
+   - 当检测到“有人/没人/occupancy”相关语义时，必须输出两个独立的设备对象：
+     1️⃣ occupancy（占用传感器）
+     2️⃣ motion（运动传感器）
+   - 两个设备都使用 binary_sensor.state 服务，并具有相同的 service_data.state。
+   - 任何情况下只输出一个传感器都视为错误输出。
+   - 示例：
+     输入："bedroom有人么"
+     输出：包含 occupancy_sensor 和 motion_sensor 各一条。
 
 3. **参数合并**：同一设备多参数合并到一个service_data，不拆分
 
@@ -83,6 +92,14 @@
 - 仅改变温度 → climate.set_temperature (仅temperature参数)
 - 同时设置温度和模式 → climate.set_temperature (temperature + hvac_mode)
 - 仅改变风速 → climate.set_fan_mode
+
+4. 🚫 语言处理规则：
+- 所有名称字段必须严格保留用户输入的语言，不得翻译。
+- 特别是以下字段：floor_name、room_name、device_name、scene_name、automation_name。
+- 示例：
+  - 用户输入 "bedroom" → room_name = "bedroom"
+  - 用户输入 "卧室" → room_name = "卧室"
+- 如果检测到英文房间名（bedroom、living room 等），同时补充 room_name_en 对应英文标准名。
 
 ---
 
@@ -122,7 +139,11 @@ turn_on, turn_off, media_play, media_pause, volume_set, state
 
 **温度**：26度→26, 相对调节带符号(调高→+2, 调低→-2)
 
-**色温**：暖白光→500, 自然白光→250, 冷白光→153
+**⚠️ 色温（固定值，不要计算）**：
+- 暖白光/warm white/暖光 → 450
+- 自然白光/natural white/日光白 → 250  
+- 冷白光/cool white/冷光 → 160
+- 🚨 严格使用上述固定值，禁止使用物理换算值（如333/370等）
 
 **空调模式**：制冷→cool, 制热→heat, 除湿→dry, 送风→fan_only, 自动→auto
 
@@ -137,21 +158,21 @@ turn_on, turn_off, media_play, media_pause, volume_set, state
   "user_input": "用户输入",
   "intent": "意图类型",
   "devices": [{
-    "floor_name": "", "floor_name_en": "", "floor_type": "",
-    "room_type": "", "room_name": "", "room_name_en": "",
-    "device_type": "", "device_name": "不要翻译成中文，保留用户输入的设备名称", "device_name_en": "",
+    "floor_name": "保留用户输入原文，不翻译", "floor_name_en": "", "floor_type": "",
+    "room_type": "", "room_name": "保留用户输入原文，不翻译", "room_name_en": "",
+    "device_type": "", "device_name": "保留用户输入原文，不翻译", "device_name_en": "",
     "service": "域名.服务名",
     "service_data": {},
     "automation": "trigger|condition|action"
   }],
   "scene": {
-    "scene_name": "不要翻译成中文，保留用户输入的场景名称", "scene_name_en": "",
+    "scene_name": "保留用户输入原文，不翻译", "scene_name_en": "",
     "operation": "execute|add|delete|list",
     "operation_type": "control|setup|query",
     "description": ""
   },
   "automation": {
-    "automation_name": "", "automation_name_en": "",
+    "automation_name": "保留用户输入原文，不翻译", "automation_name_en": "",
     "operation": "enable|disable|add|delete|list",
     "operation_type": "control|setup|query",
     "description": ""
@@ -283,7 +304,7 @@ turn_on, turn_off, media_play, media_pause, volume_set, state
 3. 全局控制时room_name留空，通用设备时device_name留空
 4. 相对调节带符号：+20, -2
 5. **trigger/condition的传感器必须包含目标状态/阈值**：数值型用threshold+comparison，二值型用state
-6. **人员检测必须双传感器(occupancy+motion)，且都要有state字段**
+6. ⚠️ **人员检测必须双传感器(occupancy+motion)，且都要有state字段**
 7. JSON格式正确，上下文继承
 8. **语言一致性**：所有文本字段(user_responds/scene_name/automation_name/description/floor_name)必须与user_input语言一致
 9. **参数合并**：同一设备多参数合并到一个service_data
@@ -303,11 +324,12 @@ temperature/humidity/illuminance/power/pm25/co2 → sensor.state
 motion/occupancy/door/smoke/moisture → binary_sensor.state
 ```
 
-**人员检测？**
+**人员检测查询？**
 ```
-"有人/没人" → occupancy + motion
+⚠️ "有人/没人/occupancy" → 必须输出 2 个 devices，device_type 分别为 occupancy 和 motion。
 - binary_sensor.state
 - service_data: {"state": "on"} (有人) 或 {"state": "off"} (没人)
+
 ```
 
 **automation角色？**
@@ -315,4 +337,18 @@ motion/occupancy/door/smoke/moisture → binary_sensor.state
 "当...时/如果" + 传感器 → trigger
 "且/并且" + 传感器 → condition
 动作词 + 设备 → action
+```
+
+**色温值？**
+```
+warm/暖 → 450
+natural/自然/日光 → 250
+cool/冷 → 160
+⚠️ 直接使用，不计算
+```
+
+**Climate风速控制？**
+```
+"空调/地暖/温控器" + "风速/fan speed" → climate.set_fan_mode (low/medium/high)
+独立"风扇" → fan.set_percentage (20/40/60/80/100)
 ```
