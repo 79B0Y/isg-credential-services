@@ -1,5 +1,422 @@
 [
   {
+    "id": "1762438504268_qp103x541",
+    "timestamp": "2025-11-06T14:15:04.268Z",
+    "type": "message",
+    "metadata": {},
+    "source": "api",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762438503260_fvb0a5egs",
+    "timestamp": "2025-11-06T14:15:03.260Z",
+    "type": "notification",
+    "content": "Sorry, device not found",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762438496337_fy6lx454r",
+    "timestamp": "2025-11-06T14:14:56.337Z",
+    "type": "notification",
+    "content": "Checking bedroom humidity and temperature...",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762438493822_xwctbo52d",
+    "timestamp": "2025-11-06T14:14:53.822Z",
+    "type": "message",
+    "content": "bedroom humidity temperature",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762438476772_lh9e16yqh",
+    "timestamp": "2025-11-06T14:14:36.772Z",
+    "type": "notification",
+    "content": "I'm not sure what you mean. Could you please clarify?",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762438473929_2amlh8fhp",
+    "timestamp": "2025-11-06T14:14:33.929Z",
+    "type": "message",
+    "content": "be d",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762438355925_57k6mk20o",
+    "timestamp": "2025-11-06T14:12:35.925Z",
+    "type": "message",
+    "metadata": {},
+    "source": "api",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762438354919_aepqa5jiz",
+    "timestamp": "2025-11-06T14:12:34.919Z",
+    "type": "notification",
+    "content": "Sorry, device not found",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762438350105_8tlciw4j5",
+    "timestamp": "2025-11-06T14:12:30.105Z",
+    "type": "notification",
+    "content": "Checking the humidity in the kitchen...",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762438347539_pjgrrxnzq",
+    "timestamp": "2025-11-06T14:12:27.539Z",
+    "type": "message",
+    "content": "what is the humidity in kitchen",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762437591958_yxmx7v4n8",
+    "timestamp": "2025-11-06T13:59:51.958Z",
+    "type": "notification",
+    "content": "• Switch 2g left — off\n• Switch 2g right — off",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762437588788_lhkjxulht",
+    "timestamp": "2025-11-06T13:59:48.788Z",
+    "type": "notification",
+    "content": "Sure, I'll turn off all switches",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762437586138_3kifm4zt5",
+    "timestamp": "2025-11-06T13:59:46.138Z",
+    "type": "message",
+    "content": "turn off all switch",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762437559825_g8acwz438",
+    "timestamp": "2025-11-06T13:59:19.825Z",
+    "type": "notification",
+    "content": "• QP Contact Sensor — on",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762437554169_q3dlrgoaj",
+    "timestamp": "2025-11-06T13:59:14.169Z",
+    "type": "notification",
+    "content": "Checking...",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762437551753_xr373601w",
+    "timestamp": "2025-11-06T13:59:11.753Z",
+    "type": "message",
+    "content": "is baby room door closed\n",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762437526593_gi3dw8jng",
+    "timestamp": "2025-11-06T13:58:46.593Z",
+    "type": "notification",
+    "content": "• Contact Sensor — off",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762437521964_b4vwhfbx0",
+    "timestamp": "2025-11-06T13:58:41.964Z",
+    "type": "notification",
+    "content": "Checking...",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762437519409_b1zwjp9qh",
+    "timestamp": "2025-11-06T13:58:39.409Z",
+    "type": "message",
+    "content": "is bedroom door closed\n",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762437473818_hllrl2hi1",
+    "timestamp": "2025-11-06T13:57:53.818Z",
+    "type": "notification",
+    "content": {
+      "success": false,
+      "error": "Invalid input: content or user_input is required"
+    },
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762436902182_ntu6l74eg",
+    "timestamp": "2025-11-06T13:48:22.182Z",
+    "type": "message",
+    "metadata": {},
+    "source": "api",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762436901175_6vb5yk5es",
+    "timestamp": "2025-11-06T13:48:21.175Z",
+    "type": "notification",
+    "content": "Sorry, device not found",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762436896961_u79p61701",
+    "timestamp": "2025-11-06T13:48:16.961Z",
+    "type": "notification",
+    "content": "Checking...",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762436894202_nysdmq0u5",
+    "timestamp": "2025-11-06T13:48:14.202Z",
+    "type": "message",
+    "content": "is bedroom door closed",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762436783347_412sporki",
+    "timestamp": "2025-11-06T13:46:23.347Z",
+    "type": "notification",
+    "content": "• Thermostate — on · 28°C · (current: 5°C) · fan: high",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762436778892_xjxdfik2s",
+    "timestamp": "2025-11-06T13:46:18.892Z",
+    "type": "notification",
+    "content": "Sure, I'll change the bedroom thermostat to cool",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762436775655_sucj7dacq",
+    "timestamp": "2025-11-06T13:46:15.655Z",
+    "type": "message",
+    "content": "change bedroom thermostate to cool",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762436651367_z9kvlwe57",
+    "timestamp": "2025-11-06T13:44:11.367Z",
+    "type": "notification",
+    "content": "• Thermostate — on · 28°C · (current: 7°C) · fan: high\n• Floor Heating — on · 25°C · (current: 7°C) · fan: high",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762436647672_673k43m39",
+    "timestamp": "2025-11-06T13:44:07.672Z",
+    "type": "notification",
+    "content": "Sure, I'll change thermostat to cool",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762436644916_ychuguk5y",
+    "timestamp": "2025-11-06T13:44:04.916Z",
+    "type": "message",
+    "content": "change thermostate to cool",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762436562510_v3yscg9gz",
+    "timestamp": "2025-11-06T13:42:42.510Z",
+    "type": "notification",
+    "content": "• Motion — off",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762436554025_2zux7ybei",
+    "timestamp": "2025-11-06T13:42:34.025Z",
+    "type": "notification",
+    "content": "Checking...",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762436551635_ii7cnv3jx",
+    "timestamp": "2025-11-06T13:42:31.635Z",
+    "type": "message",
+    "content": "anyone in bedroom",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762436518779_cvaql2bod",
+    "timestamp": "2025-11-06T13:41:58.779Z",
+    "type": "notification",
+    "content": "• LinknLink Presence Total — off\n• Presence Zone1 — off\n• Presence Zone2 — off\n• Presence Zone3 — on\n• Presence Zone4 — off",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762436509826_lyqz8sqcd",
+    "timestamp": "2025-11-06T13:41:49.826Z",
+    "type": "notification",
+    "content": "Checking if anyone is in the baby room...",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762436507212_4fvy4998v",
+    "timestamp": "2025-11-06T13:41:47.212Z",
+    "type": "message",
+    "content": "anyone in baby room",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762436455932_esv7ktyhk",
+    "timestamp": "2025-11-06T13:40:55.932Z",
+    "type": "notification",
+    "content": {
+      "success": false,
+      "error": "Invalid input: content or user_input is required"
+    },
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762436054489_tuaanqs3s",
+    "timestamp": "2025-11-06T13:34:14.489Z",
+    "type": "message",
+    "metadata": {},
+    "source": "api",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762436053484_5w7tunqbw",
+    "timestamp": "2025-11-06T13:34:13.484Z",
+    "type": "notification",
+    "content": "Sorry, device not found",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762436045582_9kd1jg69m",
+    "timestamp": "2025-11-06T13:34:05.582Z",
+    "type": "notification",
+    "content": "Checking if anyone is in the baby room...",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762436042422_bgi9gl34s",
+    "timestamp": "2025-11-06T13:34:02.422Z",
+    "type": "message",
+    "content": "anyone in baby room",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762426407241_ybnuqw11r",
+    "timestamp": "2025-11-06T10:53:27.241Z",
+    "type": "notification",
+    "content": "• Thermostate — off\n• Floor Heating — off",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762426401190_sf4q7ecug",
+    "timestamp": "2025-11-06T10:53:21.190Z",
+    "type": "notification",
+    "content": "好的，即将为您打开空调制热高风",
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762426398246_iv01qo02n",
+    "timestamp": "2025-11-06T10:53:18.246Z",
+    "type": "message",
+    "content": "打开空调制热高凤",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762425562208_4gfw127g4",
+    "timestamp": "2025-11-06T10:39:22.208Z",
+    "type": "notification",
+    "content": {
+      "success": false,
+      "error": "No AI provider available"
+    },
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
+    "id": "1762425562187_q5ayxtf8g",
+    "timestamp": "2025-11-06T10:39:22.187Z",
+    "type": "message",
+    "content": "turn off bedroom light strip",
+    "metadata": {},
+    "direction": "outgoing"
+  },
+  {
+    "id": "1762425534381_6pfr2k311",
+    "timestamp": "2025-11-06T10:38:54.381Z",
+    "type": "notification",
+    "content": {
+      "success": false,
+      "error": "Invalid input: content or user_input is required"
+    },
+    "metadata": {},
+    "source": "external_system",
+    "direction": "incoming"
+  },
+  {
     "id": "1762413106188_e84rp89mb",
     "timestamp": "2025-11-06T07:11:46.188Z",
     "type": "notification",
@@ -459,415 +876,5 @@
     "metadata": {},
     "source": "external_system",
     "direction": "incoming"
-  },
-  {
-    "id": "1762407428697_5uggypbhz",
-    "timestamp": "2025-11-06T05:37:08.697Z",
-    "type": "message",
-    "content": "turn on floor heat ",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762407371309_atmvi590k",
-    "timestamp": "2025-11-06T05:36:11.309Z",
-    "type": "notification",
-    "content": "• Floor Heating — off",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762407369042_sphjw86q5",
-    "timestamp": "2025-11-06T05:36:09.042Z",
-    "type": "notification",
-    "content": "Sure, I'll turn on the floor heat and set it to 30 degrees",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762407367555_ban8lzqw6",
-    "timestamp": "2025-11-06T05:36:07.555Z",
-    "type": "message",
-    "content": "turn on floor heat and set to 30 degree",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762407119730_jczao10la",
-    "timestamp": "2025-11-06T05:31:59.730Z",
-    "type": "notification",
-    "content": "• Floor Heating — off",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762407118055_vc4mfmz86",
-    "timestamp": "2025-11-06T05:31:58.055Z",
-    "type": "notification",
-    "content": "Sure, I'll turn on the floor heat and set it to high speed fan",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762407116997_1ptn19l9d",
-    "timestamp": "2025-11-06T05:31:56.997Z",
-    "type": "message",
-    "content": "turn on floor heat and set to high speed fan\n",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762407102579_s0go77alc",
-    "timestamp": "2025-11-06T05:31:42.579Z",
-    "type": "notification",
-    "content": {
-      "success": false,
-      "error": "Invalid input: content or user_input is required"
-    },
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762406758046_mh5hgw7w3",
-    "timestamp": "2025-11-06T05:25:58.046Z",
-    "type": "notification",
-    "content": "• Floor Heating — off",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762406756368_umde4kev1",
-    "timestamp": "2025-11-06T05:25:56.368Z",
-    "type": "notification",
-    "content": "Sure, I'll turn on the floor heat and set it to high speed fan",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762406755490_sscsbtdgv",
-    "timestamp": "2025-11-06T05:25:55.490Z",
-    "type": "message",
-    "content": "turn on floor heat and set to high speed fan",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762406732550_vgyo8uzg8",
-    "timestamp": "2025-11-06T05:25:32.550Z",
-    "type": "notification",
-    "content": "• Floor Heating — off",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762406730333_cmbrjw1jp",
-    "timestamp": "2025-11-06T05:25:30.333Z",
-    "type": "notification",
-    "content": "Sure, I'll set the floor heating to high speed fan",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762406729598_abw5a26vc",
-    "timestamp": "2025-11-06T05:25:29.598Z",
-    "type": "message",
-    "content": "floor heating to high speed fan",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762406685321_bd7kadtz7",
-    "timestamp": "2025-11-06T05:24:45.321Z",
-    "type": "notification",
-    "content": "• Wiz Bulb — off",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762406683976_9o4mbosyu",
-    "timestamp": "2025-11-06T05:24:43.976Z",
-    "type": "notification",
-    "content": "Sure, I'll shut the Wiz bulb",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762406682347_pvj1a71s5",
-    "timestamp": "2025-11-06T05:24:42.347Z",
-    "type": "message",
-    "content": "shut Wiz bulb",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762406656109_qfijf6yso",
-    "timestamp": "2025-11-06T05:24:16.109Z",
-    "type": "notification",
-    "content": "• Light Strip — on · 100% · Warm White",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762406655094_7rsdl4ioo",
-    "timestamp": "2025-11-06T05:24:15.094Z",
-    "type": "notification",
-    "content": "Sure, I'll change the strip to warm white",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762406653303_des0xxytx",
-    "timestamp": "2025-11-06T05:24:13.303Z",
-    "type": "message",
-    "content": "change strip to warm white",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762406630786_eljr1e5l0",
-    "timestamp": "2025-11-06T05:23:50.786Z",
-    "type": "notification",
-    "content": "• Light Strip — on · 100% · Cool White\n• IKEA Bulb — off",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762406627554_h9ifcrr9y",
-    "timestamp": "2025-11-06T05:23:47.554Z",
-    "type": "notification",
-    "content": "Sure, I'll turn on the Light Strip, and turn off the IKEA bulb",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762406626429_7y1x8bwpf",
-    "timestamp": "2025-11-06T05:23:46.429Z",
-    "type": "message",
-    "content": "turn on Light Strip, turn off IKEA bulb, ",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762406530047_4huiy2lrz",
-    "timestamp": "2025-11-06T05:22:10.047Z",
-    "type": "notification",
-    "content": "• IKEA Bulb — on · 100% · Warm White",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762406527537_cmfcnyan2",
-    "timestamp": "2025-11-06T05:22:07.537Z",
-    "type": "notification",
-    "content": "Sure, I'll set the IKEA bulb to warm white",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762406526230_ki2g3mc7p",
-    "timestamp": "2025-11-06T05:22:06.230Z",
-    "type": "message",
-    "content": "set IKEA bulb warm white\n",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762406035161_v8juqthg3",
-    "timestamp": "2025-11-06T05:13:55.161Z",
-    "type": "notification",
-    "content": "• IKEA Bulb — on · 100% · Cool White",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762406033751_gizaw9sni",
-    "timestamp": "2025-11-06T05:13:53.751Z",
-    "type": "notification",
-    "content": "Sure, I'll set the IKEA bulb to warm white",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762406032618_f935fmrgg",
-    "timestamp": "2025-11-06T05:13:52.618Z",
-    "type": "message",
-    "content": "set IKEA bulb warm white",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762405913437_vvheyc30l",
-    "timestamp": "2025-11-06T05:11:53.437Z",
-    "type": "notification",
-    "content": "• IKEA Bulb — on · 100% · Natural White",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762405911089_lgjk7m5ci",
-    "timestamp": "2025-11-06T05:11:51.089Z",
-    "type": "notification",
-    "content": "Sure, I'll set the IKEA bulb to warm white",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762405910154_9dt102lmw",
-    "timestamp": "2025-11-06T05:11:50.154Z",
-    "type": "message",
-    "content": "set IKEA bulb to warm whit",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762405804718_1i48yynm4",
-    "timestamp": "2025-11-06T05:10:04.718Z",
-    "type": "notification",
-    "content": "• IKEA Bulb — on · 100% · Extra Warm Light",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762405802693_bn57746af",
-    "timestamp": "2025-11-06T05:10:02.693Z",
-    "type": "notification",
-    "content": "Sure, I'll set the IKEA bulb color temperature to 480",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762405801730_1o48mf9lo",
-    "timestamp": "2025-11-06T05:10:01.730Z",
-    "type": "message",
-    "content": "set IKEA bulb color temp to 480",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762405782299_rt36s4oz7",
-    "timestamp": "2025-11-06T05:09:42.299Z",
-    "type": "notification",
-    "content": "• IKEA Bulb — on · 100% · Cool White",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762405780181_g358pret3",
-    "timestamp": "2025-11-06T05:09:40.181Z",
-    "type": "notification",
-    "content": "Sure, I'll set the IKEA bulb color temperature to 250",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762405779390_z0f2e6ej5",
-    "timestamp": "2025-11-06T05:09:39.390Z",
-    "type": "message",
-    "content": "set IKEA bulb color temp to 250\n",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762405749027_9t4ayh6iv",
-    "timestamp": "2025-11-06T05:09:09.027Z",
-    "type": "notification",
-    "content": "• IKEA Bulb — on · 100% · Pure White",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762405746855_pz5lqg370",
-    "timestamp": "2025-11-06T05:09:06.855Z",
-    "type": "notification",
-    "content": "Sure, I'll set the IKEA bulb to warm white",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762405745688_1n7p5cac4",
-    "timestamp": "2025-11-06T05:09:05.688Z",
-    "type": "message",
-    "content": "set IKEA bulb to warm white",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762405711575_a23e6j963",
-    "timestamp": "2025-11-06T05:08:31.575Z",
-    "type": "notification",
-    "content": "• IKEA Bulb — on · 100% · Natural White",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762405710139_pc0bv4f7z",
-    "timestamp": "2025-11-06T05:08:30.139Z",
-    "type": "notification",
-    "content": "Sure, I'll set the IKEA bulb color temperature to 300",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762405708728_k391wxot4",
-    "timestamp": "2025-11-06T05:08:28.728Z",
-    "type": "message",
-    "content": "set IKEA bulb color temp to 300\n",
-    "metadata": {},
-    "direction": "outgoing"
-  },
-  {
-    "id": "1762405657239_zjpxwpqw5",
-    "timestamp": "2025-11-06T05:07:37.239Z",
-    "type": "notification",
-    "content": "• IKEA Bulb — on · 100% · Cool White",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762405654936_w524vk3j5",
-    "timestamp": "2025-11-06T05:07:34.936Z",
-    "type": "notification",
-    "content": "Sure, I'll set the IKEA bulb color temperature to 250",
-    "metadata": {},
-    "source": "external_system",
-    "direction": "incoming"
-  },
-  {
-    "id": "1762405654169_m9seia72k",
-    "timestamp": "2025-11-06T05:07:34.169Z",
-    "type": "message",
-    "content": "set IKEA bulb color temp to 250",
-    "metadata": {},
-    "direction": "outgoing"
   }
 ]

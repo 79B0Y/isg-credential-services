@@ -1485,7 +1485,7 @@ class BestMatchModule extends BaseCredentialModule {
             'living_room': ['客厅', 'keting', 'living', 'livingroom', 'living_room', 'lounge'],
             'bedroom': ['卧室', 'woshi', 'bedroom', 'bed_room'],
             'master_bedroom': ['主卧', 'zhuwo', 'master', 'masterbedroom', 'master_bedroom'],
-            'baby_room': ['婴儿房', '宝宝房', 'baby', 'babyroom', 'baby_room'],
+            'baby_room': ['婴儿房', '宝宝房', 'baby', 'babyroom', 'baby_room', 'nursery', 'kids', 'kids_room', 'kidsroom'],
             'kitchen': ['厨房', 'chufang', 'kitchen'],
             'bathroom': ['浴室', '卫生间', 'yushi', 'weishengjian', 'bathroom', 'washroom'],
             'study': ['书房', 'shufang', 'study', 'office'],
@@ -1524,7 +1524,13 @@ class BestMatchModule extends BaseCredentialModule {
             'binary_sensor': ['binary_sensor', 'binarysensor', 'presence', '存在', '在家'],
             // ⭐ occupancy 和 motion 作为独立的设备类型
             'occupancy': ['occupancy', 'occupied', '占用', '占用传感器'],
-            'motion': ['motion', '运动', '运动传感器', '人体传感器']
+            'motion': ['motion', '运动', '运动传感器', '人体传感器'],
+            // ⭐ door 和 window 作为独立的设备类型（虽然域名是 binary_sensor）
+            'door': ['door', 'doors', 'men', '门', '门传感器', 'contact', 'contactsensor'],
+            'window': ['window', 'windows', 'chuang', '窗', '窗户', '窗户传感器'],
+            // ⭐ humidity 和 temperature 作为独立的设备类型（虽然域名是 sensor）
+            'humidity': ['humidity', 'humiditysensor', 'shidu', '湿度', '湿度传感器'],
+            'temperature': ['temperature', 'temp', 'temperaturesensor', 'tempsensor', 'wendu', '温度', '温度传感器']
         };
         
         for (const [domain, aliases] of Object.entries(HA_DOMAIN_ALIASES)) {
@@ -1562,7 +1568,12 @@ class BestMatchModule extends BaseCredentialModule {
             'cover','covers','chuanglian','窗帘','curtain','blind',
             'sensor','sensors','chuanganqi','传感器',
             'binarysensor','occupancysensor','motionsensor','occupancy','motion',
-            '占用传感器','运动传感器','人体传感器','存在传感器'
+            '占用传感器','运动传感器','人体传感器','存在传感器',
+            'door','doors','men','门','门传感器','doorsensor',
+            'window','windows','chuang','窗','窗户','窗户传感器','windowsensor',
+            'contact','contactsensor','contacts','contactsensors',
+            'humidity','humiditysensor','shidu','湿度','湿度传感器',
+            'temperature','temperaturesensor','temp','tempsensor','wendu','温度','温度传感器'
         ].includes(n);
     }
 
@@ -1640,10 +1651,10 @@ class BestMatchModule extends BaseCredentialModule {
                     }
                     
                     // 如果 device_type 不匹配，检查域名是否匹配
-                    // 但如果查询的类型有独立定义（如 occupancy, motion），则不应匹配到其他类型
+                    // 但如果查询的类型有独立定义（如 occupancy, motion, door, window, humidity, temperature），则不应匹配到其他类型
                     if (normalizedTypeQ === normalizedEDomain) {
                         // 检查查询类型是否是独立类型（非通用域名）
-                        const isIndependentType = ['occupancy', 'motion'].includes(normalizedTypeQ);
+                        const isIndependentType = ['occupancy', 'motion', 'door', 'window', 'humidity', 'temperature'].includes(normalizedTypeQ);
                         if (isIndependentType) {
                             // 独立类型必须精确匹配 device_type
                             return normalizedTypeQ === normalizedEType || this.normalizeText(typeQ) === this.normalizeText(eType);

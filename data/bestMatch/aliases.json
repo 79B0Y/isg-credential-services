@@ -112,7 +112,11 @@
       "baby",
       "babyroom",
       "baby_room",
-      "baby room"
+      "baby room",
+      "nursery",
+      "kids",
+      "kids_room",
+      "kids room"
     ]
   },
   "floors": {
@@ -231,6 +235,41 @@
       "人体传感器",
       "存在",
       "在家"
+    ],
+    "door": [
+      "door",
+      "doors",
+      "men",
+      "门",
+      "门传感器",
+      "contact",
+      "contact_sensor"
+    ],
+    "window": [
+      "window",
+      "windows",
+      "chuang",
+      "窗",
+      "窗户",
+      "窗户传感器"
+    ],
+    "humidity": [
+      "humidity",
+      "humidity_sensor",
+      "humiditysensor",
+      "shidu",
+      "湿度",
+      "湿度传感器"
+    ],
+    "temperature": [
+      "temperature",
+      "temp",
+      "temperature_sensor",
+      "temperaturesensor",
+      "tempsensor",
+      "wendu",
+      "温度",
+      "温度传感器"
     ]
   },
   "device_names": {
